@@ -9,21 +9,36 @@ struct ContentView: View {
 
     var body: some View {
         
-//        Button(action: spotify.authorize) {
-//            Text("Log in")
-//        }
         NavigationStack {
             Section {
                 Button(action: spotify.authorize) {
-                    Text("Log in")
+                    HStack {
+                        Image("spotify logo green")
+                            .interpolation(.high)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 32)
+                            .padding(12)
+
+                        Text("Sign in with Spotify")
+                            .padding(12)
+                            .foregroundColor(.black)
+                        
+                    }
+                    .padding()                   // Adds padding inside the button
+                    .background(Color.white)     // Button background color
+                    .cornerRadius(12)            // Rounded corners
+                    .overlay(                    // Border overlay
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray, lineWidth: 1)
+                    )
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.extraLarge)
+
             }
             
-//            Form {
-//                TextField("Search artist...", text: $search)
-//            }
+            NavigationView {
+                MenuView()
+            }
             
             Text("\(spotify.isAuthorized)")
         }
@@ -113,14 +128,7 @@ struct ContentView: View {
 
 }
 
-
-
-//#Preview {
-//    ContentView()
-//}
-
-
-struct RootView_Previews: PreviewProvider {
+struct ContentView_Previews: PreviewProvider {
     
     static let spotify: Spotify = {
         let spotify = Spotify()
