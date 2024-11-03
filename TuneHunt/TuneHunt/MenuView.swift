@@ -6,11 +6,11 @@ struct MenuView: View {
         List {
             
             NavigationLink(
-                "Menu Item 1", destination: PlayListView()
+                "Create playlist from text", destination: PlayListView()
                 // TODO add info button which collapses an info text
             )
             NavigationLink(
-                "Menu Item 2", destination: PlayListView()
+                "Create playlist from image", destination: PlayListView()
             )
             NavigationLink(
                 "Menu Item 3", destination: PlayListView()

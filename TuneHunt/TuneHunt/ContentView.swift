@@ -3,7 +3,6 @@ import SwiftData
 import Combine
 
 struct ContentView: View {
-    @State private var search: String = ""
     @EnvironmentObject var spotify: Spotify
     @State private var cancellables: Set<AnyCancellable> = []
 
