@@ -1,11 +1,12 @@
 import SwiftUI
 import Combine
+import Foundation
 import SpotifyWebAPI
 
 struct PlayListView: View {
     @EnvironmentObject var spotify: Spotify
     @State private var searchText: String = ""
-    @State var artists: [Artist] = []
+    @State var artistSearchResults: [ArtistSearchResult] = []
     @State private var selectedSeparator = "Comma"
     @State private var isSearching = false
     @State private var searchCancellables: [AnyCancellable] = []
@@ -50,17 +51,17 @@ struct PlayListView: View {
                 Section(header: Text("Result")) {
                     if isSearching {
                         ProgressView("Searching...")
-                    } else if artists.isEmpty {
+                    } else if artistSearchResults.isEmpty {
                         Text("No artists found")
                     } else {
-                        ForEach(artists, id: \.id) { artist in
-                            Text(artist.name)
+                        ForEach(artistSearchResults, id: \.id) { artistSearchResult in
+                            Text(artistSearchResult.artist.name)
                         }
                     }
                 }
                 
                 NavigationLink {
-                    SearchResultsView(artists: artists)
+                    ArtistSearchResultsListView(artistSearchResults: artistSearchResults)
                 } label: {
                     Text("Next")
                 }
@@ -89,7 +90,7 @@ struct PlayListView: View {
     }
     
     func searchArtists() {
-        self.artists = []
+        self.artistSearchResults = []
         let artistNames = splitArtists()
         
         guard !artistNames.isEmpty else { return }
@@ -113,7 +114,7 @@ struct PlayListView: View {
                     },
                     receiveValue: { searchResults in
                         if let artist = searchResults.artists?.items.first {
-                            self.artists.append(artist)
+                            self.artistSearchResults.append(ArtistSearchResult(artist: artist))
                         }
                     }
                 )
