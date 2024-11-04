@@ -10,10 +10,11 @@ struct PlayListView: View {
     @State private var isSearching = false
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
-    @State private var navigateToResults = false  // Controls navigation to the results view
-
+    @State private var path = [Artist]()
+    @State private var shouldNavigate = false
+    
     let separators = ["Comma", "Space", "Newline"]
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -44,8 +45,7 @@ struct PlayListView: View {
                     }
                 }
                 
-                Button("Search", action: searchArtist)
-                    .disabled(isSearching || searchText.isEmpty)
+                Button("Search", action: searchArtists)
                 
                 Section(header: Text("Result")) {
                     if isSearching {
@@ -57,6 +57,12 @@ struct PlayListView: View {
                             Text(artist.name)
                         }
                     }
+                }
+                
+                NavigationLink {
+                    SearchResultsView(artists: artists)
+                } label: {
+                    Text("Next")
                 }
                 
             }
@@ -82,10 +88,8 @@ struct PlayListView: View {
             .filter { !$0.isEmpty }
     }
     
-    func searchArtist() {
-
+    func searchArtists() {
         self.artists = []
-        
         let artistNames = splitArtists()
         
         guard !artistNames.isEmpty else { return }
@@ -96,29 +100,29 @@ struct PlayListView: View {
             let cancellable = spotify.api.search(
                 query: artist, categories: [.artist]
             )
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { completion in
-                    self.isSearching = false
-                    if case .failure(let error) = completion {
-                        self.alertItem = AlertItem(
-                            title: "Couldn't Perform Search",
-                            message: error.localizedDescription
-                        )
+                .receive(on: RunLoop.main)
+                .sink(
+                    receiveCompletion: { completion in
+                        self.isSearching = false
+                        if case .failure(let error) = completion {
+                            self.alertItem = AlertItem(
+                                title: "Couldn't Perform Search",
+                                message: error.localizedDescription
+                            )
+                        }
+                    },
+                    receiveValue: { searchResults in
+                        if let artist = searchResults.artists?.items.first {
+                            self.artists.append(artist)
+                        }
                     }
-                },
-                receiveValue: { searchResults in
-                    if let artist = searchResults.artists?.items.first {
-                        self.artists.append(artist)
-                    }
-                }
-            )
+                )
             
             self.searchCancellables.append(cancellable)
             
         }
         
-
+        shouldNavigate = true
     }
     
 }
