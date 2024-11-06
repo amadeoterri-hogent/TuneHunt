@@ -10,7 +10,7 @@ struct MenuView: View {
                     // TODO add info button which collapses an info text
                 )
                 NavigationLink(
-                    "Create playlist from image", destination: PlayListView()
+                    "Create playlist from image", destination: ImagePlayListView()
                 )
                 NavigationLink(
                     "Menu Item 3", destination: PlayListView()

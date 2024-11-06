@@ -48,6 +48,8 @@ final class Spotify: ObservableObject {
     /// **process completes.**
     var authorizationState = String.randomURLSafe(length: 128)
     
+    // TODO: Create LoginView
+    
     /**
      Whether or not the application has been authorized. If `true`, then you can
      begin making requests to the Spotify web API using the `api` property of
@@ -75,8 +77,7 @@ final class Spotify: ObservableObject {
     @Published var currentUser: SpotifyUser? = nil
     
     /// The keychain to store the authorization information in.
-//    let keychain = Keychain(service: "com.amadeo.TuneHunt")
-    let keychain = Keychain(service: "com.Peter-Schorn.SpotifyAPIExampleApp")
+    let keychain = Keychain(service: "com.amadeo.TuneHunt")
     
     /// An instance of `SpotifyAPI` that you use to make requests to the Spotify
     /// web API.
@@ -93,11 +94,9 @@ final class Spotify: ObservableObject {
     
     init() {
         
-        print("init")
-        
         // Configure the loggers.
         self.api.apiRequestLogger.logLevel = .trace
-        // self.api.logger.logLevel = .trace
+        self.api.logger.logLevel = .trace
         
         // MARK: Important: Subscribe to `authorizationManagerDidChange` BEFORE
         // MARK: retrieving `authorizationManager` from persistent storage
@@ -113,12 +112,9 @@ final class Spotify: ObservableObject {
             .sink(receiveValue: authorizationManagerDidDeauthorize)
             .store(in: &cancellables)
         
-        print("auth - step 1")
-        
         // MARK: Check to see if the authorization information is saved in
         // MARK: the keychain.
         if let authManagerData = keychain[data: self.authorizationManagerKey] {
-            print("auth - step 2")
 
             do {
                 // Try to decode the data.
