@@ -1,7 +1,8 @@
 import SwiftUI
 
-struct AlertItem {
+struct AlertItem: Identifiable {
     
+    let id = UUID()
     let title: Text
     let message: Text
     

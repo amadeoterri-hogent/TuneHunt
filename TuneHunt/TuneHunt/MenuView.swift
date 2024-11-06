@@ -12,15 +12,6 @@ struct MenuView: View {
                 NavigationLink(
                     "Create playlist from image", destination: ImagePlayListView()
                 )
-                NavigationLink(
-                    "Menu Item 3", destination: PlayListView()
-                )
-                NavigationLink(
-                    "Menu Item 4", destination: PlayListView()
-                )
-                NavigationLink(
-                    "Menu Item 5", destination: PlayListView()
-                )
             }
             .listStyle(PlainListStyle())
         }
