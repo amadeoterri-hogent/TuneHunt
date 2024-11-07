@@ -9,12 +9,14 @@ struct ContentView: View {
     @State var currentUser: SpotifyUser? = nil
     
     var body: some View {
-        VStack {
-            LoginView(currentUser: currentUser)
-                .padding()
-            MenuView()
+        NavigationStack {
+            VStack {
+                LoginView(currentUser: currentUser)
+                    .padding()
+                MenuView()
+            }
+            .onOpenURL(perform: handleURL(_:))
         }
-        .onOpenURL(perform: handleURL(_:))
         
     }
     

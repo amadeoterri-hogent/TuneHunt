@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import SpotifyWebAPI
 
-struct PlayListView: View {
+struct ArtistSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @State private var searchText: String = ""
     @State var artistSearchResults: [ArtistSearchResult] = []
@@ -128,7 +128,7 @@ struct PlayListView: View {
     
 }
 
-struct PlayListView_Previews: PreviewProvider {
+struct ArtistSearchView_Previews: PreviewProvider {
     
     static let spotify: Spotify = {
         let spotify = Spotify()
@@ -137,7 +137,7 @@ struct PlayListView_Previews: PreviewProvider {
     }()
     
     static var previews: some View {
-        PlayListView()
+        ArtistSearchView()
             .environmentObject(spotify)
     }
 }

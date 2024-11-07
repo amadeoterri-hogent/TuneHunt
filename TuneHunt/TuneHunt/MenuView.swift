@@ -3,18 +3,16 @@ import SwiftUI
 struct MenuView: View {
     
     var body: some View {
-        NavigationStack {
             List {
                 NavigationLink(
-                    "Create playlist from text", destination: PlayListView()
+                    "Create playlist from text", destination: ArtistSearchView()
                     // TODO add info button which collapses an info text
                 )
                 NavigationLink(
-                    "Create playlist from image", destination: ImagePlayListView()
+                    "Create playlist from image", destination: SelectOrCreatePlaylistView()
                 )
             }
             .listStyle(PlainListStyle())
-        }
     }
 }
 
