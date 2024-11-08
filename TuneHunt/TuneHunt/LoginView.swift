@@ -3,7 +3,16 @@ import SpotifyWebAPI
 
 struct LoginView: View {
     @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
     @State var currentUser: SpotifyUser? = nil
+    
+    var textColor: Color {
+        colorScheme == .dark ? .white : .black
+    }
+    var backgroundColor: Color {
+        colorScheme == .dark ? .black : .white
+    }
+    
     
     var body: some View {
         if (!spotify.isAuthorized) {
@@ -37,12 +46,16 @@ struct LoginView: View {
                 if let userName = currentUser?.displayName {
                     Text("Welcome, \(userName)")
                         .frame(maxWidth: .infinity, alignment: .leading)
+
                 }
                 Button(action: spotify.api.authorizationManager.deauthorize, label: {
                     Text("Logout")
                 })
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity, alignment: .trailing)
+                .foregroundStyle(textColor)
+
+
             }
         }
     }

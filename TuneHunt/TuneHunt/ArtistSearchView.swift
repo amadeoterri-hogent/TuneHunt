@@ -17,7 +17,6 @@ struct ArtistSearchView: View {
     let separators = ["Comma", "Space", "Newline"]
     
     var body: some View {
-        NavigationView {
             Form {
                 Section {
                     TextField("Enter artists here...", text: $searchText)
@@ -66,7 +65,6 @@ struct ArtistSearchView: View {
                     Text("Next")
                 }
                 
-            }
         }
     }
     

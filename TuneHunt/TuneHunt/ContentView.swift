@@ -4,19 +4,33 @@ import SpotifyWebAPI
 
 struct ContentView: View {
     @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
+
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var alert: AlertItem? = nil
     @State var currentUser: SpotifyUser? = nil
     
+    var textColor: Color {
+        colorScheme == .dark ? .white : .black
+    }
+    
+    var backgroundColor: Color {
+        colorScheme == .dark ? .black : .white
+    }
+    
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack {
                 LoginView(currentUser: currentUser)
                     .padding()
                 MenuView()
             }
             .onOpenURL(perform: handleURL(_:))
+            .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
         }
+        .accentColor(.orange)
+
         
     }
     

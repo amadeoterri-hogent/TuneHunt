@@ -1,18 +1,87 @@
 import SwiftUI
 
 struct MenuView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
+    @State private var showInfoText = false
+    @State private var showInfoImage = false
+    
+    var textColor: Color {
+        colorScheme == .dark ? .white : .black
+    }
+    
     
     var body: some View {
-            List {
-                NavigationLink(
-                    "Create playlist from text", destination: ArtistSearchView()
-                    // TODO add info button which collapses an info text
-                )
-                NavigationLink(
-                    "Create playlist from image", destination: SelectOrCreatePlaylistView()
-                )
+        VStack {
+            NavigationLink(destination: ArtistSearchView()) {
+                HStack {
+                    Image(systemName: "character.cursor.ibeam" )
+                        .font(.title2)
+                        .frame(width:48,height: 48)
+                    
+                    Text("Build from text")
+                        .font(.title2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading,12)
+                    Button(action: { showInfoText.toggle()
+                        if showInfoImage {
+                            showInfoImage.toggle()
+                        }
+                    }) {
+                        Image(systemName: "info.circle")
+                    }
+                    .padding(.trailing, 12)
+                    
+                    
+                }
+                .padding(12)
+                
             }
-            .listStyle(PlainListStyle())
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if showInfoText {
+                Text("Build a playlist which adds the top tracks of artists of your choice. Easily insert or paste a list of artists, and it will automatically add the top tracks of this artist into your playlist. This makes it a lot easier for you to find and listen to new tunes you like!")
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
+            }
+            
+            NavigationLink(destination: PlaylistMenuView()) {
+                HStack {
+                    Image(systemName: "photo" )
+                        .font(.title2)
+                        .frame(width:48,height: 48)
+                    Text("Build from image")
+                        .font(.title2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading,12)
+                    Button(action: {
+                        showInfoImage.toggle()
+                        if showInfoText {
+                            showInfoText.toggle()
+                        }
+                    }) {
+                        Image(systemName: "info.circle")
+                    }
+                    .padding(.trailing, 12)
+                    
+                    
+                }
+                .padding(12)
+                
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if showInfoImage {
+                Text("Build a playlist by simply inserting an image, f.e. of your favorite festival. The app will automatically find the artists in the image and add the top tracks of these artists into your playlist. This way you can easily discover new artists and tunes!")               .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading,24)
+            }
+            Spacer()
+        }
+        .foregroundStyle(textColor)
+        
+        
     }
 }
 
