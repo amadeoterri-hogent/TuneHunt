@@ -5,19 +5,18 @@ import Combine
 
 struct ArtistSearchResultsListView: View {
     @EnvironmentObject var spotify: Spotify
-    @State private var artistsSearchResults: [ArtistSearchResult] = []
+    @State var artistsSearchResults: [ArtistSearchResult]
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
     
-    init(artistSearchResults: [ArtistSearchResult]) {
-        self._artistsSearchResults = State(initialValue: artistSearchResults)
-    }
-    
     var body: some View {
+        // TODO: Select All toggle
         List(artistsSearchResults, id: \.id) { artistSearchResult in
             ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
         }
         .navigationTitle("Search Results")
+        
+        // TODO: Next button which adds top 10 tracks to playlist
     }
 
 }
@@ -36,7 +35,7 @@ struct ArtistsSearchResultsView_Previews: PreviewProvider {
     static let artists = [artist1,artist2]
     
     static var previews: some View {
-        ArtistSearchResultsListView(artistSearchResults: artists)
+        ArtistSearchResultsListView(artistsSearchResults: artists)
             .environmentObject(spotify)
     }
 }

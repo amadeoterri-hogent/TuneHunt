@@ -5,22 +5,33 @@ import SpotifyWebAPI
 
 struct ArtistSearchView: View {
     @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
+    
     @State private var searchText: String = ""
+    @State var artistsPreview: [String] = []
     @State var artistSearchResults: [ArtistSearchResult] = []
     @State private var selectedSeparator = "Comma"
     @State private var isSearching = false
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
-    @State private var path = [Artist]()
     @State private var shouldNavigate = false
+    @State private var selection: Int? = nil
+    
     
     let separators = ["Comma", "Space", "Newline"]
+    var textColor: Color {colorScheme == .dark ? .white : .black}
+    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
     var body: some View {
+        VStack {
             Form {
+                
                 Section {
-                    TextField("Enter artists here...", text: $searchText)
+                    TextEditor(text: $searchText)
                         .disableAutocorrection(true)
+                        .frame(height: 200)
+                } header: {
+                    Text("Enter Artists Here:")
                 }
                 
                 Section {
@@ -31,45 +42,60 @@ struct ArtistSearchView: View {
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Text("Select a separator:")
+                    Text("Select a Separator:")
                 }
                 
                 Section {
-                    // List of artists
-                    ForEach(splitArtists(), id: \.self) { artist in
-                        Text(artist)
-                            .padding(.vertical, 2)
-                            .padding(.horizontal, 8)
-                            .background(Color(UIColor.systemGray5))
-                            .cornerRadius(5)
-                    }
-                }
-                
-                Button("Search", action: searchArtists)
-                
-                Section(header: Text("Result")) {
-                    if isSearching {
-                        ProgressView("Searching...")
-                    } else if artistSearchResults.isEmpty {
-                        Text("No artists found")
-                    } else {
-                        ForEach(artistSearchResults, id: \.id) { artistSearchResult in
-                            Text(artistSearchResult.artist.name)
+                    ForEach(artistsPreview, id: \.self) { artist in
+                        HStack {
+                            Text(artist)
+                            Button(action: { removeArtist(artist) }) {
+                                Image(systemName: "minus.circle")
+                            }
                         }
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .background(Color(UIColor.systemGray5))
+                        .cornerRadius(5)
+                        
+                    }
+                    .onChange(of: searchText) { _ in
+                        splitArtists()
+                    }
+                    .onChange(of: selectedSeparator) { _ in
+                        splitArtists()
                     }
                 }
                 
-                NavigationLink {
-                    ArtistSearchResultsListView(artistSearchResults: artistSearchResults)
-                } label: {
-                    Text("Next")
-                }
                 
+                Button(action: {
+                    selection = 1
+                    searchArtists()
+                }, label: {
+                    Text("Search In Spotify")
+                })
+                .foregroundStyle(textColor)
+                
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+        .ignoresSafeArea())
+        
+    }
+    
+    @ViewBuilder
+    func destinationView() -> some View {
+        switch selection {
+        case 1:
+            ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
+        default:
+            EmptyView()
         }
     }
     
-    // Function to split artists based on selected separator
-    private func splitArtists() -> [String] {
+    private func splitArtists() -> Void {
         let separator: Character
         switch selectedSeparator {
         case "Comma":
@@ -81,48 +107,57 @@ struct ArtistSearchView: View {
         default:
             separator = " "
         }
-        return searchText
+        artistsPreview = searchText
             .split(separator: separator)
             .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
+            .removingDuplicates()
+    }
+    
+    private func removeArtist(_ artist: String) {
+        guard artistsPreview.isEmpty else { return }
+        artistsPreview.removeAll { $0 == artist }
     }
     
     func searchArtists() {
         self.artistSearchResults = []
-        let artistNames = splitArtists()
-        
-        guard !artistNames.isEmpty else { return }
+        let artistNames = artistsPreview
+        guard !artistNames.isEmpty else {
+            // TODO alert
+            return
+        }
         self.isSearching = true
-        
+
+        var remainingSearches = artistNames.count
         for artist in artistNames {
-            
             let cancellable = spotify.api.search(
                 query: artist, categories: [.artist]
             )
-                .receive(on: RunLoop.main)
-                .sink(
-                    receiveCompletion: { completion in
-                        self.isSearching = false
-                        if case .failure(let error) = completion {
-                            self.alertItem = AlertItem(
-                                title: "Couldn't Perform Search",
-                                message: error.localizedDescription
-                            )
-                        }
-                    },
-                    receiveValue: { searchResults in
-                        if let artist = searchResults.artists?.items.first {
-                            self.artistSearchResults.append(ArtistSearchResult(artist: artist))
-                        }
+            .receive(on: RunLoop.main)
+            .sink(
+                receiveCompletion: { completion in
+                    self.isSearching = false
+                    remainingSearches -= 1
+                    if remainingSearches == 0 {
+                        self.shouldNavigate = true
                     }
-                )
-            
+                    if case .failure(let error) = completion {
+                        self.alertItem = AlertItem(
+                            title: "Couldn't Perform Search",
+                            message: error.localizedDescription
+                        )
+                    }
+                },
+                receiveValue: { searchResults in
+                    if let artist = searchResults.artists?.items.first {
+                        self.artistSearchResults.append(ArtistSearchResult(artist: artist))
+                    }
+                }
+            )
             self.searchCancellables.append(cancellable)
-            
         }
-        
-        shouldNavigate = true
     }
+
     
 }
 

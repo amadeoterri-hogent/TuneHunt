@@ -12,81 +12,85 @@ struct MenuView: View {
     
     
     var body: some View {
-        VStack {
-            NavigationLink(destination: ArtistSearchView()) {
-                HStack {
-                    Image(systemName: "character.cursor.ibeam" )
-                        .font(.title2)
-                        .frame(width:48,height: 48)
+            VStack {
+                // TODO: Button?? and destination playlistmenuview with param artist
+                NavigationLink(destination: ArtistSearchView()) {
+                    HStack {
+                        Image(systemName: "character.cursor.ibeam" )
+                            .font(.title2)
+                            .frame(width:48,height: 48)
+                        
+                        Text("Build from text")
+                            .font(.title2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading,12)
+                        Button(action: { showInfoText.toggle()
+                            if showInfoImage {
+                                showInfoImage.toggle()
+                            }
+                        }) {
+                            Image(systemName: "info.circle")
+                        }
+                        .padding(.trailing, 12)
+                        
+                        
+                    }
+                    .padding(12)
                     
-                    Text("Build from text")
-                        .font(.title2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                if showInfoText {
+                    Text("Build a playlist which adds the top tracks of artists of your choice. Easily insert or paste a list of artists, and it will automatically add the top tracks of this artist into your playlist. This makes it a lot easier for you to find and listen to new tunes you like!")
+                        .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading,12)
-                    Button(action: { showInfoText.toggle()
-                        if showInfoImage {
+                        .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
+                }
+                
+                // TODO: Button??
+                NavigationLink(destination: PlaylistMenuView()) {
+                    HStack {
+                        Image(systemName: "photo" )
+                            .font(.title2)
+                            .frame(width:48,height: 48)
+                        Text("Build from image")
+                            .font(.title2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading,12)
+                        Button(action: {
                             showInfoImage.toggle()
+                            if showInfoText {
+                                showInfoText.toggle()
+                            }
+                        }) {
+                            Image(systemName: "info.circle")
                         }
-                    }) {
-                        Image(systemName: "info.circle")
+                        .padding(.trailing, 12)
+                        
+                        
                     }
-                    .padding(.trailing, 12)
-                    
+                    .padding(12)
                     
                 }
-                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            if showInfoText {
-                Text("Build a playlist which adds the top tracks of artists of your choice. Easily insert or paste a list of artists, and it will automatically add the top tracks of this artist into your playlist. This makes it a lot easier for you to find and listen to new tunes you like!")
-                    .font(.subheadline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
-            }
-            
-            NavigationLink(destination: PlaylistMenuView()) {
-                HStack {
-                    Image(systemName: "photo" )
-                        .font(.title2)
-                        .frame(width:48,height: 48)
-                    Text("Build from image")
-                        .font(.title2)
+                if showInfoImage {
+                    Text("Build a playlist by simply inserting an image, f.e. of your favorite festival. The app will automatically find the artists in the image and add the top tracks of these artists into your playlist. This way you can easily discover new artists and tunes!")
+                        .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading,12)
-                    Button(action: {
-                        showInfoImage.toggle()
-                        if showInfoText {
-                            showInfoText.toggle()
-                        }
-                    }) {
-                        Image(systemName: "info.circle")
-                    }
-                    .padding(.trailing, 12)
-                    
-                    
+                        .padding(.leading,24)
                 }
-                .padding(12)
-                
+                Spacer()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            if showInfoImage {
-                Text("Build a playlist by simply inserting an image, f.e. of your favorite festival. The app will automatically find the artists in the image and add the top tracks of these artists into your playlist. This way you can easily discover new artists and tunes!")               .font(.subheadline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading,24)
-            }
-            Spacer()
-        }
-        .foregroundStyle(textColor)
-        
-        
+//            .navigationDestination(for: Int.self) { selection in
+//                Text("You selected \(selection)")
+//            }
+            .foregroundStyle(textColor)
+
     }
 }
 
 struct MenuView_Previews: PreviewProvider {
-    
     static let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
@@ -94,7 +98,7 @@ struct MenuView_Previews: PreviewProvider {
     }()
     
     static var previews: some View {
-        NavigationView {
+        NavigationStack {
             MenuView()
                 .environmentObject(spotify)
         }

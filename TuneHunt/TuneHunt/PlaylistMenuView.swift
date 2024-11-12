@@ -19,7 +19,6 @@ struct PlaylistMenuView: View {
     
     
     var body: some View {
-        NavigationView {
             VStack {
                 NavigationLink(destination: PlaylistCreateView()) {
                     HStack {
@@ -72,14 +71,8 @@ struct PlaylistMenuView: View {
             }
             .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
-            
-        }
-        .foregroundStyle(textColor)
-        
-        
+            .foregroundStyle(textColor)
     }
-    
-    
 }
 
 extension ProcessInfo {

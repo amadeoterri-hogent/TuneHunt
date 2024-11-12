@@ -9,6 +9,7 @@ struct PlaylistCreateView: View {
     @State private var alert: AlertItem? = nil
     
     var body: some View {
+        // TODO: styling
         TextField("Enter playlist...",text: $namePlaylist)
         Button(action: createPlaylist, label: {
             Text("Create Playlist")

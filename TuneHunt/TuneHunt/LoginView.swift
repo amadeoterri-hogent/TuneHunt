@@ -4,7 +4,6 @@ import SpotifyWebAPI
 struct LoginView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    @State var currentUser: SpotifyUser? = nil
     
     var textColor: Color {
         colorScheme == .dark ? .white : .black
@@ -43,7 +42,7 @@ struct LoginView: View {
         else {
             // TODO: Profile
             HStack {
-                if let userName = currentUser?.displayName {
+                if let userName = spotify.currentUser?.displayName {
                     Text("Welcome, \(userName)")
                         .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -52,6 +51,7 @@ struct LoginView: View {
                     Text("Logout")
                 })
                 .buttonStyle(.bordered)
+                .background(backgroundColor)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .foregroundStyle(textColor)
 
@@ -63,22 +63,25 @@ struct LoginView: View {
 
 struct LoginView_Previews: PreviewProvider {
     
-    static let spotify: Spotify = {
-        let spotify = Spotify()
-        //        spotify.isAuthorized = false
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    static let user = SpotifyUser(
+    static let demoUser = SpotifyUser(
         displayName: "Amadeo",
         uri: "www.google.com",
         id: "1",
         href: URL(string: "www.google.com")!
     )
     
+    static let spotify: Spotify = {
+        let spotify = Spotify()
+        //        spotify.isAuthorized = false
+        spotify.isAuthorized = true
+        spotify.currentUser = demoUser
+        return spotify
+    }()
+    
+
+    
     static var previews: some View {
-        LoginView(currentUser: user)
+        LoginView()
             .environmentObject(spotify)
     }
 }

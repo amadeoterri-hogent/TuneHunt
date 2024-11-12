@@ -3,46 +3,38 @@ import Combine
 import SpotifyWebAPI
 
 struct ContentView: View {
+    @State private var path: [Int] = []
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-
+    
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var alert: AlertItem? = nil
-    @State var currentUser: SpotifyUser? = nil
     
-    var textColor: Color {
-        colorScheme == .dark ? .white : .black
-    }
-    
-    var backgroundColor: Color {
-        colorScheme == .dark ? .black : .white
-    }
+    var textColor: Color { colorScheme == .dark ? .white : .black}
+    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
     var body: some View {
-        NavigationView {
-            VStack {
-                LoginView(currentUser: currentUser)
-                    .padding()
-                MenuView()
+        NavigationStack() {
+            ZStack {
+                LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+                    .ignoresSafeArea()
+                
+                VStack {
+                    LoginView()
+                        .padding()
+                    MenuView()
+                }
+                .onOpenURL(perform: handleURL(_:))
             }
-            .onOpenURL(perform: handleURL(_:))
-            .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea())
         }
-        .accentColor(.orange)
+        .accentColor(textColor)
 
-        
     }
     
-    /**
-     Handle the URL that Spotify redirects to after the user Either authorizes or denies authorization for the application.
-     This method is called by the `onOpenURL(perform:)` view modifier directly above.
-     */
     func handleURL(_ url: URL) {
         
-        // **Always** validate URLs; they offer a potential attack vector into your app.
+        // Validate url
         guard url.scheme == self.spotify.loginCallbackURL.scheme else {
-            print("not handling URL: unexpected scheme: '\(url)'")
             self.alert = AlertItem(
                 title: "Cannot Handle Redirect",
                 message: "Unexpected URL"
@@ -89,7 +81,7 @@ struct ContentView: View {
                 }
                 else {
                     alertTitle =
-                        "Couldn't authorize with your account"
+                    "Couldn't authorize with your account"
                     alertMessage = error.localizedDescription
                 }
                 self.alert = AlertItem(
@@ -104,7 +96,6 @@ struct ContentView: View {
         // MARK: from Spotify was the result of a request made by this app, and
         // MARK: and not an attacker.
         self.spotify.authorizationState = String.randomURLSafe(length: 128)
-        self.currentUser = spotify.currentUser
         
     }
     
@@ -119,15 +110,8 @@ struct ContentView_Previews: PreviewProvider {
         return spotify
     }()
     
-    static let user = SpotifyUser(
-        displayName: "Amadeo",
-        uri: "www.google.com",
-        id: "1",
-        href: URL(string: "www.google.com")!
-    )
-    
     static var previews: some View {
-        ContentView(currentUser: user)
+        ContentView()
             .environmentObject(spotify)
     }
 }
