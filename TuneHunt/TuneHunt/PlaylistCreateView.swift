@@ -4,18 +4,33 @@ import SpotifyWebAPI
 
 struct PlaylistCreateView: View {
     @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
+
     @State private var createPlaylistCancellable: AnyCancellable?
     @State private var namePlaylist: String = ""
     @State private var alert: AlertItem? = nil
     
+    var textColor: Color {colorScheme == .dark ? .white : .black}
+    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
+    
     var body: some View {
         // TODO: styling
-        TextField("Enter playlist...",text: $namePlaylist)
-        Button(action: createPlaylist, label: {
-            Text("Create Playlist")
-        })
-        .frame(maxWidth: .infinity,alignment: .leading)
-        .buttonStyle(.bordered)
+        // TODO: on create playlist show finish screen + playlist created
+        VStack {
+            TextField("Enter playlist...",text: $namePlaylist)
+            Button {
+                createPlaylist()
+            }
+            label: {
+                Text("Create Playlist")
+            }
+            .frame(maxWidth: .infinity,alignment: .leading)
+            .buttonStyle(.bordered)
+        }
+        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
+        .foregroundStyle(textColor)
+
     }
     
     func createPlaylist() {

@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import SpotifyWebAPI
 
-struct ArtistSearchView: View {
+struct ArtistTextSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
@@ -67,15 +67,18 @@ struct ArtistSearchView: View {
                     }
                 }
                 
-                
-                Button(action: {
-                    selection = 1
-                    searchArtists()
-                }, label: {
-                    Text("Search In Spotify")
-                })
-                .foregroundStyle(textColor)
-                
+                Section {
+                    Button(action: {
+                        selection = 1
+                        searchArtists()
+                    }, label: {
+                        Text("Search")
+                    })
+                    .foregroundStyle(textColor)
+                } header: {
+                    Text("Search artists in spotify")
+                }
+
             }
             .scrollContentBackground(.hidden)
         }
@@ -161,7 +164,7 @@ struct ArtistSearchView: View {
     
 }
 
-struct ArtistSearchView_Previews: PreviewProvider {
+struct ArtistTextSearchView_Previews: PreviewProvider {
     
     static let spotify: Spotify = {
         let spotify = Spotify()
@@ -170,7 +173,7 @@ struct ArtistSearchView_Previews: PreviewProvider {
     }()
     
     static var previews: some View {
-        ArtistSearchView()
+        ArtistTextSearchView()
             .environmentObject(spotify)
     }
 }

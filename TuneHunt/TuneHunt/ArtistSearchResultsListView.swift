@@ -5,18 +5,59 @@ import Combine
 
 struct ArtistSearchResultsListView: View {
     @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
+    
     @State var artistsSearchResults: [ArtistSearchResult]
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
+    @State private var shouldNavigate = false
+    @State private var selection: Int? = nil
+    @State private var spotifyArtists: [Artist] = []
+    
+    var textColor: Color {colorScheme == .dark ? .white : .black}
+    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
     var body: some View {
         // TODO: Select All toggle
-        List(artistsSearchResults, id: \.id) { artistSearchResult in
-            ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+        VStack {
+            Form {
+                List(artistsSearchResults, id: \.id) { artistSearchResult in
+                    ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+                }
+                .navigationTitle("Search Results")
+
+                Section {
+                    Button(action: {
+                        selection = 1
+                        for artistsSearchResult in artistsSearchResults {
+                            if artistsSearchResult.addToPlaylist {
+                                spotifyArtists.append(artistsSearchResult.artist)
+                            }
+                        }
+                        shouldNavigate = true
+                    }, label: {
+                        Text("Choose playlist")
+                    })
+                    .foregroundStyle(textColor)
+                } header: {
+                    Text("Select or create a playlist")
+                }
+            }
+            .scrollContentBackground(.hidden)
         }
-        .navigationTitle("Search Results")
-        
-        // TODO: Next button which adds top 10 tracks to playlist
+        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+        .ignoresSafeArea())
+    }
+    
+    @ViewBuilder
+    func destinationView() -> some View {
+        switch selection {
+        case 1:
+            PlaylistMenuView(artists: spotifyArtists)
+        default:
+            EmptyView()
+        }
     }
 
 }

@@ -5,16 +5,18 @@ struct MenuView: View {
     
     @State private var showInfoText = false
     @State private var showInfoImage = false
-    
-    var textColor: Color {
-        colorScheme == .dark ? .white : .black
-    }
+    @State private var selection: Int? = nil
+    @State private var shouldNavigate = false
+
+    var textColor: Color {colorScheme == .dark ? .white : .black}
     
     
     var body: some View {
             VStack {
-                // TODO: Button?? and destination playlistmenuview with param artist
-                NavigationLink(destination: ArtistSearchView()) {
+                Button {
+                    selection = 1
+                    shouldNavigate = true
+                } label: {
                     HStack {
                         Image(systemName: "character.cursor.ibeam" )
                             .font(.title2)
@@ -36,9 +38,9 @@ struct MenuView: View {
                         
                     }
                     .padding(12)
-                    
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                
                 
                 if showInfoText {
                     Text("Build a playlist which adds the top tracks of artists of your choice. Easily insert or paste a list of artists, and it will automatically add the top tracks of this artist into your playlist. This makes it a lot easier for you to find and listen to new tunes you like!")
@@ -47,8 +49,10 @@ struct MenuView: View {
                         .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                 }
                 
-                // TODO: Button??
-                NavigationLink(destination: PlaylistMenuView()) {
+                Button {
+                    selection = 2
+                    shouldNavigate = true
+                } label: {
                     HStack {
                         Image(systemName: "photo" )
                             .font(.title2)
@@ -82,11 +86,21 @@ struct MenuView: View {
                 }
                 Spacer()
             }
-//            .navigationDestination(for: Int.self) { selection in
-//                Text("You selected \(selection)")
-//            }
+            .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
             .foregroundStyle(textColor)
 
+    }
+    
+    @ViewBuilder
+    func destinationView() -> some View {
+        switch selection {
+        case 1:
+            ArtistTextSearchView()
+        case 2:
+            ArtistImageSearchView()
+        default:
+            EmptyView()
+        }
     }
 }
 

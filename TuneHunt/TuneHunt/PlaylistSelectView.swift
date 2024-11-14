@@ -5,29 +5,50 @@ import SpotifyWebAPI
 
 struct PlaylistSelectView: View {
     @EnvironmentObject var spotify: Spotify
-
+    @Environment(\.colorScheme) var colorScheme
+    
     @State private var alert: AlertItem? = nil
     @State private var playlists: [Playlist<PlaylistItemsReference>] = []
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var isLoadingPlaylists = false
     @State private var couldntLoadPlaylists = false
-
+    
+    @State private var showingAlert = false
+    @State private var selectedPlaylist = ""
+    
+    var textColor: Color {colorScheme == .dark ? .white : .black}
+    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
+    
     
     var body: some View {
+        // TODO: on select playlist show finish screen
         VStack {
             List {
                 ForEach(playlists, id: \.uri) { playlist in
-                    Text("\( playlist.name)")
+                    Button {
+                        selectedPlaylist = playlist.name
+                        showingAlert = true
+                    } label: {
+                        Text("\( playlist.name)")
+                    }
+                    .alert("Playlist \(selectedPlaylist) selected", isPresented: $showingAlert) {
+                        Button("OK", role: .cancel) { }
+                    }
                 }
             }
+            .scrollContentBackground(.hidden)
+
         }
+        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
+        .foregroundStyle(textColor)
         .navigationTitle("Playlists")
         .onAppear(perform: retrievePlaylists)
         .alert(item: $alert) { alert in
             Alert(title: alert.title, message: alert.message)
         }
         .padding()
-
+        
     }
     
     func retrievePlaylists() {
@@ -37,21 +58,21 @@ struct PlaylistSelectView: View {
         self.isLoadingPlaylists = true
         self.playlists = []
         spotify.api.currentUserPlaylists(limit: 50)
-            // Gets all pages of playlists.
+        // Gets all pages of playlists.
             .extendPages(spotify.api)
             .receive(on: RunLoop.main)
             .sink(
                 receiveCompletion: { completion in
                     self.isLoadingPlaylists = false
                     switch completion {
-                        case .finished:
-                            self.couldntLoadPlaylists = false
-                        case .failure(let error):
-                            self.couldntLoadPlaylists = true
-                            self.alert = AlertItem(
-                                title: "Couldn't Retrieve Playlists",
-                                message: error.localizedDescription
-                            )
+                    case .finished:
+                        self.couldntLoadPlaylists = false
+                    case .failure(let error):
+                        self.couldntLoadPlaylists = true
+                        self.alert = AlertItem(
+                            title: "Couldn't Retrieve Playlists",
+                            message: error.localizedDescription
+                        )
                     }
                 },
                 receiveValue: { playlistsPage in
@@ -60,7 +81,7 @@ struct PlaylistSelectView: View {
                 }
             )
             .store(in: &cancellables)
-
+        
     }
 }
 
