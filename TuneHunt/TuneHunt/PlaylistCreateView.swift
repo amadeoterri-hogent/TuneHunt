@@ -9,16 +9,26 @@ struct PlaylistCreateView: View {
     @State private var createPlaylistCancellable: AnyCancellable?
     @State private var namePlaylist: String = ""
     @State private var alert: AlertItem? = nil
+    @State private var selection: Int? = nil
+    @State private var shouldNavigate = false
+    @State private var selectedArtists: [Artist]
+    @State private var alertItem: AlertItem? = nil
     
     var textColor: Color {colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
+    @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
+    
+    init(artists:[Artist]) {
+        self.selectedArtists = artists
+    }
+    
     var body: some View {
         // TODO: styling
-        // TODO: on create playlist show finish screen + playlist created
         VStack {
             TextField("Enter playlist...",text: $namePlaylist)
             Button {
+                selection = 1
                 createPlaylist()
             }
             label: {
@@ -27,10 +37,28 @@ struct PlaylistCreateView: View {
             .frame(maxWidth: .infinity,alignment: .leading)
             .buttonStyle(.bordered)
         }
+        .navigationDestination(isPresented: $shouldNavigate) {
+            destinationView()
+        }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .foregroundStyle(textColor)
 
+    }
+    
+    @ViewBuilder
+    func destinationView() -> some View {
+        switch selection {
+        case 1:
+            if let playlist = createdPlaylist {
+                FinishView(playlist: playlist, artists: selectedArtists)
+            } else {
+                // TODO: Throw alert?
+                EmptyView()
+            }
+        default:
+            EmptyView()
+        }
     }
     
     func createPlaylist() {
@@ -55,8 +83,6 @@ struct PlaylistCreateView: View {
             isCollaborative: false
         )
         
-        
-        // Create the playlist and assign to cancellable
         createPlaylistCancellable = spotify.api.createPlaylist(for: userURI, playlistDetails)
             .receive(on: RunLoop.main)
             .sink(
@@ -64,6 +90,7 @@ struct PlaylistCreateView: View {
                     switch completion {
                     case .finished:
                         print("Playlist created successfully.")
+                        shouldNavigate = true
                     case .failure(let error):
                         print("Failed to create playlist: \(error)")
                         self.alert = AlertItem(
@@ -73,6 +100,7 @@ struct PlaylistCreateView: View {
                     }
                 },
                 receiveValue: { playlist in
+                    self.createdPlaylist = playlist
                     print("Created playlist:", playlist)
                 }
             )

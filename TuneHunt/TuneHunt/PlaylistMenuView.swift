@@ -59,7 +59,7 @@ struct PlaylistMenuView: View {
                     VStack {
                         Text("Select playlist")
                             .font(.largeTitle)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity,  alignment: .leading)
                         
                         Text("Select an existing playlist from your library")
                             .font(.subheadline)
@@ -86,9 +86,9 @@ struct PlaylistMenuView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            PlaylistCreateView()
+            PlaylistCreateView(artists: artists)
         case 2:
-            PlaylistSelectView()
+            PlaylistSelectView(artists: artists)
         default:
             EmptyView()
         }

@@ -126,7 +126,7 @@ struct ArtistTextSearchView: View {
         self.artistSearchResults = []
         let artistNames = artistsPreview
         guard !artistNames.isEmpty else {
-            // TODO alert
+            // TODO: alert
             return
         }
         self.isSearching = true

@@ -12,13 +12,19 @@ struct PlaylistSelectView: View {
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var isLoadingPlaylists = false
     @State private var couldntLoadPlaylists = false
-    
+    @State private var selectedArtists: [Artist]   
     @State private var showingAlert = false
-    @State private var selectedPlaylist = ""
+    @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
+    @State private var selection: Int? = nil
+    @State private var shouldNavigate = false
+    @State private var loadPlaylistCancellable: AnyCancellable? = nil
     
     var textColor: Color {colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
+    init(artists:[Artist]) {
+        self.selectedArtists = artists
+    }
     
     var body: some View {
         // TODO: on select playlist show finish screen
@@ -26,18 +32,19 @@ struct PlaylistSelectView: View {
             List {
                 ForEach(playlists, id: \.uri) { playlist in
                     Button {
-                        selectedPlaylist = playlist.name
-                        showingAlert = true
+                        selection = 1
+                        loadPlaylist(playlist: playlist)
+                        shouldNavigate = true
                     } label: {
                         Text("\( playlist.name)")
-                    }
-                    .alert("Playlist \(selectedPlaylist) selected", isPresented: $showingAlert) {
-                        Button("OK", role: .cancel) { }
                     }
                 }
             }
             .scrollContentBackground(.hidden)
 
+        }
+        .navigationDestination(isPresented: $shouldNavigate) {
+            destinationView()
         }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
@@ -49,6 +56,21 @@ struct PlaylistSelectView: View {
         }
         .padding()
         
+    }
+    
+    @ViewBuilder
+    func destinationView() -> some View {
+        switch selection {
+        case 1:
+            if let playlist = selectedPlaylist {
+                FinishView(playlist: playlist, artists: selectedArtists)
+            } else {
+                // TODO: Throw alert?
+                EmptyView()
+            }
+        default:
+            EmptyView()
+        }
     }
     
     func retrievePlaylists() {
@@ -83,18 +105,30 @@ struct PlaylistSelectView: View {
             .store(in: &cancellables)
         
     }
-}
-
-struct PlayListSelectView_Previews: PreviewProvider {
     
-    static let spotify: Spotify = {
-        let spotify = Spotify()
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    static var previews: some View {
-        PlaylistSelectView()
-            .environmentObject(spotify)
+    func loadPlaylist(playlist: Playlist<PlaylistItemsReference>) {
+        self.loadPlaylistCancellable =  spotify.api.playlist(playlist)
+            .receive(on: RunLoop.main)
+            .sink(
+                receiveCompletion:{ _ in }
+                , receiveValue: { playlist in
+                    self.selectedPlaylist = playlist
+                    
+                }
+            )
     }
 }
+
+//struct PlayListSelectView_Previews: PreviewProvider {
+//    
+//    static let spotify: Spotify = {
+//        let spotify = Spotify()
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    static var previews: some View {
+//        PlaylistSelectView()
+//            .environmentObject(spotify)
+//    }
+//}
