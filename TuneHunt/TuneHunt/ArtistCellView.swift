@@ -7,12 +7,7 @@ struct ArtistCellView: View {
     @State private var image = Image("spotify logo green")
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var artistSearchResult: ArtistSearchResult
-    
-    init(spotify: Spotify, artistSearchResult: ArtistSearchResult) {
-        self.spotify = spotify
-        self.artistSearchResult = artistSearchResult
-    }
+    @Binding var artistSearchResult: ArtistSearchResult
 
     var body: some View {
         HStack() {

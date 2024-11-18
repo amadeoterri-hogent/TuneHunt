@@ -17,15 +17,34 @@ struct ArtistSearchResultsListView: View {
     var textColor: Color {colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
+    
     var body: some View {
-        // TODO: Select All toggle
+        let selectAll = Binding<Bool>(
+            get: {
+                artistsSearchResults.allSatisfy { $0.addToPlaylist }
+            },
+            set: { newValue in
+                for index in artistsSearchResults.indices {
+                    artistsSearchResults[index].addToPlaylist = newValue
+                }
+            }
+        )
+        
+        
         VStack {
             Form {
-                List(artistsSearchResults, id: \.id) { artistSearchResult in
-                    ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
-                }
-                .navigationTitle("Search Results")
+                Section {
+                    Toggle("Select All", isOn: selectAll)
+                        .frame(alignment: .trailing)
+                    List($artistsSearchResults, id: \.id) { $artistSearchResult in
+                        ArtistCellView(spotify: spotify, artistSearchResult: $artistSearchResult)
+                    }
+                    .navigationTitle("Search Results")
+                } header: {
+                    Text("Select artists")
 
+                }
+                
                 Section {
                     Button(action: {
                         selection = 1
@@ -46,8 +65,8 @@ struct ArtistSearchResultsListView: View {
             .scrollContentBackground(.hidden)
         }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
-        .ignoresSafeArea())
+            .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+            .ignoresSafeArea())
     }
     
     @ViewBuilder
@@ -59,7 +78,7 @@ struct ArtistSearchResultsListView: View {
             EmptyView()
         }
     }
-
+    
 }
 
 struct ArtistsSearchResultsView_Previews: PreviewProvider {
@@ -70,10 +89,10 @@ struct ArtistsSearchResultsView_Previews: PreviewProvider {
         return spotify
     }()
     
-    static let artist1 = ArtistSearchResult(artist: Artist(name:"Pink Floyd"))
-    static let artist2 = ArtistSearchResult(artist: Artist(name:"Radiohead"))
-    
-    static let artists = [artist1,artist2]
+    @State static var artists = [
+        ArtistSearchResult(artist: Artist(name: "Pink Floyd")),
+        ArtistSearchResult(artist: Artist(name: "Radiohead"))
+    ]
     
     static var previews: some View {
         ArtistSearchResultsListView(artistsSearchResults: artists)
