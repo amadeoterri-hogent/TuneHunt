@@ -4,11 +4,15 @@ import Combine
 
 struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
+
     @State var tracks: [Track] = []
     @State private var searchCancellables: Set<AnyCancellable> = []
     @State private var isSearching = false
     @State private var alert: AlertItem? = nil
 
+    var textColor: Color { colorScheme == .dark ? .white : .black}
+    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
     var playlist: Playlist<PlaylistItems>
     var artists: [Artist]
@@ -32,6 +36,8 @@ struct FinishView: View {
                 Text("Finish")
             }
         }
+        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .ignoresSafeArea())
         .alert(item: $alert) { alert in
             Alert(title: alert.title, message: alert.message)
         }
@@ -133,3 +139,18 @@ extension Array {
     }
 }
 
+// TODO: Fix preview
+//struct FinishView_Previews: PreviewProvider {
+//    
+//    static let spotify: Spotify = {
+//        let spotify = Spotify()
+//        //        spotify.isAuthorized = false
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    static var previews: some View {
+//        FinishView()
+//            .environmentObject(spotify)
+//    }
+//}

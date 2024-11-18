@@ -97,7 +97,7 @@ struct MenuView: View {
         case 1:
             ArtistTextSearchView()
         case 2:
-            ArtistImageSearchView()
+            ArtistImageSearchView(artistSearchResults: [])
         default:
             EmptyView()
         }

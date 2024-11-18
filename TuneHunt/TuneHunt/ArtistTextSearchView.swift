@@ -59,10 +59,10 @@ struct ArtistTextSearchView: View {
                         .cornerRadius(5)
                         
                     }
-                    .onChange(of: searchText) { _ in
+                    .onChange(of: searchText, initial: true) {
                         splitArtists()
                     }
-                    .onChange(of: selectedSeparator) { _ in
+                    .onChange(of: selectedSeparator, initial: true) {
                         splitArtists()
                     }
                 }
@@ -118,7 +118,6 @@ struct ArtistTextSearchView: View {
     }
     
     private func removeArtist(_ artist: String) {
-        guard artistsPreview.isEmpty else { return }
         artistsPreview.removeAll { $0 == artist }
     }
     

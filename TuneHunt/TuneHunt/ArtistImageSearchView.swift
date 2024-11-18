@@ -22,74 +22,85 @@ struct ArtistImageSearchView: View {
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var selectedSeparator = "Comma"
-
     
     var textColor: Color {colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
+    init(artistSearchResults: [ArtistSearchResult]) {
+        self.artistSearchResults = artistSearchResults
+    }
+    
     var body: some View {
         VStack {
-            // Image Picker
-            PhotosPicker("Select a Picture", selection: $pickerItem, matching: .images)
-                .padding()
-            
-            // Show Selected Image
-            if let imagePreview = imagePreview {
-                imagePreview
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-                    .padding()
-            }
-            
-            // Recognized Text Display{
-            TextEditor(text: $searchText)
-                .disableAutocorrection(true)
-                .frame(height: 200)
-            
-            // Loading Indicator
-            if isProcessingImage {
-                ProgressView("Processing image...")
-                    .padding()
-            }
-            
-            // Extracted Artist List
-            if !artistsPreview.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(artistsPreview, id: \.self) { artist in
-                        HStack {
-                            Text(artist)
-                            Button(action: { removeArtist(artist) }) {
-                                Image(systemName: "minus.circle")
+            Form {
+                Section {
+                    // Image Picker
+                    PhotosPicker("Select a Picture", selection: $pickerItem, matching: .images)
+                } header: {
+                    Text("Choose a picture from your photo album")
+                }
+                
+                Section {
+                    
+                    // Show Selected Image
+                    if let imagePreview = imagePreview {
+                        imagePreview
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 200)
+                            .padding()
+                    }
+                    
+                    // Loading Indicator
+                    if isProcessingImage {
+                        ProgressView("Processing image...")
+                            .padding()
+                    }
+                    
+                    // Extracted Artist List
+                    if !artistsPreview.isEmpty {
+                        ScrollView {
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(artistsPreview, id: \.self) { artist in
+                                    HStack {
+                                        Text(artist)
+                                        Button(action: { removeArtist(artist) }) {
+                                            Image(systemName: "minus.circle")
+                                        }
+                                    }
+                                    .padding(.vertical, 2)
+                                    .padding(.horizontal, 8)
+                                    .background(Color(UIColor.systemGray5))
+                                    .cornerRadius(5)
+                                    
+                                }
+                                
                             }
                         }
-                        .padding(.vertical, 2)
-                        .padding(.horizontal, 8)
-                        .background(Color(UIColor.systemGray5))
-                        .cornerRadius(5)
-                        
                     }
+                    
                 }
-                .padding()
-                .onChange(of: searchText) { _ in
-                    splitArtists()
+                Section {
+                    
+                    Button {
+                        selection = 1
+                        searchArtists()
+                    } label: {
+                        Text("Search")
+                    }
+                } header: {
+                    Text("Search artists in spotify")
                 }
                 
             }
-            
-            Button(action: {
-                selection = 1
-                searchArtists()
-            }, label: {
-                Text("Search")
-            })
-            .foregroundStyle(textColor)
-            
-            Spacer()
+            .scrollContentBackground(.hidden)
         }
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
-        .padding()
-        .onChange(of: pickerItem) { _ in
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .ignoresSafeArea())
+        .onChange(of: pickerItem, initial: true) {
             processPickerItem()
         }
         
@@ -139,13 +150,14 @@ struct ArtistImageSearchView: View {
                 let recognizedStrings = observations.compactMap { $0.topCandidates(1).first?.string }
                 DispatchQueue.main.async {
                     self.searchText = recognizedStrings.joined(separator: ",")
-                    // TODO: remove filter first 10 results and filter with ai possibly
                     self.artistsPreview = Array(searchText
                         .split(separator: " ")
                         .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
                         .filter { !$0.isEmpty }
                         .removingDuplicates()
-                        .prefix(10))
+                                                //                         TODO: remove filter first 10 results and filter with ai possibly
+                        .prefix(30)
+                    )
                 }
             }
         }
@@ -205,17 +217,7 @@ struct ArtistImageSearchView: View {
     }
     
     private func splitArtists() -> Void {
-        let separator: Character
-        switch selectedSeparator {
-        case "Comma":
-            separator = ","
-        case "Space":
-            separator = " "
-        case "Newline":
-            separator = "\n"
-        default:
-            separator = " "
-        }
+        let separator: Character = ","
         artistsPreview = searchText
             .split(separator: separator)
             .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -224,9 +226,25 @@ struct ArtistImageSearchView: View {
     }
     
     private func removeArtist(_ artist: String) {
-        print("Remove artist: \(artist)")
-        guard artistsPreview.isEmpty else { return }
         artistsPreview.removeAll { $0 == artist }
     }
 }
 
+struct ArtistImageSearchView_Previews: PreviewProvider {
+    
+    static let spotify: Spotify = {
+        let spotify = Spotify()
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    
+    @State static var artists = [
+        ArtistSearchResult(artist: Artist(name: "Pink Floyd")),
+        ArtistSearchResult(artist: Artist(name: "Radiohead"))
+    ]
+    
+    static var previews: some View {
+        ArtistImageSearchView(artistSearchResults: artists)
+            .environmentObject(spotify)
+    }
+}

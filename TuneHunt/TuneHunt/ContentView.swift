@@ -3,7 +3,6 @@ import Combine
 import SpotifyWebAPI
 
 struct ContentView: View {
-    @State private var path: [Int] = []
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     

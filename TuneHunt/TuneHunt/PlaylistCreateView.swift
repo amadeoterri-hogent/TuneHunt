@@ -41,7 +41,7 @@ struct PlaylistCreateView: View {
             destinationView()
         }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea())
+        .ignoresSafeArea())
         .foregroundStyle(textColor)
 
     }
