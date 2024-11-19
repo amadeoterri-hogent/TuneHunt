@@ -16,21 +16,26 @@ import SpotifyWebAPI
  */
 final class Spotify: ObservableObject {
     
-    private static let clientId: String = {
-        if let clientId = ProcessInfo.processInfo
-                .environment["CLIENT_ID"] {
-            return clientId
-        }
-        fatalError("Could not find 'CLIENT_ID' in environment variables")
-    }()
+    private static let config = Config()
     
-    private static let clientSecret: String = {
-        if let clientSecret = ProcessInfo.processInfo
-                .environment["CLIENT_SECRET"] {
-            return clientSecret
-        }
-        fatalError("Could not find 'CLIENT_SECRET' in environment variables")
-    }()
+    private static let clientId: String = config.clientId
+    private static let clientSecret: String = config.clientSecret
+    
+//    private static let clientId: String = {
+//        if let clientId = ProcessInfo.processInfo
+//                .environment["CLIENT_ID"] {
+//            return clientId
+//        }
+//        fatalError("Could not find 'CLIENT_ID' in environment variables")
+//    }()
+//    
+//    private static let clientSecret: String = {
+//        if let clientSecret = ProcessInfo.processInfo
+//                .environment["CLIENT_SECRET"] {
+//            return clientSecret
+//        }
+//        fatalError("Could not find 'CLIENT_SECRET' in environment variables")
+//    }()
     
     /// The key in the keychain that is used to store the authorization
     /// information: "authorizationManager".
@@ -303,4 +308,29 @@ final class Spotify: ObservableObject {
         
     }
 
+}
+
+extension Spotify {
+    
+    struct Config {
+        let clientId: String
+        let clientSecret: String
+        
+        init() {
+            guard let path = Bundle.main.path(forResource: "config", ofType: "plist"),
+                  let xml = FileManager.default.contents(atPath: path),
+                  let plist = try? PropertyListSerialization.propertyList(from: xml, options: [], format: nil),
+                  let dict = plist as? [String: Any] else {
+                fatalError("Could not load config.plist")
+            }
+            
+            guard let clientId = dict["client_id"] as? String,
+                  let clientSecret = dict["client_secret"] as? String else {
+                fatalError("Config.plist is missing client_id or client_secret")
+            }
+            
+            self.clientId = clientId
+            self.clientSecret = clientSecret
+        }
+    }
 }
