@@ -11,12 +11,10 @@ struct ArtistTextSearchView: View {
     @State var artistsPreview: [String] = []
     @State var artistSearchResults: [ArtistSearchResult] = []
     @State private var selectedSeparator = "Comma"
-    @State private var isSearching = false
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
     @State private var selection: Int? = nil
-    
     
     let separators = ["Comma", "Space", "Newline"]
     var textColor: Color {colorScheme == .dark ? .white : .black}
@@ -25,10 +23,10 @@ struct ArtistTextSearchView: View {
     var body: some View {
         VStack {
             Form {
-                
                 Section {
                     TextEditor(text: $searchText)
-                        .disableAutocorrection(true)
+                        .padding(.top,4)
+                        .padding(.leading,4)
                         .frame(height: 200)
                 } header: {
                     Text("Enter Artists Here:")
@@ -41,51 +39,71 @@ struct ArtistTextSearchView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    
                 } header: {
-                    Text("Select a Separator:")
+                    Text("Select a seperator:")
                 }
+                .listRowBackground(Color.clear)
                 
                 Section {
-                    ForEach(artistsPreview, id: \.self) { artist in
-                        HStack {
-                            Text(artist)
-                            Button(action: { removeArtist(artist) }) {
-                                Image(systemName: "minus.circle")
+                    if searchText.isEmpty {
+                        Text("No artists found.")
+                    } else {
+                        ForEach(artistsPreview, id: \.self) { artist in
+                            HStack {
+                                Text(artist)
+                                Button(action: { removeArtist(artist) }) {
+                                    Image(systemName: "minus.circle")
+                                }
                             }
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 8)
+                            .background(Color(UIColor.systemGray5))
+                            .cornerRadius(5)
+                            
                         }
-                        .padding(.vertical, 2)
-                        .padding(.horizontal, 8)
-                        .background(Color(UIColor.systemGray5))
-                        .cornerRadius(5)
-                        
+                        .onChange(of: searchText, initial: true) {
+                            splitArtists()
+                        }
+                        .onChange(of: selectedSeparator, initial: true) {
+                            splitArtists()
+                        }
                     }
-                    .onChange(of: searchText, initial: true) {
-                        splitArtists()
-                    }
-                    .onChange(of: selectedSeparator, initial: true) {
-                        splitArtists()
-                    }
+                } header: {
+                    Text("Result:")
                 }
                 
                 Section {
-                    Button(action: {
+                    Button {
                         selection = 1
                         searchArtists()
-                    }, label: {
-                        Text("Search")
-                    })
-                    .foregroundStyle(textColor)
-                } header: {
-                    Text("Search artists in spotify")
+                    } label: {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                            Text("Search artists in Spotify")
+                            
+                        }
+                        
+                    }
+                    .foregroundStyle(.white)
+                    .padding()
+                    .background(.green)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-
+                .listRowBackground(Color.clear)
+                
             }
+            .padding()
             .scrollContentBackground(.hidden)
         }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .ignoresSafeArea())
-        
+        .alert(item: $alertItem) { alert in
+            Alert(title: alert.title, message: alert.message)
+        }
+
     }
     
     @ViewBuilder
@@ -125,42 +143,43 @@ struct ArtistTextSearchView: View {
         self.artistSearchResults = []
         let artistNames = artistsPreview
         guard !artistNames.isEmpty else {
-            // TODO: alert
+            self.alertItem = AlertItem(
+                title: "Couldn't Perform Search",
+                message: "No artists where found."
+            )
             return
         }
-        self.isSearching = true
-
+        
         var remainingSearches = artistNames.count
         for artist in artistNames {
             let cancellable = spotify.api.search(
                 query: artist, categories: [.artist]
             )
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { completion in
-                    self.isSearching = false
-                    remainingSearches -= 1
-                    if remainingSearches == 0 {
-                        self.shouldNavigate = true
+                .receive(on: RunLoop.main)
+                .sink(
+                    receiveCompletion: { completion in
+                        // Only navigate when all artists have been searched in Spotify
+                        remainingSearches -= 1
+                        if remainingSearches == 0 {
+                            self.shouldNavigate = true
+                        }
+                        if case .failure(let error) = completion {
+                            self.alertItem = AlertItem(
+                                title: "Couldn't Perform Search",
+                                message: error.localizedDescription
+                            )
+                        }
+                    },
+                    receiveValue: { searchResults in
+                        // Add the first result to the list of artists to send to the next screen
+                        if let artist = searchResults.artists?.items.first {
+                            self.artistSearchResults.append(ArtistSearchResult(artist: artist))
+                        }
                     }
-                    if case .failure(let error) = completion {
-                        self.alertItem = AlertItem(
-                            title: "Couldn't Perform Search",
-                            message: error.localizedDescription
-                        )
-                    }
-                },
-                receiveValue: { searchResults in
-                    if let artist = searchResults.artists?.items.first {
-                        self.artistSearchResults.append(ArtistSearchResult(artist: artist))
-                    }
-                }
-            )
+                )
             self.searchCancellables.append(cancellable)
         }
     }
-
-    
 }
 
 struct ArtistTextSearchView_Previews: PreviewProvider {
