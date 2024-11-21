@@ -36,6 +36,8 @@ struct ArtistSearchResultsListView: View {
                 Section {
                     Toggle("Select All", isOn: selectAll)
                         .frame(alignment: .trailing)
+                        .padding(8)
+                    
                     List($artistsSearchResults, id: \.id) { $artistSearchResult in
                         ArtistCellView(spotify: spotify, artistSearchResult: $artistSearchResult)
                     }
@@ -46,7 +48,7 @@ struct ArtistSearchResultsListView: View {
                 }
                 
                 Section {
-                    Button(action: {
+                    Button {
                         selection = 1
                         for artistsSearchResult in artistsSearchResults {
                             if artistsSearchResult.addToPlaylist {
@@ -54,13 +56,21 @@ struct ArtistSearchResultsListView: View {
                             }
                         }
                         shouldNavigate = true
-                    }, label: {
-                        Text("Choose playlist")
-                    })
+                    } label: {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                            Text("Choose playlist")
+                            
+                        }
+                        
+                    }
                     .foregroundStyle(textColor)
-                } header: {
-                    Text("Select or create a playlist")
+                    .padding()
+                    .background(.green)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
+                .listRowBackground(Color.clear)
             }
             .scrollContentBackground(.hidden)
         }

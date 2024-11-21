@@ -88,6 +88,8 @@ struct MenuView: View {
             }
             .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
             .foregroundStyle(textColor)
+        
+        // TODO: build from other playlist
 
     }
     

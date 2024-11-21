@@ -26,16 +26,32 @@ struct PlaylistCreateView: View {
     var body: some View {
         // TODO: styling
         VStack {
-            TextField("Enter playlist...",text: $namePlaylist)
-            Button {
-                selection = 1
-                createPlaylist()
+            Form {
+                Section {
+                    TextField("Enter playlist name...",text: $namePlaylist)
+                }
+
+                Section {
+                    
+                    Button {
+                        selection = 1
+                        createPlaylist()
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus")
+                            Text("Create playlist")
+                        }
+                    }
+                    .foregroundStyle(textColor)
+                    .padding()
+                    .background(.green)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .listRowBackground(Color.clear)
+
             }
-            label: {
-                Text("Create Playlist")
-            }
-            .frame(maxWidth: .infinity,alignment: .leading)
-            .buttonStyle(.bordered)
+            .scrollContentBackground(.hidden)
         }
         .navigationDestination(isPresented: $shouldNavigate) {
             destinationView()
@@ -107,3 +123,21 @@ struct PlaylistCreateView: View {
     }
 }
 
+struct PlaylistCreateView_Previews: PreviewProvider {
+    
+    static let spotify: Spotify = {
+        let spotify = Spotify()
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    
+    @State static var artists = [
+        Artist(name: "Pink Floyd"),
+        Artist(name: "Radiohead")
+    ]
+    
+    static var previews: some View {
+        PlaylistCreateView(artists: artists)
+            .environmentObject(spotify)
+    }
+}

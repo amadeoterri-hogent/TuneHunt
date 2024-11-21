@@ -47,13 +47,19 @@ struct LoginView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                 }
-                Button(action: spotify.api.authorizationManager.deauthorize, label: {
-                    Text("Logout")
-                })
-                .buttonStyle(.bordered)
-                .background(backgroundColor)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                
+                Button {
+                    spotify.api.authorizationManager.deauthorize()
+                } label: {
+                    HStack {
+                        Text("Logout")
+                    }
+                    .padding()
+                }
                 .foregroundStyle(textColor)
+                .background(.green)
+                .clipShape(Capsule())
+                .frame(maxWidth: .infinity, alignment: .center)
 
 
             }

@@ -26,17 +26,19 @@ struct PlaylistMenuView: View {
             } label: {
                 HStack {
                     Image(systemName: "plus" )
-                        .font(.largeTitle)
+                        .font(.title2)
                         .frame(width:48,height: 48)
                     VStack {
                         Text("Create playlist")
-                            .font(.largeTitle)
+                            .font(.title2)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading,12)
                         
                         
                         Text("Build a new playlist with songs")
                             .font(.subheadline)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading,12)
                         
                     }
                     .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 0))
@@ -54,16 +56,18 @@ struct PlaylistMenuView: View {
             {
                 HStack {
                     Image(systemName: "music.note.list" )
-                        .font(.largeTitle)
+                        .font(.title2)
                         .frame(width:48,height: 48)
                     VStack {
                         Text("Select playlist")
-                            .font(.largeTitle)
+                            .font(.title2)
                             .frame(maxWidth: .infinity,  alignment: .leading)
+                            .padding(.leading,12)
                         
                         Text("Select an existing playlist from your library")
                             .font(.subheadline)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading,12)
                         
                     }
                     .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 0))
@@ -88,7 +92,7 @@ struct PlaylistMenuView: View {
         case 1:
             PlaylistCreateView(artists: artists)
         case 2:
-            PlaylistSelectView(artists: artists)
+            PlaylistSelectView(selectedArtists: artists)
         default:
             EmptyView()
         }

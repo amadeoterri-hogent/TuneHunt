@@ -5,12 +5,12 @@ import Combine
 struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-
+    
     @State var tracks: [Track] = []
     @State private var searchCancellables: Set<AnyCancellable> = []
     @State private var isSearching = false
     @State private var alert: AlertItem? = nil
-
+    
     var textColor: Color { colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
@@ -19,38 +19,67 @@ struct FinishView: View {
     
     var body: some View {
         VStack {
-            Text("Playlist: \(playlist.name)")
-            Text("Number of artists: \(artists.count) ")
-            
-            if isSearching {
-                ProgressView("Searching top tracks...")
-            } else {
-                List(tracks, id: \.id) { track in
-                    Text(track.name)
+            Form {
+                Section {
+                    Text("Playlist: \(playlist.name)")
+                    Text("Number of artists: \(artists.count) ")
                 }
+                Section {
+                    if isSearching {
+                        ProgressView("Searching top tracks...")
+                    } else {
+                        List(tracks, id: \.id) { track in
+                            HStack {
+                                Text(track.name)
+                                Button(action: { removeTrack(track) }) {
+                                    Image(systemName: "minus.circle")
+                                }
+                            }
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 8)
+                            .background(Color(UIColor.systemGray5))
+                            .cornerRadius(5)
+                        }
+                    }
+                } header: {
+                    Text("Track names:")
+                }
+                
+                Section {
+                    Button {
+                        finish()
+                    } label: {
+                        Text("Add tracks to playlist")
+                    }
+                    .foregroundStyle(textColor)
+                    .padding()
+                    .background(.green)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .listRowBackground(Color.clear)
             }
-            
-            Button {
-                finish()
-            } label: {
-                Text("Finish")
-            }
+            .scrollContentBackground(.hidden)
         }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-        .ignoresSafeArea())
+            .ignoresSafeArea())
         .alert(item: $alert) { alert in
             Alert(title: alert.title, message: alert.message)
         }
         .onAppear {
             search()
-        } 
+        }
+    }
+    
+    private func removeTrack(_ track: Track) {
+        tracks.removeAll { $0.id == track.id }
     }
     
     func search() {
         self.tracks = []
         self.isSearching = true
         var remainingRequests = artists.count
-
+        
         for artist in artists {
             if let uri = artist.uri {
                 spotify.api.artistTopTracks(uri, country: "BE")
@@ -88,7 +117,7 @@ struct FinishView: View {
     func finish() {
         let playlistURI = playlist.uri
         let trackURIs = tracks.compactMap { $0.uri }
-
+        
         guard !trackURIs.isEmpty else {
             self.alert = AlertItem(
                 title: "Error",
@@ -96,10 +125,11 @@ struct FinishView: View {
             )
             return
         }
-
-        let chunks = trackURIs.chunked(into: 100) // Split track URIs into batches of 100
+        
+        // Split track URIs into batches of 100
+        let chunks = trackURIs.chunked(into: 100)
         var remainingChunks = chunks.count
-
+        
         for chunk in chunks {
             spotify.api.addToPlaylist(playlistURI, uris: chunk)
                 .receive(on: RunLoop.main)
@@ -128,7 +158,7 @@ struct FinishView: View {
                 .store(in: &spotify.cancellables)
         }
     }
-
+    
 }
 
 extension Array {
@@ -141,14 +171,14 @@ extension Array {
 
 // TODO: Fix preview
 //struct FinishView_Previews: PreviewProvider {
-//    
+//
 //    static let spotify: Spotify = {
 //        let spotify = Spotify()
 //        //        spotify.isAuthorized = false
 //        spotify.isAuthorized = true
 //        return spotify
 //    }()
-//    
+//
 //    static var previews: some View {
 //        FinishView()
 //            .environmentObject(spotify)

@@ -85,7 +85,7 @@ struct ArtistTextSearchView: View {
                         }
                         
                     }
-                    .foregroundStyle(.white)
+                    .foregroundStyle(textColor)
                     .padding()
                     .background(.green)
                     .clipShape(Capsule())
@@ -97,6 +97,7 @@ struct ArtistTextSearchView: View {
             .padding()
             .scrollContentBackground(.hidden)
         }
+        .navigationTitle("Enter artists")
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .ignoresSafeArea())
