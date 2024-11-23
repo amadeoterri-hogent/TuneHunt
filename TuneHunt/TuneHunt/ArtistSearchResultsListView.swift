@@ -83,7 +83,7 @@ struct ArtistSearchResultsListView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            PlaylistMenuView(artists: spotifyArtists)
+            PlaylistSelectView(selectedArtists: spotifyArtists)
         default:
             EmptyView()
         }

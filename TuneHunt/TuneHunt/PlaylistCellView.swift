@@ -27,9 +27,11 @@ struct PlaylistCellView: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 70, height: 70)
+                    .frame(width:48,height: 48)
                     .padding(.trailing, 5)
-                Text("\( playlist.name)")
+                VStack {
+                    Text("\( playlist.name)")
+                }
             }
             .onAppear(perform: loadImage)
         }
@@ -81,5 +83,25 @@ struct PlaylistCellView: View {
                     
                 }
             )
+    }
+}
+
+struct PlaylistCellView_Previews: PreviewProvider {
+    
+    static let spotify: Spotify = {
+        let spotify = Spotify()
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    static let playlist: Playlist<PlaylistItemsReference> = .menITrust
+
+    
+    @State static var artists: [Artist] = [
+        .pinkFloyd,.radiohead
+    ]
+    
+    static var previews: some View {
+        PlaylistCellView(playlist: playlist, selectedArtists: artists)
+            .environmentObject(spotify)
     }
 }
