@@ -26,11 +26,14 @@ struct MenuView: View {
                             .font(.title2)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading,12)
-                        Button(action: { showInfoText.toggle()
+                        Button {
+                            showInfoText.toggle()
                             if showInfoImage {
-                                showInfoImage.toggle()
+                                withAnimation{
+                                    showInfoImage.toggle()
+                                }
                             }
-                        }) {
+                        } label: {
                             Image(systemName: "info.circle")
                         }
                         .padding(.trailing, 12)
@@ -47,6 +50,7 @@ struct MenuView: View {
                         .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
+                        .transition(.asymmetric(insertion: .scale, removal: .opacity))
                 }
                 
                 Button {
@@ -61,12 +65,13 @@ struct MenuView: View {
                             .font(.title2)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading,12)
-                        Button(action: {
+                        Button {
                             showInfoImage.toggle()
                             if showInfoText {
-                                showInfoText.toggle()
-                            }
-                        }) {
+                                withAnimation{
+                                    showInfoText.toggle()
+                                }                            }
+                        } label: {
                             Image(systemName: "info.circle")
                         }
                         .padding(.trailing, 12)
@@ -83,6 +88,7 @@ struct MenuView: View {
                         .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading,24)
+                        .transition(.asymmetric(insertion: .scale, removal: .opacity))
                 }
                 Spacer()
             }
