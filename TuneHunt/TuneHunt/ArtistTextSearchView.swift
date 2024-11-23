@@ -25,9 +25,14 @@ struct ArtistTextSearchView: View {
             Form {
                 Section {
                     TextEditor(text: $searchText)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
                         .padding(.top,4)
                         .padding(.leading,4)
                         .frame(height: 200)
+                        .onChange(of: searchText, initial: true) {
+                            splitArtists()
+                        }
                 } header: {
                     Text("Enter Artists Here:")
                 }
@@ -39,6 +44,9 @@ struct ArtistTextSearchView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .onChange(of: selectedSeparator, initial: true) {
+                        splitArtists()
+                    }
                     
                 } header: {
                     Text("Select a seperator:")
@@ -46,27 +54,23 @@ struct ArtistTextSearchView: View {
                 .listRowBackground(Color.clear)
                 
                 Section {
-                    if searchText.isEmpty {
-                        Text("No artists found.")
+                    if artistsPreview.isEmpty {
+                        Text("No artists added.")
                     } else {
-                        ForEach(artistsPreview, id: \.self) { artist in
-                            HStack {
-                                Text(artist)
-                                Button(action: { removeArtist(artist) }) {
-                                    Image(systemName: "minus.circle")
+                        List {
+                            ForEach(artistsPreview, id: \.self) { artist in
+                                HStack {
+                                    Text(artist)
+                                    Button(action: { removeArtist(artist) }) {
+                                        Image(systemName: "minus.circle")
+                                    }
                                 }
+                                .padding(.vertical, 2)
+                                .padding(.horizontal, 8)
+                                .background(Color(UIColor.systemGray5))
+                                .cornerRadius(5)
+                                
                             }
-                            .padding(.vertical, 2)
-                            .padding(.horizontal, 8)
-                            .background(Color(UIColor.systemGray5))
-                            .cornerRadius(5)
-                            
-                        }
-                        .onChange(of: searchText, initial: true) {
-                            splitArtists()
-                        }
-                        .onChange(of: selectedSeparator, initial: true) {
-                            splitArtists()
                         }
                     }
                 } header: {
@@ -137,7 +141,9 @@ struct ArtistTextSearchView: View {
     }
     
     private func removeArtist(_ artist: String) {
-        artistsPreview.removeAll { $0 == artist }
+        withAnimation {
+            artistsPreview.removeAll { $0 == artist }
+        }
     }
     
     func searchArtists() {
