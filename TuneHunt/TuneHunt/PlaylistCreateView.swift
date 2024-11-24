@@ -5,12 +5,14 @@ import SpotifyWebAPI
 struct PlaylistCreateView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.dismiss) var dismiss
+    
+    @Binding var shouldRefreshPlaylists: Bool
 
     @State private var createPlaylistCancellable: AnyCancellable?
     @State private var namePlaylist: String = ""
     @State private var alert: AlertItem? = nil
     @State private var selection: Int? = nil
-    @State private var shouldNavigate = false
     @State private var selectedArtists: [Artist]
     @State private var alertItem: AlertItem? = nil
     
@@ -19,12 +21,12 @@ struct PlaylistCreateView: View {
     
     @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
     
-    init(artists:[Artist]) {
-        self.selectedArtists = artists
+    init(artists: [Artist], shouldRefreshPlaylists: Binding<Bool>) {
+        self._selectedArtists = State(initialValue: artists)
+        self._shouldRefreshPlaylists = shouldRefreshPlaylists
     }
     
     var body: some View {
-        // TODO: styling
         VStack {
             Form {
                 Section {
@@ -32,9 +34,8 @@ struct PlaylistCreateView: View {
                 }
 
                 Section {
-                    
                     Button {
-                        selection = 1
+                        // Create playlist and dismiss sheet
                         createPlaylist()
                     } label: {
                         HStack {
@@ -53,35 +54,17 @@ struct PlaylistCreateView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .navigationDestination(isPresented: $shouldNavigate) {
-            destinationView()
-        }
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
         .ignoresSafeArea())
         .foregroundStyle(textColor)
 
     }
     
-    @ViewBuilder
-    func destinationView() -> some View {
-        switch selection {
-        case 1:
-            if let playlist = createdPlaylist {
-                FinishView(playlist: playlist, artists: selectedArtists)
-            } else {
-                // TODO: Throw alert?
-                EmptyView()
-            }
-        default:
-            EmptyView()
-        }
-    }
-    
     func createPlaylist() {
         
         if self.namePlaylist == "" {
             self.alert = AlertItem(
-                title: "Couldn't create playlist Search",
+                title: "Couldn't create playlist",
                 message: "Playlist name is empty."
             )
         }
@@ -106,7 +89,9 @@ struct PlaylistCreateView: View {
                     switch completion {
                     case .finished:
                         print("Playlist created successfully.")
-                        shouldNavigate = true
+                        shouldRefreshPlaylists = true
+                        // Dismiss the sheet
+                        dismiss()
                     case .failure(let error):
                         print("Failed to create playlist: \(error)")
                         self.alert = AlertItem(
@@ -131,13 +116,14 @@ struct PlaylistCreateView_Previews: PreviewProvider {
         return spotify
     }()
     
-    @State static var artists = [
-        Artist(name: "Pink Floyd"),
-        Artist(name: "Radiohead")
+    static let artists: [Artist] = [
+        .pinkFloyd,.radiohead
     ]
     
+    @State static var shouldRefreshPlaylists = false
+    
     static var previews: some View {
-        PlaylistCreateView(artists: artists)
+        PlaylistCreateView(artists: artists, shouldRefreshPlaylists: $shouldRefreshPlaylists)
             .environmentObject(spotify)
     }
 }

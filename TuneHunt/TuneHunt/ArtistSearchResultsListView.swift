@@ -83,7 +83,7 @@ struct ArtistSearchResultsListView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            PlaylistSelectView(selectedArtists: spotifyArtists)
+            PlaylistSelectView(artists: spotifyArtists)
         default:
             EmptyView()
         }
@@ -99,9 +99,9 @@ struct ArtistsSearchResultsView_Previews: PreviewProvider {
         return spotify
     }()
     
-    @State static var artists = [
-        ArtistSearchResult(artist: Artist(name: "Pink Floyd")),
-        ArtistSearchResult(artist: Artist(name: "Radiohead"))
+    static let artists = [
+        ArtistSearchResult(artist: .pinkFloyd),
+        ArtistSearchResult(artist: .radiohead)
     ]
     
     static var previews: some View {

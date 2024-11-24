@@ -238,9 +238,9 @@ struct ArtistImageSearchView_Previews: PreviewProvider {
         return spotify
     }()
     
-    @State static var artists = [
-        ArtistSearchResult(artist: Artist(name: "Pink Floyd")),
-        ArtistSearchResult(artist: Artist(name: "Radiohead"))
+    static let artists = [
+        ArtistSearchResult(artist: .pinkFloyd),
+        ArtistSearchResult(artist: .radiohead)
     ]
     
     static var previews: some View {

@@ -4,9 +4,8 @@ import Foundation
 import SpotifyWebAPI
 
 struct PlaylistCellView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
 
-    @State var playlist: Playlist<PlaylistItemsReference>
     @State private var image = Image("spotify logo green")
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
@@ -14,13 +13,20 @@ struct PlaylistCellView: View {
     @State private var selection: Int? = nil
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
     @State private var loadPlaylistCancellable: AnyCancellable? = nil
-    @State var selectedArtists: [Artist]
+    @State var artists: [Artist]
+    
+    let playlist: Playlist<PlaylistItemsReference>
+    
+    init(spotify: Spotify, playlist: Playlist<PlaylistItemsReference>, artists: [Artist]) {
+        self.spotify = spotify
+        self.playlist = playlist
+        self.artists = artists
+    }
     
     var body: some View {
         Button {
-            self.playlist = playlist
             selection = 1
-            loadPlaylist(playlist: playlist)
+            loadPlaylist()
             shouldNavigate = true
         } label: {
             HStack {
@@ -45,7 +51,7 @@ struct PlaylistCellView: View {
         switch selection {
         case 1:
             if let playlist = selectedPlaylist {
-                FinishView(playlist: playlist, artists: selectedArtists)
+                FinishView(playlist: playlist, artists: artists)
             } else {
                 // TODO: Throw alert?
                 EmptyView()
@@ -73,7 +79,7 @@ struct PlaylistCellView: View {
             )
     }
     
-    func loadPlaylist(playlist: Playlist<PlaylistItemsReference>) {
+    func loadPlaylist() {
         self.loadPlaylistCancellable =  spotify.api.playlist(playlist)
             .receive(on: RunLoop.main)
             .sink(
@@ -93,15 +99,19 @@ struct PlaylistCellView_Previews: PreviewProvider {
         spotify.isAuthorized = true
         return spotify
     }()
-    static let playlist: Playlist<PlaylistItemsReference> = .menITrust
-
     
-    @State static var artists: [Artist] = [
+    static let artists: [Artist] = [
         .pinkFloyd,.radiohead
     ]
     
     static var previews: some View {
-        PlaylistCellView(playlist: playlist, selectedArtists: artists)
-            .environmentObject(spotify)
+        List {
+            PlaylistCellView(spotify: spotify, playlist: .thisIsMildHighClub, artists: artists)
+            PlaylistCellView(spotify: spotify, playlist: .thisIsRadiohead, artists: artists)
+            PlaylistCellView(spotify: spotify, playlist: .modernPsychedelia, artists: artists)
+            PlaylistCellView(spotify: spotify, playlist: .rockClassics, artists: artists)
+            PlaylistCellView(spotify: spotify, playlist: .menITrust, artists: artists)
+        }
+        .environmentObject(spotify)
     }
 }

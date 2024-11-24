@@ -10,26 +10,46 @@ struct PlaylistSelectView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var alert: AlertItem? = nil
-    @State var playlists: [Playlist<PlaylistItemsReference>] = []
+    @State private var playlists: [Playlist<PlaylistItemsReference>] = []
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var isLoadingPlaylists = false
     @State private var couldntLoadPlaylists = false
-    @State var selectedArtists: [Artist]
+    @State var artists: [Artist]
     @State private var showingAlert = false
+    @State private var shouldRefreshPlaylists = false
     @State private var shouldNavigate = false
     @State private var selection: Int? = nil
     
     var textColor: Color {colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
+    init(artists: [Artist]) {
+        self.artists = artists
+    }
+    
+    /// Used only by the preview provider to provide sample data.
+    fileprivate init(samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
+        self._playlists = State(initialValue: samplePlaylists)
+        self._artists = State(initialValue: sampleArtists)
+    }
+    
     var body: some View {
         VStack {
-            
+            Text(
+                """
+                Select a playlist to add the tracks or
+                create a new playlist
+                """
+            )
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+
             List {
                 ForEach(playlists, id: \.uri) { playlist in
-                    PlaylistCellView(playlist: playlist,selectedArtists: selectedArtists)
+                    PlaylistCellView(spotify: spotify, playlist: playlist,artists: artists)
                 }
-                
             }
             .scrollContentBackground(.hidden)
             
@@ -57,6 +77,9 @@ struct PlaylistSelectView: View {
                     .frame(width:48,height: 48)
                     .foregroundStyle(textColor)
             }
+            .sheet(isPresented: $shouldNavigate) {
+                destinationView()
+            }
         }
         
     }
@@ -65,7 +88,7 @@ struct PlaylistSelectView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            PlaylistCreateView(artists: selectedArtists)
+            PlaylistCreateView(artists: artists, shouldRefreshPlaylists: $shouldRefreshPlaylists)
         default:
             EmptyView()
         }
@@ -73,6 +96,9 @@ struct PlaylistSelectView: View {
     
     
     func retrievePlaylists() {
+        // Don't try to load any playlists if we're in preview mode.
+        if ProcessInfo.processInfo.isPreviewing { return }
+        
         self.isLoadingPlaylists = true
         self.playlists = []
         
@@ -100,11 +126,7 @@ struct PlaylistSelectView: View {
                 }
             )
             .store(in: &cancellables)
-        
     }
-    
-    
-    
 }
 
 struct PlayListSelectView_Previews: PreviewProvider {
@@ -114,20 +136,20 @@ struct PlayListSelectView_Previews: PreviewProvider {
         spotify.isAuthorized = true
         return spotify
     }()
+    
     static let playlists: [Playlist<PlaylistItemsReference>] = [
-        .menITrust, .modernPsychedelia, .menITrust,
+        .menITrust, .modernPsychedelia,
         .lucyInTheSkyWithDiamonds, .rockClassics,
         .thisIsMFDoom, .thisIsSonicYouth, .thisIsMildHighClub,
         .thisIsSkinshape
     ]
     
-    @State static var artists = [
-        Artist(name: "Pink Floyd"),
-        Artist(name: "Radiohead")
+    static let artists: [Artist] = [
+        .pinkFloyd,.radiohead
     ]
     
     static var previews: some View {
-        PlaylistSelectView(playlists: playlists, selectedArtists: artists)
+        PlaylistSelectView(samplePlaylists: playlists, sampleArtists: artists)
             .environmentObject(spotify)
     }
 }
