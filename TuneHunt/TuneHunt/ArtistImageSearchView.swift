@@ -10,12 +10,11 @@ struct ArtistImageSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var searchText: String = "Recognized text will appear here"
     @State private var pickerItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
     @State private var imagePreview: Image?
-    @State private var artistsPreview: [String] = []
-    @State private var isProcessingImage = false
+    @State private var artists: [String] = []
+    @State private var imageUploaded = false
     @State private var shouldNavigate = false
     @State private var artistSearchResults: [ArtistSearchResult] = []
     @State private var selection: Int? = nil
@@ -35,62 +34,70 @@ struct ArtistImageSearchView: View {
             Form {
                 Section {
                     // Image Picker
-                    PhotosPicker("Select a Picture", selection: $pickerItem, matching: .images)
-                } header: {
-                    Text("Choose a picture from your photo album")
-                }
-                
-                Section {
-                    
-                    // Show Selected Image
-                    if let imagePreview = imagePreview {
-                        imagePreview
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 200)
-                            .padding()
-                    }
-                    
-                    // Loading Indicator
-                    if isProcessingImage {
-                        ProgressView("Processing image...")
-                            .padding()
-                    }
-                    
-                    // Extracted Artist List
-                    if !artistsPreview.isEmpty {
-                        ScrollView {
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(artistsPreview, id: \.self) { artist in
-                                    HStack {
-                                        Text(artist)
-                                        Button(action: { removeArtist(artist) }) {
-                                            Image(systemName: "minus.circle")
-                                        }
-                                    }
-                                    .padding(.vertical, 2)
-                                    .padding(.horizontal, 8)
-                                    .background(Color(UIColor.systemGray5))
-                                    .cornerRadius(5)
-                                    
-                                }
-                                
+                    PhotosPicker(selection: $pickerItem, matching: .images) {
+                            HStack {
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Upload an image")
                             }
                         }
-                    }
+                        .foregroundStyle(textColor)
+                        .padding()
+                        .background(.blue)
+                        .clipShape(Capsule())
+                        .frame(maxWidth: .infinity, alignment: .center)
                     
                 }
-                Section {
-                    
-                    Button {
-                        selection = 1
-                        searchArtists()
-                    } label: {
-                        Text("Search")
+                .listRowBackground(Color.clear)
+
+                // TODO: Loading screen
+                if imageUploaded {
+                    Section {
+                        
+                        if let imagePreview = imagePreview {
+                            imagePreview
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 200)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
                     }
-                } header: {
-                    Text("Search artists in spotify")
+                    .listRowBackground(Color.clear)
+                    Section {
+                        // Extracted Artist List
+                        if artists.isEmpty {
+                            Text("No artists found.")
+                        } else {
+                            List {
+                                ForEach(artists, id: \.self) {
+                                    Text("\($0)")
+                                }
+                                .onDelete(perform: removeArtist)
+                            }
+                        }
+                    } header: {
+                        Text("Result:")
+                    }
+                    
+                    Section {
+                        Button {
+                            selection = 1
+                            searchArtists()
+                        } label: {
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                Text("Search artists in Spotify")
+                                
+                            }
+                            
+                        }
+                        .foregroundStyle(textColor)
+                        .padding()
+                        .background(.green)
+                        .clipShape(Capsule())
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .listRowBackground(Color.clear)
                 }
                 
             }
@@ -99,9 +106,12 @@ struct ArtistImageSearchView: View {
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-        .ignoresSafeArea())
+            .ignoresSafeArea())
         .onChange(of: pickerItem, initial: true) {
             processPickerItem()
+        }
+        .alert(item: $alertItem) { alert in
+            Alert(title: alert.title, message: alert.message)
         }
         
     }
@@ -124,8 +134,7 @@ struct ArtistImageSearchView: View {
             // Set image preview and perform text recognition
             selectedImage = uiImage
             imagePreview = Image(uiImage: uiImage)
-            searchText = ""
-            artistsPreview = []
+            artists = []
             performTextRecognition(on: uiImage)
         }
     }
@@ -133,14 +142,16 @@ struct ArtistImageSearchView: View {
     private func performTextRecognition(on image: UIImage) {
         guard let cgImage = image.cgImage else { return }
         
-        isProcessingImage = true
         let request = VNRecognizeTextRequest { request, error in
-            defer { isProcessingImage = false }
+            defer { imageUploaded = true }
             
             if let error = error {
                 print("Text recognition error: \(error)")
                 DispatchQueue.main.async {
-                    self.searchText = "Error recognizing text: \(error.localizedDescription)"
+                    self.alertItem = AlertItem(
+                        title: "Couldn't Perform Search",
+                        message: "No artists where found."
+                    )
                 }
                 return
             }
@@ -149,15 +160,19 @@ struct ArtistImageSearchView: View {
             if let observations = request.results as? [VNRecognizedTextObservation] {
                 let recognizedStrings = observations.compactMap { $0.topCandidates(1).first?.string }
                 DispatchQueue.main.async {
-                    self.searchText = recognizedStrings.joined(separator: ",")
-                    self.artistsPreview = Array(searchText
-                        .split(separator: " ")
-                        .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
-                        .filter { !$0.isEmpty }
-                        .removingDuplicates()
-                                                //                         TODO: remove filter first 10 results and filter with ai possibly
-                        .prefix(30)
+                    self.artists = Array(
+                        recognizedStrings
+                            .joined(separator: " ")
+                            .replacingOccurrences(of: "•", with: ",")
+                            .replacingOccurrences(of: "-", with: ",")
+                            .replacingOccurrences(of: "  ", with: " ")
+//                            .components(separatedBy: [",", "\n"]
+                            .components(separatedBy: CharacterSet(charactersIn: ",\n"))
+                            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                            .filter { !$0.isEmpty }
+                            .removingDuplicates()
                     )
+                    print(artists)
                 }
             }
         }
@@ -172,7 +187,10 @@ struct ArtistImageSearchView: View {
             } catch {
                 print("Failed to perform text recognition: \(error)")
                 DispatchQueue.main.async {
-                    self.searchText = "Error processing image: \(error.localizedDescription)"
+                    self.alertItem = AlertItem(
+                        title: "Couldn't Perform Search",
+                        message: "No artists where found."
+                    )
                 }
             }
         }
@@ -180,9 +198,12 @@ struct ArtistImageSearchView: View {
     
     func searchArtists() {
         self.artistSearchResults = []
-        let artistNames = artistsPreview
+        let artistNames = artists
         guard !artistNames.isEmpty else {
-            // TODO: alert
+            self.alertItem = AlertItem(
+                title: "Couldn't Perform Search",
+                message: "No artists where found."
+            )
             return
         }
         
@@ -216,17 +237,10 @@ struct ArtistImageSearchView: View {
         }
     }
     
-    private func splitArtists() -> Void {
-        let separator: Character = ","
-        artistsPreview = searchText
-            .split(separator: separator)
-            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .removingDuplicates()
-    }
-    
-    private func removeArtist(_ artist: String) {
-        artistsPreview.removeAll { $0 == artist }
+    private func removeArtist(at offsets: IndexSet) {
+        withAnimation {
+            artists.remove(atOffsets: offsets)
+        }
     }
 }
 

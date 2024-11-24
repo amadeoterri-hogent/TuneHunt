@@ -16,7 +16,6 @@ struct PlaylistSelectView: View {
     @State private var couldntLoadPlaylists = false
     @State var artists: [Artist]
     @State private var showingAlert = false
-    @State private var shouldRefreshPlaylists = false
     @State private var shouldNavigate = false
     @State private var selection: Int? = nil
     
@@ -88,7 +87,7 @@ struct PlaylistSelectView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            PlaylistCreateView(artists: artists, shouldRefreshPlaylists: $shouldRefreshPlaylists)
+            PlaylistCreateView(artists: artists)
         default:
             EmptyView()
         }

@@ -6,8 +6,6 @@ struct PlaylistCreateView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
-    
-    @Binding var shouldRefreshPlaylists: Bool
 
     @State private var createPlaylistCancellable: AnyCancellable?
     @State private var namePlaylist: String = ""
@@ -21,9 +19,8 @@ struct PlaylistCreateView: View {
     
     @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
     
-    init(artists: [Artist], shouldRefreshPlaylists: Binding<Bool>) {
+    init(artists: [Artist]) {
         self._selectedArtists = State(initialValue: artists)
-        self._shouldRefreshPlaylists = shouldRefreshPlaylists
     }
     
     var body: some View {
@@ -89,7 +86,6 @@ struct PlaylistCreateView: View {
                     switch completion {
                     case .finished:
                         print("Playlist created successfully.")
-                        shouldRefreshPlaylists = true
                         // Dismiss the sheet
                         dismiss()
                     case .failure(let error):
@@ -123,7 +119,7 @@ struct PlaylistCreateView_Previews: PreviewProvider {
     @State static var shouldRefreshPlaylists = false
     
     static var previews: some View {
-        PlaylistCreateView(artists: artists, shouldRefreshPlaylists: $shouldRefreshPlaylists)
+        PlaylistCreateView(artists: artists)
             .environmentObject(spotify)
     }
 }

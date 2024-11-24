@@ -8,7 +8,7 @@ struct ArtistTextSearchView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var searchText: String = ""
-    @State var artistsPreview: [String] = []
+    @State var artists: [String] = []
     @State var artistSearchResults: [ArtistSearchResult] = []
     @State private var selectedSeparator = "Comma"
     @State private var searchCancellables: [AnyCancellable] = []
@@ -27,8 +27,6 @@ struct ArtistTextSearchView: View {
                     TextEditor(text: $searchText)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                        .padding(.top,4)
-                        .padding(.leading,4)
                         .frame(height: 200)
                         .onChange(of: searchText, initial: true) {
                             splitArtists()
@@ -54,23 +52,14 @@ struct ArtistTextSearchView: View {
                 .listRowBackground(Color.clear)
                 
                 Section {
-                    if artistsPreview.isEmpty {
+                    if artists.isEmpty {
                         Text("No artists added.")
                     } else {
                         List {
-                            ForEach(artistsPreview, id: \.self) { artist in
-                                HStack {
-                                    Text(artist)
-                                    Button(action: { removeArtist(artist) }) {
-                                        Image(systemName: "minus.circle")
-                                    }
-                                }
-                                .padding(.vertical, 2)
-                                .padding(.horizontal, 8)
-                                .background(Color(UIColor.systemGray5))
-                                .cornerRadius(5)
-                                
+                            ForEach(artists, id: \.self) {
+                                Text("\($0)")
                             }
+                            .onDelete(perform: removeArtist)
                         }
                     }
                 } header: {
@@ -103,12 +92,12 @@ struct ArtistTextSearchView: View {
         }
         .navigationTitle("Enter artists")
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
-        .ignoresSafeArea())
+            .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+            .ignoresSafeArea())
         .alert(item: $alertItem) { alert in
             Alert(title: alert.title, message: alert.message)
         }
-
+        
     }
     
     @ViewBuilder
@@ -133,22 +122,22 @@ struct ArtistTextSearchView: View {
         default:
             separator = " "
         }
-        artistsPreview = searchText
+        artists = searchText
             .split(separator: separator)
             .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
             .removingDuplicates()
     }
     
-    private func removeArtist(_ artist: String) {
+    private func removeArtist(at offsets: IndexSet) {
         withAnimation {
-            artistsPreview.removeAll { $0 == artist }
+            artists.remove(atOffsets: offsets)
         }
     }
     
     func searchArtists() {
         self.artistSearchResults = []
-        let artistNames = artistsPreview
+        let artistNames = artists
         guard !artistNames.isEmpty else {
             self.alertItem = AlertItem(
                 title: "Couldn't Perform Search",
