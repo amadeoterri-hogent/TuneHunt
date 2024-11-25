@@ -14,7 +14,6 @@ struct ArtistTextSearchView: View {
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
-    @State private var selection: Int? = nil
     
     let separators = ["Comma", "Space", "Newline"]
     var textColor: Color {colorScheme == .dark ? .white : .black}
@@ -68,7 +67,6 @@ struct ArtistTextSearchView: View {
                 
                 Section {
                     Button {
-                        selection = 1
                         searchArtists()
                     } label: {
                         HStack {
@@ -76,7 +74,6 @@ struct ArtistTextSearchView: View {
                             Text("Search artists in Spotify")
                             
                         }
-                        
                     }
                     .foregroundStyle(textColor)
                     .padding()
@@ -92,21 +89,10 @@ struct ArtistTextSearchView: View {
         }
         .navigationTitle("Enter artists")
         .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-            .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
             .ignoresSafeArea())
+        .navigationDestination(isPresented: $shouldNavigate) { ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)}
         .alert(item: $alertItem) { alert in
             Alert(title: alert.title, message: alert.message)
-        }
-        
-    }
-    
-    @ViewBuilder
-    func destinationView() -> some View {
-        switch selection {
-        case 1:
-            ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
-        default:
-            EmptyView()
         }
     }
     

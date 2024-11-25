@@ -6,7 +6,7 @@ import SpotifyWebAPI
 struct PlaylistCellView: View {
     @ObservedObject var spotify: Spotify
 
-    @State private var image = Image("spotify logo green")
+    @State private var image = Image(.spotifyLogoGreen)
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
     @State private var shouldNavigate = false

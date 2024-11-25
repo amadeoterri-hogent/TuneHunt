@@ -14,20 +14,14 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack() {
-            ZStack {
-                LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
-                
-                VStack {
-                    LoginView()
-                        .padding()
-                    MenuView()
-                }
-                .onOpenURL(perform: handleURL(_:))
+            if (!spotify.isAuthorized) {
+                LoginView(spotify: spotify)
+                    .onOpenURL(perform: handleURL(_:))
+            } else {
+                MenuView()
             }
         }
         .accentColor(textColor)
-
     }
     
     func handleURL(_ url: URL) {
@@ -104,8 +98,8 @@ struct ContentView_Previews: PreviewProvider {
     
     static let spotify: Spotify = {
         let spotify = Spotify()
-        //        spotify.isAuthorized = false
-        spotify.isAuthorized = true
+        spotify.isAuthorized = false
+//        spotify.isAuthorized = true
         return spotify
     }()
     
