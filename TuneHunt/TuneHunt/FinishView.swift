@@ -28,17 +28,11 @@ struct FinishView: View {
                     if isSearching {
                         ProgressView("Searching top tracks...")
                     } else {
-                        List(tracks, id: \.id) { track in
-                            HStack {
-                                Text(track.name)
-                                Button(action: { removeTrack(track) }) {
-                                    Image(systemName: "minus.circle")
-                                }
+                        List {
+                            ForEach(tracks, id: \.self) { track in
+                                Text("\(track.name)")
                             }
-                            .padding(.vertical, 2)
-                            .padding(.horizontal, 8)
-                            .background(Color(UIColor.systemGray5))
-                            .cornerRadius(5)
+                            .onDelete(perform: removeTrack)
                         }
                     }
                 } header: {
@@ -71,8 +65,10 @@ struct FinishView: View {
         }
     }
     
-    private func removeTrack(_ track: Track) {
-        tracks.removeAll { $0.id == track.id }
+    private func removeTrack(at offsets: IndexSet) {
+        withAnimation {
+            tracks.remove(atOffsets: offsets)
+        }
     }
     
     func search() {
@@ -178,9 +174,14 @@ extension Array {
 //        spotify.isAuthorized = true
 //        return spotify
 //    }()
+//    
+//    static let playlist: Playlist = .thisIsMFDoom
+//    static let artists: [Artist] = [
+//        .pinkFloyd,.radiohead
+//    ]
 //
 //    static var previews: some View {
-//        FinishView()
+//        FinishView(playlist: , artists: artists)
 //            .environmentObject(spotify)
 //    }
 //}
