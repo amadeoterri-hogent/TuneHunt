@@ -10,12 +10,12 @@ struct ArtistTextSearchView: View {
     @State private var searchText: String = ""
     @State var artists: [String] = []
     @State var artistSearchResults: [ArtistSearchResult] = []
-    @State private var selectedSeparator = "Comma"
+    @State private var selectedSeparator = "Auto"
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
     
-    let separators = ["Comma", "Space", "Newline"]
+    let separators = ["Auto","Comma", "Space", "Newline"]
     var textColor: Color {colorScheme == .dark ? .white : .black}
     var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
@@ -99,6 +99,12 @@ struct ArtistTextSearchView: View {
     private func splitArtists() -> Void {
         let separator: Character
         switch selectedSeparator {
+        case "Auto":
+            searchText = searchText
+                            .replacingOccurrences(of: "•", with: ",")
+                            .replacingOccurrences(of: "-", with: ",")
+                            .replacingOccurrences(of: "\n", with: ",")
+            separator = ","
         case "Comma":
             separator = ","
         case "Space":
