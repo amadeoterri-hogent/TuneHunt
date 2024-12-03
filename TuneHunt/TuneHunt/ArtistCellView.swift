@@ -4,14 +4,15 @@ import SpotifyWebAPI
 
 struct ArtistCellView: View {
     @ObservedObject var spotify: Spotify
-    @State private var image = Image(.spotifyLogoGreen)
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
     @Binding var artistSearchResult: ArtistSearchResult
+    
+    let placeholderImage = Image(.spotifyLogoGreen)
 
     var body: some View {
         HStack() {
-            image
+            (artistSearchResult.image ?? placeholderImage)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 60, height: 60)
@@ -26,11 +27,16 @@ struct ArtistCellView: View {
             Spacer()
         }
         .padding(.vertical, 5)
-        .onAppear(perform: loadImage)
+        .onAppear {
+            if artistSearchResult.image == nil {
+                loadImage()
+            }
+        }
     }
     
     
     func loadImage() {
+        print("Searching image \(artistSearchResult.artist.name)")
         if self.didRequestImage { return }
         self.didRequestImage = true
         
@@ -43,7 +49,7 @@ struct ArtistCellView: View {
             .sink(
                 receiveCompletion: { _ in },
                 receiveValue: { image in
-                    self.image = image
+                    artistSearchResult.image = image
                 }
             )
     }

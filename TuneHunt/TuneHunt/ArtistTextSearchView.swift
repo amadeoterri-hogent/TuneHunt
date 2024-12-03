@@ -8,12 +8,14 @@ struct ArtistTextSearchView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var searchText: String = ""
+    @State private var artistsSearch: String = ""
     @State var artists: [String] = []
     @State var artistSearchResults: [ArtistSearchResult] = []
     @State private var selectedSeparator = "Auto"
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
+    let pasteboard = UIPasteboard.general
     
     let separators = ["Auto","Comma", "Space", "Newline"]
     var textColor: Color {colorScheme == .dark ? .white : .black}
@@ -23,13 +25,47 @@ struct ArtistTextSearchView: View {
         VStack {
             Form {
                 Section {
-                    TextEditor(text: $searchText)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .frame(height: 200)
-                        .onChange(of: searchText, initial: true) {
-                            splitArtists()
+                    VStack {
+                        TextEditor(text: $searchText)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .frame(height: 200)
+                            .onChange(of: searchText, initial: true) {
+                                splitArtists()
+                            }
+                        
+                        HStack {
+                            Button {
+                            } label: {
+                                Image(systemName: "list.clipboard")
+                            }
+                            .foregroundStyle(textColor)
+                            .onTapGesture {
+                                if let textFromPasteboard = pasteboard.string {
+                                    searchText.append(textFromPasteboard)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                                                
+                            Button {
+                            } label: {
+                                Image(systemName: "clear")
+                            }
+                            .foregroundStyle(textColor)
+                            .onTapGesture {
+                                print("Text cleared")
+                                searchText = ""
+                                artistsSearch = ""
+                                artists = []
+                            }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+
                         }
+                        
+                    }
+                    
+
                 } header: {
                     Text("Enter Artists Here:")
                 }
@@ -51,21 +87,6 @@ struct ArtistTextSearchView: View {
                 .listRowBackground(Color.clear)
                 
                 Section {
-                    if artists.isEmpty {
-                        Text("No artists added.")
-                    } else {
-                        List {
-                            ForEach(artists, id: \.self) {
-                                Text("\($0)")
-                            }
-                            .onDelete(perform: removeArtist)
-                        }
-                    }
-                } header: {
-                    Text("Result:")
-                }
-                
-                Section {
                     Button {
                         searchArtists()
                     } label: {
@@ -83,6 +104,21 @@ struct ArtistTextSearchView: View {
                 }
                 .listRowBackground(Color.clear)
                 
+                Section {
+                    if artists.isEmpty {
+                        Text("No artists added.")
+                    } else {
+                        List {
+                            ForEach(artists, id: \.self) {
+                                Text("\($0)")
+                            }
+                            .onDelete(perform: removeArtist)
+                        }
+                    }
+                } header: {
+                    Text("Result:")
+                }
+                
             }
             .padding()
             .scrollContentBackground(.hidden)
@@ -98,9 +134,10 @@ struct ArtistTextSearchView: View {
     
     private func splitArtists() -> Void {
         let separator: Character
+        artistsSearch = searchText
         switch selectedSeparator {
         case "Auto":
-            searchText = searchText
+            artistsSearch = artistsSearch
                             .replacingOccurrences(of: "•", with: ",")
                             .replacingOccurrences(of: "-", with: ",")
                             .replacingOccurrences(of: "\n", with: ",")
@@ -114,7 +151,7 @@ struct ArtistTextSearchView: View {
         default:
             separator = " "
         }
-        artists = searchText
+        artists = artistsSearch
             .split(separator: separator)
             .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }

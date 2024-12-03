@@ -1,6 +1,7 @@
 import SwiftUI
 import SpotifyWebAPI
 import Combine
+import Foundation
 
 struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
@@ -16,14 +17,30 @@ struct FinishView: View {
     
     var playlist: Playlist<PlaylistItems>
     var artists: [Artist]
+    var isPreview = false
     
     var body: some View {
         VStack {
             Form {
                 Section {
+                    Button {
+                        finish()
+                    } label: {
+                        Text("Add tracks to playlist")
+                    }
+                    .foregroundStyle(textColor)
+                    .padding()
+                    .background(.green)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .listRowBackground(Color.clear)
+                
+                Section {
                     Text("Playlist: \(playlist.name)")
                     Text("Number of artists: \(artists.count) ")
                 }
+                
                 Section {
                     if isSearching {
                         ProgressView("Searching top tracks...")
@@ -38,20 +55,6 @@ struct FinishView: View {
                 } header: {
                     Text("Track names:")
                 }
-                
-                Section {
-                    Button {
-                        finish()
-                    } label: {
-                        Text("Add tracks to playlist")
-                    }
-                    .foregroundStyle(textColor)
-                    .padding()
-                    .background(.green)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .listRowBackground(Color.clear)
             }
             .scrollContentBackground(.hidden)
         }
@@ -72,6 +75,9 @@ struct FinishView: View {
     }
     
     func search() {
+        if isPreview {
+            return
+        }
         self.tracks = []
         self.isSearching = true
         var remainingRequests = artists.count
@@ -165,23 +171,26 @@ extension Array {
     }
 }
 
-// TODO: Fix preview
-//struct FinishView_Previews: PreviewProvider {
-//
-//    static let spotify: Spotify = {
-//        let spotify = Spotify()
-//        //        spotify.isAuthorized = false
-//        spotify.isAuthorized = true
-//        return spotify
-//    }()
-//    
-//    static let playlist: Playlist = .thisIsMFDoom
-//    static let artists: [Artist] = [
-//        .pinkFloyd,.radiohead
-//    ]
-//
-//    static var previews: some View {
-//        FinishView(playlist: , artists: artists)
-//            .environmentObject(spotify)
-//    }
-//}
+struct FinishView_Previews: PreviewProvider {
+
+    static let spotify: Spotify = {
+        let spotify = Spotify()
+        //        spotify.isAuthorized = false
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    
+    static let playlist: Playlist = .crumb
+    static let artists: [Artist] = [
+        .pinkFloyd,.radiohead
+    ]
+    static let tracks: [Track] = [
+        .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
+    ]
+
+    static var previews: some View {
+        FinishView(tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
+            .environmentObject(spotify)
+    }
+}
+
