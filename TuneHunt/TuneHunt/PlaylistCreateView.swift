@@ -3,25 +3,16 @@ import Combine
 import SpotifyWebAPI
 
 struct PlaylistCreateView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
 
     @State private var createPlaylistCancellable: AnyCancellable?
     @State private var namePlaylist: String = ""
     @State private var alert: AlertItem? = nil
-    @State private var selection: Int? = nil
-    @State private var selectedArtists: [Artist]
     @State private var alertItem: AlertItem? = nil
     
-    var textColor: Color {colorScheme == .dark ? .white : .black}
-    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
-    
     @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
-    
-    init(artists: [Artist]) {
-        self._selectedArtists = State(initialValue: artists)
-    }
     
     var body: some View {
         VStack {
@@ -40,7 +31,7 @@ struct PlaylistCreateView: View {
                             Text("Create playlist")
                         }
                     }
-                    .foregroundStyle(textColor)
+                    .foregroundStyle(Theme(colorScheme).textColor)
                     .padding()
                     .background(.green)
                     .clipShape(Capsule())
@@ -51,10 +42,9 @@ struct PlaylistCreateView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-        .ignoresSafeArea())
-        .foregroundStyle(textColor)
-
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
+        .foregroundStyle(Theme(colorScheme).textColor)
     }
     
     func createPlaylist() {
@@ -104,22 +94,12 @@ struct PlaylistCreateView: View {
     }
 }
 
-struct PlaylistCreateView_Previews: PreviewProvider {
-    
-    static let spotify: Spotify = {
+#Preview{
+    let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
     }()
-    
-    static let artists: [Artist] = [
-        .pinkFloyd,.radiohead
-    ]
-    
-    @State static var shouldRefreshPlaylists = false
-    
-    static var previews: some View {
-        PlaylistCreateView(artists: artists)
-            .environmentObject(spotify)
-    }
+        
+    return PlaylistCreateView(spotify: spotify)
 }

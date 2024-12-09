@@ -6,7 +6,7 @@ struct ArtistCellView: View {
     @ObservedObject var spotify: Spotify
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @Binding var artistSearchResult: ArtistSearchResult
+    @State var artistSearchResult: ArtistSearchResult
     
     let placeholderImage = Image(.spotifyLogoGreen)
 
@@ -55,3 +55,21 @@ struct ArtistCellView: View {
     }
     
 }
+
+#Preview {
+    var artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
+    
+    let spotify: Spotify = {
+        let spotify = Spotify()
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    
+    return List {
+        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+    }
+}
+

@@ -7,7 +7,7 @@ import Vision
 import NaturalLanguage
 
 struct ArtistImageSearchView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var pickerItem: PhotosPickerItem?
@@ -22,11 +22,9 @@ struct ArtistImageSearchView: View {
     @State private var alertItem: AlertItem? = nil
     @State private var selectedSeparator = "Comma"
     
-    var textColor: Color {colorScheme == .dark ? .white : .black}
-    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
-    
-    init(artistSearchResults: [ArtistSearchResult]) {
+    init(spotify: Spotify, artistSearchResults: [ArtistSearchResult]) {
         self.artistSearchResults = artistSearchResults
+        self.spotify = spotify
     }
     
     var body: some View {
@@ -35,20 +33,20 @@ struct ArtistImageSearchView: View {
                 Section {
                     // Image Picker
                     PhotosPicker(selection: $pickerItem, matching: .images) {
-                            HStack {
-                                Image(systemName: "square.and.arrow.up")
-                                Text("Upload an image")
-                            }
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                            Text("Upload an image")
                         }
-                        .foregroundStyle(textColor)
-                        .padding()
-                        .background(.blue)
-                        .clipShape(Capsule())
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .foregroundStyle(Theme(colorScheme).textColor)
+                    .padding()
+                    .background(.blue)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
                     
                 }
                 .listRowBackground(Color.clear)
-
+                
                 // TODO: Loading screen
                 if imageUploaded {
                     Section {
@@ -91,7 +89,7 @@ struct ArtistImageSearchView: View {
                             }
                             
                         }
-                        .foregroundStyle(textColor)
+                        .foregroundStyle(Theme(colorScheme).textColor)
                         .padding()
                         .background(.green)
                         .clipShape(Capsule())
@@ -105,7 +103,7 @@ struct ArtistImageSearchView: View {
         }
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .onChange(of: pickerItem, initial: true) {
             processPickerItem()
@@ -120,7 +118,7 @@ struct ArtistImageSearchView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
+            ArtistSearchResultsListView(spotify:spotify, artistsSearchResults: artistSearchResults)
         default:
             EmptyView()
         }
@@ -166,7 +164,7 @@ struct ArtistImageSearchView: View {
                             .replacingOccurrences(of: "•", with: ",")
                             .replacingOccurrences(of: "-", with: ",")
                             .replacingOccurrences(of: "  ", with: " ")
-//                            .components(separatedBy: [",", "\n"]
+                        //                            .components(separatedBy: [",", "\n"]
                             .components(separatedBy: CharacterSet(charactersIn: ",\n"))
                             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                             .filter { !$0.isEmpty }
@@ -244,21 +242,17 @@ struct ArtistImageSearchView: View {
     }
 }
 
-struct ArtistImageSearchView_Previews: PreviewProvider {
-    
-    static let spotify: Spotify = {
+#Preview {
+    let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
     }()
     
-    static let artists = [
+    let artists = [
         ArtistSearchResult(artist: .pinkFloyd),
         ArtistSearchResult(artist: .radiohead)
     ]
     
-    static var previews: some View {
-        ArtistImageSearchView(artistSearchResults: artists)
-            .environmentObject(spotify)
-    }
+    return ArtistImageSearchView(spotify: spotify,artistSearchResults: artists)
 }

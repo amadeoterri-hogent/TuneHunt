@@ -5,29 +5,19 @@ import SpotifyWebAPI
 
 struct PlaylistCellView: View {
     @ObservedObject var spotify: Spotify
+    @Binding var shouldNavigate: Bool
+    @Binding var selectedPlaylist: Playlist<PlaylistItems>?
 
     @State private var image = Image(.spotifyLogoGreen)
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var shouldNavigate = false
-    @State private var selection: Int? = nil
-    @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
     @State private var loadPlaylistCancellable: AnyCancellable? = nil
-    @State var artists: [Artist]
     
-    let playlist: Playlist<PlaylistItemsReference>
-    
-    init(spotify: Spotify, playlist: Playlist<PlaylistItemsReference>, artists: [Artist]) {
-        self.spotify = spotify
-        self.playlist = playlist
-        self.artists = artists
-    }
+    var playlist: Playlist<PlaylistItemsReference>
     
     var body: some View {
         Button {
-            selection = 1
             loadPlaylist()
-            shouldNavigate = true
         } label: {
             HStack {
                 image
@@ -36,28 +26,10 @@ struct PlaylistCellView: View {
                     .frame(width:48,height: 48)
                     .padding(.trailing, 5)
                 VStack {
-                    Text("\( playlist.name)")
+                    Text("\(playlist.name)")
                 }
             }
             .onAppear(perform: loadImage)
-        }
-        .navigationDestination(isPresented: $shouldNavigate) {
-            destinationView()
-        }
-    }
-    
-    @ViewBuilder
-    func destinationView() -> some View {
-        switch selection {
-        case 1:
-            if let playlist = selectedPlaylist {
-                FinishView(playlist: playlist, artists: artists)
-            } else {
-                // TODO: Throw alert?
-                EmptyView()
-            }
-        default:
-            EmptyView()
         }
     }
     
@@ -83,35 +55,32 @@ struct PlaylistCellView: View {
         self.loadPlaylistCancellable =  spotify.api.playlist(playlist)
             .receive(on: RunLoop.main)
             .sink(
-                receiveCompletion:{ _ in }
-                , receiveValue: { playlist in
+                receiveCompletion:{ _ in
+                    shouldNavigate = true
+                },
+                receiveValue: { playlist in
                     self.selectedPlaylist = playlist
-                    
                 }
             )
     }
 }
 
-struct PlaylistCellView_Previews: PreviewProvider {
-    
-    static let spotify: Spotify = {
-        let spotify = Spotify()
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    static let artists: [Artist] = [
-        .pinkFloyd,.radiohead
-    ]
-    
-    static var previews: some View {
-        List {
-            PlaylistCellView(spotify: spotify, playlist: .thisIsMildHighClub, artists: artists)
-            PlaylistCellView(spotify: spotify, playlist: .thisIsRadiohead, artists: artists)
-            PlaylistCellView(spotify: spotify, playlist: .modernPsychedelia, artists: artists)
-            PlaylistCellView(spotify: spotify, playlist: .rockClassics, artists: artists)
-            PlaylistCellView(spotify: spotify, playlist: .menITrust, artists: artists)
-        }
-        .environmentObject(spotify)
-    }
-}
+//#Preview {
+//    let spotify: Spotify = {
+//        let spotify = Spotify()
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    let artists: [Artist] = [
+//        .pinkFloyd,.radiohead
+//    ]
+//    
+//    return List {
+//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .thisIsMildHighClub)
+//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .thisIsRadiohead)
+//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .modernPsychedelia)
+//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .rockClassics)
+//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .menITrust)
+//    }
+//}

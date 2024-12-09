@@ -4,7 +4,7 @@ import Foundation
 import SpotifyWebAPI
 
 struct ArtistTextSearchView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var searchText: String = ""
@@ -18,8 +18,6 @@ struct ArtistTextSearchView: View {
     let pasteboard = UIPasteboard.general
     
     let separators = ["Auto","Comma", "Space", "Newline"]
-    var textColor: Color {colorScheme == .dark ? .white : .black}
-    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
     var body: some View {
         VStack {
@@ -39,7 +37,7 @@ struct ArtistTextSearchView: View {
                             } label: {
                                 Image(systemName: "list.clipboard")
                             }
-                            .foregroundStyle(textColor)
+                            .foregroundStyle(Theme(colorScheme).textColor)
                             .onTapGesture {
                                 if let textFromPasteboard = pasteboard.string {
                                     searchText.append(textFromPasteboard)
@@ -52,7 +50,7 @@ struct ArtistTextSearchView: View {
                             } label: {
                                 Image(systemName: "clear")
                             }
-                            .foregroundStyle(textColor)
+                            .foregroundStyle(Theme(colorScheme).textColor)
                             .onTapGesture {
                                 print("Text cleared")
                                 searchText = ""
@@ -96,7 +94,7 @@ struct ArtistTextSearchView: View {
                             
                         }
                     }
-                    .foregroundStyle(textColor)
+                    .foregroundStyle(Theme(colorScheme).textColor)
                     .padding()
                     .background(.green)
                     .clipShape(Capsule())
@@ -124,9 +122,11 @@ struct ArtistTextSearchView: View {
             .scrollContentBackground(.hidden)
         }
         .navigationTitle("Enter artists")
-        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
-        .navigationDestination(isPresented: $shouldNavigate) { ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)}
+        .navigationDestination(isPresented: $shouldNavigate) {
+            ArtistSearchResultsListView(spotify: spotify, artistsSearchResults: artistSearchResults)
+        }
         .alert(item: $alertItem) { alert in
             Alert(title: alert.title, message: alert.message)
         }
@@ -207,16 +207,13 @@ struct ArtistTextSearchView: View {
     }
 }
 
-struct ArtistTextSearchView_Previews: PreviewProvider {
-    
-    static let spotify: Spotify = {
+#Preview {
+     let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
     }()
     
-    static var previews: some View {
-        ArtistTextSearchView()
-            .environmentObject(spotify)
-    }
+    return ArtistTextSearchView(spotify:spotify)
+    
 }

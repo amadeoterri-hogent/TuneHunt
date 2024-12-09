@@ -9,24 +9,20 @@ struct ContentView: View {
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var alert: AlertItem? = nil
     
-    var textColor: Color { colorScheme == .dark ? .white : .black}
-    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
-    
     var body: some View {
+        // TODO: Navigationstack on individual views
         NavigationStack() {
             if (!spotify.isAuthorized) {
                 LoginView(spotify: spotify)
                     .onOpenURL(perform: handleURL(_:))
             } else {
-                MenuView()
+                MenuView(spotify: spotify)
             }
         }
-        .accentColor(textColor)
+        .accentColor(Theme(colorScheme).textColor)
     }
     
     func handleURL(_ url: URL) {
-        
-        // Validate url
         guard url.scheme == self.spotify.loginCallbackURL.scheme else {
             self.alert = AlertItem(
                 title: "Cannot Handle Redirect",
@@ -35,35 +31,16 @@ struct ContentView: View {
             return
         }
         
-        // This property is used to display an activity indicator in `LoginView`
-        // indicating that the access and refresh tokens are being retrieved.
         spotify.isRetrievingTokens = true
         
-        // Complete the authorization process by requesting the access and
-        // refresh tokens.
         spotify.api.authorizationManager.requestAccessAndRefreshTokens(
             redirectURIWithQuery: url,
-            // This value must be the same as the one used to create the
-            // authorization URL. Otherwise, an error will be thrown.
             state: spotify.authorizationState
         )
         .receive(on: RunLoop.main)
         .sink(receiveCompletion: { completion in
-            // Whether the request succeeded or not, we need to remove the
-            // activity indicator.
             self.spotify.isRetrievingTokens = false
             
-            /*
-             After the access and refresh tokens are retrieved,
-             `SpotifyAPI.authorizationManagerDidChange` will emit a signal,
-             causing `Spotify.authorizationManagerDidChange()` to be called,
-             which will dismiss the loginView if the app was successfully
-             authorized by setting the @Published `Spotify.isAuthorized`
-             property to `true`.
-             
-             The only thing we need to do here is handle the error and show it
-             to the user if one was received.
-             */
             if case .failure(let error) = completion {
                 let alertTitle: String
                 let alertMessage: String
@@ -84,27 +61,17 @@ struct ContentView: View {
         })
         .store(in: &cancellables)
         
-        // MARK: IMPORTANT: generate a new value for the state parameter after
-        // MARK: each authorization request. This ensures an incoming redirect
-        // MARK: from Spotify was the result of a request made by this app, and
-        // MARK: and not an attacker.
         self.spotify.authorizationState = String.randomURLSafe(length: 128)
-        
     }
-    
 }
 
-struct ContentView_Previews: PreviewProvider {
-    
-    static let spotify: Spotify = {
+#Preview {
+    let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = false
-//        spotify.isAuthorized = true
         return spotify
     }()
     
-    static var previews: some View {
-        ContentView()
-            .environmentObject(spotify)
-    }
+    return ContentView()
+        .environmentObject(spotify)
 }

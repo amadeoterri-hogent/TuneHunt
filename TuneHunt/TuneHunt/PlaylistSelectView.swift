@@ -6,7 +6,8 @@ import SpotifyExampleContent
 
 
 struct PlaylistSelectView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
+
     @Environment(\.colorScheme) var colorScheme
     
     @State private var alert: AlertItem? = nil
@@ -14,22 +15,23 @@ struct PlaylistSelectView: View {
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var isLoadingPlaylists = false
     @State private var couldntLoadPlaylists = false
-    @State var artists: [Artist]
     @State private var showingAlert = false
-    @State private var shouldNavigate = false
-    @State private var selection: Int? = nil
+    @State private var shouldNavigate: Bool = false
+    @State private var shouldCreatePlaylist: Bool = false
+    @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
     
-    var textColor: Color {colorScheme == .dark ? .white : .black}
-    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
+    @State var artists: [Artist] = []
     
-    init(artists: [Artist]) {
+    init(spotify: Spotify, artists: [Artist]) {
         self.artists = artists
+        self.spotify = spotify
     }
     
     /// Used only by the preview provider to provide sample data.
-    fileprivate init(samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
+    fileprivate init(spotify: Spotify,samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
         self._playlists = State(initialValue: samplePlaylists)
-        self._artists = State(initialValue: sampleArtists)
+        self.artists = sampleArtists
+        self.spotify = spotify
     }
     
     var body: some View {
@@ -47,19 +49,21 @@ struct PlaylistSelectView: View {
 
             List {
                 ForEach(playlists, id: \.uri) { playlist in
-                    PlaylistCellView(spotify: spotify, playlist: playlist,artists: artists)
+                    PlaylistCellView(spotify: spotify, shouldNavigate: $shouldNavigate, selectedPlaylist: $selectedPlaylist, playlist: playlist)
                 }
             }
             .scrollContentBackground(.hidden)
             
         }
-        .background(
-            LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-        )
-        .foregroundStyle(textColor)
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
+        .foregroundStyle(Theme(colorScheme).textColor)
         .navigationDestination(isPresented: $shouldNavigate) {
-            destinationView()
+            if let playlist = selectedPlaylist {
+                FinishView(spotify:spotify, playlist: playlist, artists: artists)
+            } else {
+                EmptyView()
+            }
         }
         .onAppear(perform: retrievePlaylists)
         .alert(item: $alert) { alert in
@@ -68,36 +72,26 @@ struct PlaylistSelectView: View {
         .navigationTitle("Your Playlists")
         .toolbar {
             Button {
-                selection = 1
-                shouldNavigate = true
+                shouldCreatePlaylist = true
             } label: {
                 Image(systemName: "plus" )
                     .font(.title2)
                     .frame(width:48,height: 48)
-                    .foregroundStyle(textColor)
+                    .foregroundStyle(Theme(colorScheme).textColor)
             }
-            .sheet(isPresented: $shouldNavigate) {
-                destinationView()
+            .sheet(isPresented: $shouldCreatePlaylist) {
+                PlaylistCreateView(spotify: spotify)
             }
-        }
-        
-    }
-    
-    @ViewBuilder
-    func destinationView() -> some View {
-        switch selection {
-        case 1:
-            PlaylistCreateView(artists: artists)
-        default:
-            EmptyView()
         }
     }
     
     
     func retrievePlaylists() {
+        print("Test")
         // Don't try to load any playlists if we're in preview mode.
         if ProcessInfo.processInfo.isPreviewing { return }
-        
+        print("Retrieving playlists")
+
         self.isLoadingPlaylists = true
         self.playlists = []
         
@@ -128,27 +122,24 @@ struct PlaylistSelectView: View {
     }
 }
 
-struct PlayListSelectView_Previews: PreviewProvider {
-    
-    static let spotify: Spotify = {
+#Preview {
+    let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
     }()
     
-    static let playlists: [Playlist<PlaylistItemsReference>] = [
+    let playlists: [Playlist<PlaylistItemsReference>] = [
         .menITrust, .modernPsychedelia,
         .lucyInTheSkyWithDiamonds, .rockClassics,
         .thisIsMFDoom, .thisIsSonicYouth, .thisIsMildHighClub,
         .thisIsSkinshape
     ]
     
-    static let artists: [Artist] = [
+    let artists: [Artist] = [
         .pinkFloyd,.radiohead
     ]
     
-    static var previews: some View {
-        PlaylistSelectView(samplePlaylists: playlists, sampleArtists: artists)
-            .environmentObject(spotify)
-    }
+    return PlaylistSelectView(spotify: spotify, samplePlaylists: playlists, sampleArtists: artists)
+    
 }

@@ -4,16 +4,13 @@ import Combine
 import Foundation
 
 struct FinishView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State var tracks: [Track] = []
     @State private var searchCancellables: Set<AnyCancellable> = []
     @State private var isSearching = false
     @State private var alert: AlertItem? = nil
-    
-    var textColor: Color { colorScheme == .dark ? .white : .black}
-    var backgroundColor: Color {colorScheme == .dark ? .black : .white}
     
     var playlist: Playlist<PlaylistItems>
     var artists: [Artist]
@@ -28,7 +25,7 @@ struct FinishView: View {
                     } label: {
                         Text("Add tracks to playlist")
                     }
-                    .foregroundStyle(textColor)
+                    .foregroundStyle(Theme(colorScheme).textColor)
                     .padding()
                     .background(.green)
                     .clipShape(Capsule())
@@ -58,7 +55,7 @@ struct FinishView: View {
             }
             .scrollContentBackground(.hidden)
         }
-        .background(LinearGradient(colors: [.blue, backgroundColor], startPoint: .top, endPoint: .bottom)
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .alert(item: $alert) { alert in
             Alert(title: alert.title, message: alert.message)
@@ -171,26 +168,24 @@ extension Array {
     }
 }
 
-struct FinishView_Previews: PreviewProvider {
+#Preview {
 
-    static let spotify: Spotify = {
+    let spotify: Spotify = {
         let spotify = Spotify()
         //        spotify.isAuthorized = false
         spotify.isAuthorized = true
         return spotify
     }()
     
-    static let playlist: Playlist = .crumb
-    static let artists: [Artist] = [
+    let playlist: Playlist = .crumb
+    let artists: [Artist] = [
         .pinkFloyd,.radiohead
     ]
-    static let tracks: [Track] = [
+    let tracks: [Track] = [
         .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
     ]
 
-    static var previews: some View {
-        FinishView(tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
-            .environmentObject(spotify)
-    }
+    return FinishView(spotify:spotify, tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
+    
 }
 
