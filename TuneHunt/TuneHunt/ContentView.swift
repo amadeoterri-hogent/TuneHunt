@@ -10,8 +10,7 @@ struct ContentView: View {
     @State private var alert: AlertItem? = nil
     
     var body: some View {
-        // TODO: Navigationstack on individual views
-        NavigationStack() {
+        VStack() {
             if (!spotify.isAuthorized) {
                 LoginView(spotify: spotify)
                     .onOpenURL(perform: handleURL(_:))

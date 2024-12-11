@@ -15,9 +15,11 @@ struct ArtistTextSearchView: View {
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
-    let pasteboard = UIPasteboard.general
-    
+    @State private var searching: Bool = false
+    @State private var remainingSearches: Double = 0.0
+        
     let separators = ["Auto","Comma", "Space", "Newline"]
+    let pasteboard = UIPasteboard.general
     
     var body: some View {
         VStack {
@@ -130,6 +132,8 @@ struct ArtistTextSearchView: View {
         .alert(item: $alertItem) { alert in
             Alert(title: alert.title, message: alert.message)
         }
+        ProgressView(value: remainingSearches)
+//                            .progressViewStyle(.circular)
     }
     
     private func splitArtists() -> Void {
@@ -175,7 +179,9 @@ struct ArtistTextSearchView: View {
             return
         }
         
-        var remainingSearches = artistNames.count
+        searching = true
+        
+        remainingSearches = Double(artistNames.count)
         for artist in artistNames {
             let cancellable = spotify.api.search(
                 query: artist, categories: [.artist]

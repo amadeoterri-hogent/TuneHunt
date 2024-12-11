@@ -51,7 +51,6 @@ struct ArtistSearchResultsListView: View {
                                 }
                             }
                             shouldNavigate = true
-                            print(shouldNavigate)
                         } label: {
                             HStack {
                                 Image(systemName: "magnifyingglass")
@@ -80,8 +79,6 @@ struct ArtistSearchResultsListView: View {
         switch selection {
         case 1:
             PlaylistSelectView(spotify: spotify, artists: spotifyArtists)
-//            PlaylistSelectView(artists: spotifyArtists)
-//            PlaylistSelectView()
         default:
             EmptyView()
         }
