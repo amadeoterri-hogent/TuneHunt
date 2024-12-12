@@ -69,20 +69,11 @@ struct ArtistSearchResultsListView: View {
         }
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
-        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+        .navigationDestination(isPresented: $shouldNavigate) {
+            PlaylistSelectView(spotify: spotify, artists: spotifyArtists)
+        }
         
     }
-    
-    @ViewBuilder
-    func destinationView() -> some View {
-        switch selection {
-        case 1:
-            PlaylistSelectView(spotify: spotify, artists: spotifyArtists)
-        default:
-            EmptyView()
-        }
-    }
-    
 }
 
 #Preview {

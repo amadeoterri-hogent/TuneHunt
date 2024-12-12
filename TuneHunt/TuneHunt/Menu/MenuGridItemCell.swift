@@ -21,24 +21,24 @@ struct MenuGridItemCell: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: 48, height: 48)
-                        .padding()
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 4)
                         .foregroundStyle(Theme(colorScheme).textColor)
 
-                    HStack {
-                        Text(menuItem.listItemTitle)
-                            .font(.title3)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(3)
-                            .foregroundStyle(Theme(colorScheme).textColor)
-                    }
+                    Text(menuItem.listItemTitle)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .padding(4)
+                        .lineLimit(3)
+                        .foregroundStyle(Theme(colorScheme).textColor)
                 }
             }
         }
-        .frame(width: 150, height: 150)
+        .frame(width: 144, height: 192)
         .padding()
-        .clipShape(.rect(cornerRadius: 10))
+        .clipShape(.rect(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(Theme(colorScheme).textColor)
         )
     }

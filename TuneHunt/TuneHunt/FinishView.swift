@@ -3,6 +3,9 @@ import SpotifyWebAPI
 import Combine
 import Foundation
 
+// TODO: Add back to home button
+// TODO: Skip track on error and print after which ones didn't succeed
+// Because now I get error message with a lot of tracks but the tracks were added to the playlist
 struct FinishView: View {
     @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
@@ -41,6 +44,7 @@ struct FinishView: View {
                 Section {
                     if isSearching {
                         ProgressView("Searching top tracks...")
+                            .frame(maxWidth: .infinity, alignment: .center)
                     } else {
                         List {
                             ForEach(tracks, id: \.self) { track in

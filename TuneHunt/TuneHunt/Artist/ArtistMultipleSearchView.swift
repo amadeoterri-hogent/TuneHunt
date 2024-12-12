@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import SpotifyWebAPI
 
-struct ArtistTextSearchView: View {
+struct ArtistMultipleSearchView: View {
     @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
@@ -232,6 +232,6 @@ struct ArtistTextSearchView: View {
         return spotify
     }()
     
-    return ArtistTextSearchView(spotify:spotify)
+    return ArtistMultipleSearchView(spotify:spotify)
     
 }

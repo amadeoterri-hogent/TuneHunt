@@ -45,7 +45,8 @@ struct PlaylistSelectView: View {
             .font(.caption)
             .foregroundColor(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+            .padding(.top)
+            .padding(.horizontal, 24)
 
             List {
                 ForEach(playlists, id: \.uri) { playlist in
@@ -87,7 +88,6 @@ struct PlaylistSelectView: View {
     
     
     func retrievePlaylists() {
-        print("Test")
         // Don't try to load any playlists if we're in preview mode.
         if ProcessInfo.processInfo.isPreviewing { return }
         print("Retrieving playlists")

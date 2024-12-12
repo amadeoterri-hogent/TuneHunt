@@ -32,10 +32,9 @@ struct MenuListView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            // TODO: build from single artist
-            EmptyView()
+            ArtistSingleSearchView(spotify:spotify)
         case 2:
-            ArtistTextSearchView(spotify:spotify)
+            ArtistMultipleSearchView(spotify:spotify)
         case 3:
             ArtistImageSearchView(spotify:spotify)
         case 4:

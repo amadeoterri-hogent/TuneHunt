@@ -28,25 +28,29 @@ struct MenuView: View {
             VStack {
                 ProfileBarView(spotify:spotify)
                 
-                Text("Build playlists")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding(.horizontal)
-                    .padding(.top)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
                 HStack {
-                    Image(systemName:"text.justify")
-                    Toggle("", isOn: $showGrid)
-                        .labelsHidden()
-                    Image(systemName:"square.grid.3x3")
+                    Text("Build playlist")
+                        .font(.largeTitle)
+                        .bold()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack {
+                        Image(systemName:"text.justify")
+                        Toggle("", isOn: $showGrid)
+                            .labelsHidden()
+                            .tint(.clear)
+                        Image(systemName:"square.grid.3x3")
+                    }
+                    .frame(alignment: .trailing)
+                    .padding(.top, 4)
+                    .font(.caption2)
+                    .opacity(0.7)
                 }
+                .frame(height:48)
+                .lineLimit(1)
                 .padding(.horizontal)
                 .padding(.top)
-                .font(.subheadline)
-                .opacity(0.7)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
+
                 if !showGrid {
                     MenuListView(spotify: spotify, menuItems: menuItems)
                 } else {

@@ -20,7 +20,7 @@ struct MenuGridView: View {
         
     var body: some View {
         VStack {
-            let columns = [GridItem(.adaptive(minimum: 150))]
+            let columns = [GridItem(.adaptive(minimum: 144))]
             
             LazyVGrid (columns: columns) {
                 ForEach(menuItems, id: \.self) { menuItem in
@@ -41,9 +41,9 @@ struct MenuGridView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            EmptyView()
+            ArtistSingleSearchView(spotify:spotify)
         case 2:
-            ArtistTextSearchView(spotify: spotify)
+            ArtistMultipleSearchView(spotify: spotify)
         case 3:
             ArtistImageSearchView(spotify: spotify)
         case 4:

@@ -24,7 +24,7 @@ struct PlaylistCellView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width:48,height: 48)
-                    .padding(.trailing, 5)
+                    .padding(.trailing, 4)
                 VStack {
                     Text("\(playlist.name)")
                 }
