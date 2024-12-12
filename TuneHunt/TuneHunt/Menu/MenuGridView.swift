@@ -23,12 +23,12 @@ struct MenuGridView: View {
             let columns = [GridItem(.adaptive(minimum: 150))]
             
             LazyVGrid (columns: columns) {
-                // TODO: Fix grid item height and width
                 ForEach(menuItems, id: \.self) { menuItem in
                     MenuGridItemCell(shouldNavigate: $shouldNavigate, selection: $selection, menuItem: menuItem)
+                        .padding(.horizontal,24)
+                        .padding(.top,24)
                 }
             }
-            .padding(.top)
             Spacer()
             
         }
@@ -45,7 +45,7 @@ struct MenuGridView: View {
         case 2:
             ArtistTextSearchView(spotify: spotify)
         case 3:
-            ArtistImageSearchView(spotify: spotify, artistSearchResults: [])
+            ArtistImageSearchView(spotify: spotify)
         case 4:
             EmptyView()
         default:

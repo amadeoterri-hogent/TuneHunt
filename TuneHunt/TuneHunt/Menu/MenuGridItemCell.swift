@@ -22,14 +22,19 @@ struct MenuGridItemCell: View {
                         .scaledToFill()
                         .frame(width: 48, height: 48)
                         .padding()
+                        .foregroundStyle(Theme(colorScheme).textColor)
 
                     HStack {
                         Text(menuItem.listItemTitle)
-                            .font(.title2)
+                            .font(.title3)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(3)
+                            .foregroundStyle(Theme(colorScheme).textColor)
                     }
                 }
             }
         }
+        .frame(width: 150, height: 150)
         .padding()
         .clipShape(.rect(cornerRadius: 10))
         .overlay(

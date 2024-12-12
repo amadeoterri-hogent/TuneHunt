@@ -65,7 +65,6 @@ struct PlaylistSelectView: View {
                 EmptyView()
             }
         }
-        .onAppear(perform: retrievePlaylists)
         .alert(item: $alert) { alert in
             Alert(title: alert.title, message: alert.message)
         }
@@ -83,6 +82,7 @@ struct PlaylistSelectView: View {
                 PlaylistCreateView(spotify: spotify)
             }
         }
+        .onAppear(perform: retrievePlaylists)
     }
     
     

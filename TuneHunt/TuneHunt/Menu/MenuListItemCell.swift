@@ -3,6 +3,8 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuListItemCell: View {
+    @Environment(\.colorScheme) var colorScheme
+
     @Binding var shouldNavigate: Bool
     @Binding var selection: Int
     
@@ -17,11 +19,16 @@ struct MenuListItemCell: View {
                 Image(systemName: menuItem.imageSystemName )
                     .font(.title2)
                     .frame(width: 48,height: 48)
+                    .foregroundStyle(Theme(colorScheme).textColor)
                 
                 Text(menuItem.listItemTitle)
-                    .font(.title2)
+                    .font(.title3)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 12)
+                    .foregroundStyle(Theme(colorScheme).textColor)
+
             }
             .padding(12)
         }

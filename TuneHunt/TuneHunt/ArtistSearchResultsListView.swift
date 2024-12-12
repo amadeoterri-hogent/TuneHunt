@@ -26,52 +26,51 @@ struct ArtistSearchResultsListView: View {
             }
         )
         
-        NavigationStack {
-            VStack {
-                Form {
-                    Section {
-                        Toggle("Select All", isOn: selectAll)
-                            .frame(alignment: .trailing)
-                            .padding(8)
-                        
-                        List(artistsSearchResults, id: \.id) { artistSearchResult in
-                            ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
-                        }
-                        .navigationTitle("Search Results")
-                    } header: {
-                        Text("Select artists")
-                    }
+        VStack {
+            Form {
+                Section {
+                    Toggle("Select All", isOn: selectAll)
+                        .frame(alignment: .trailing)
+                        .padding(8)
                     
-                    Section {
-                        Button {
-                            selection = 1
-                            for artistsSearchResult in artistsSearchResults {
-                                if artistsSearchResult.addToPlaylist {
-                                    spotifyArtists.append(artistsSearchResult.artist)
-                                }
-                            }
-                            shouldNavigate = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                Text("Choose playlist")
-                            }
-                            
-                        }
-                        .foregroundStyle(Theme(colorScheme).textColor)
-                        .padding()
-                        .background(.green)
-                        .clipShape(Capsule())
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    List(artistsSearchResults, id: \.id) { artistSearchResult in
+                        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
                     }
-                    .listRowBackground(Color.clear)
+                    .navigationTitle("Search Results")
+                } header: {
+                    Text("Select artists")
                 }
-                .scrollContentBackground(.hidden)
+                
+                Section {
+                    Button {
+                        selection = 1
+                        for artistsSearchResult in artistsSearchResults {
+                            if artistsSearchResult.addToPlaylist {
+                                spotifyArtists.append(artistsSearchResult.artist)
+                            }
+                        }
+                        shouldNavigate = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                            Text("Choose playlist")
+                        }
+                        
+                    }
+                    .foregroundStyle(Theme(colorScheme).textColor)
+                    .padding()
+                    .background(.green)
+                    .clipShape(Capsule())
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .listRowBackground(Color.clear)
             }
-            .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea())
-            .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+            .scrollContentBackground(.hidden)
         }
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
+        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+        
     }
     
     @ViewBuilder

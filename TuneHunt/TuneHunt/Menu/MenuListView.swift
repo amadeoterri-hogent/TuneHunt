@@ -37,7 +37,7 @@ struct MenuListView: View {
         case 2:
             ArtistTextSearchView(spotify:spotify)
         case 3:
-            ArtistImageSearchView(spotify:spotify, artistSearchResults: [])
+            ArtistImageSearchView(spotify:spotify)
         case 4:
             // TODO: build from other playlist
             EmptyView()

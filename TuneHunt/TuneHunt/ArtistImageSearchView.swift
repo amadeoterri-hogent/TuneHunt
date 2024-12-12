@@ -10,9 +10,9 @@ struct ArtistImageSearchView: View {
     @ObservedObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var pickerItem: PhotosPickerItem?
-    @State private var selectedImage: UIImage?
-    @State private var imagePreview: Image?
+    @State private var pickerItem: PhotosPickerItem? = nil
+    @State private var selectedImage: UIImage? = nil
+    @State private var imagePreview: Image? = nil
     @State private var artists: [String] = []
     @State private var imageUploaded = false
     @State private var shouldNavigate = false
@@ -21,11 +21,6 @@ struct ArtistImageSearchView: View {
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var selectedSeparator = "Comma"
-    
-    init(spotify: Spotify, artistSearchResults: [ArtistSearchResult]) {
-        self.artistSearchResults = artistSearchResults
-        self.spotify = spotify
-    }
     
     var body: some View {
         VStack {
@@ -254,5 +249,5 @@ struct ArtistImageSearchView: View {
         ArtistSearchResult(artist: .radiohead)
     ]
     
-    return ArtistImageSearchView(spotify: spotify,artistSearchResults: artists)
+    return ArtistImageSearchView(spotify: spotify)
 }
