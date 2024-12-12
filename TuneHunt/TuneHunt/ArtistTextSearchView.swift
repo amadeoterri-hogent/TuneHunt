@@ -16,124 +16,132 @@ struct ArtistTextSearchView: View {
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
     @State private var searching: Bool = false
-    @State private var remainingSearches: Double = 0.0
         
     let separators = ["Auto","Comma", "Space", "Newline"]
     let pasteboard = UIPasteboard.general
     
     var body: some View {
-        VStack {
-            Form {
-                Section {
-                    VStack {
-                        TextEditor(text: $searchText)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .frame(height: 200)
-                            .onChange(of: searchText, initial: true) {
-                                splitArtists()
-                            }
-                        
-                        HStack {
-                            Button {
-                            } label: {
-                                Image(systemName: "list.clipboard")
-                            }
-                            .foregroundStyle(Theme(colorScheme).textColor)
-                            .onTapGesture {
-                                if let textFromPasteboard = pasteboard.string {
-                                    searchText.append(textFromPasteboard)
+        ZStack {
+            VStack {
+                Form {
+                    Section {
+                        VStack {
+                            TextEditor(text: $searchText)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .frame(height: 200)
+                                .onChange(of: searchText, initial: true) {
+                                    splitArtists()
                                 }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            HStack {
+                                Button {
+                                } label: {
+                                    Image(systemName: "list.clipboard")
+                                }
+                                .foregroundStyle(Theme(colorScheme).textColor)
+                                .onTapGesture {
+                                    if let textFromPasteboard = pasteboard.string {
+                                        searchText.append(textFromPasteboard)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
-                                                
-                            Button {
-                            } label: {
-                                Image(systemName: "clear")
-                            }
-                            .foregroundStyle(Theme(colorScheme).textColor)
-                            .onTapGesture {
-                                print("Text cleared")
-                                searchText = ""
-                                artistsSearch = ""
-                                artists = []
-                            }
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                                                    
+                                Button {
+                                } label: {
+                                    Image(systemName: "clear")
+                                }
+                                .foregroundStyle(Theme(colorScheme).textColor)
+                                .onTapGesture {
+                                    print("Text cleared")
+                                    searchText = ""
+                                    artistsSearch = ""
+                                    artists = []
+                                }
+                                .frame(maxWidth: .infinity, alignment: .trailing)
 
-                        }
-                        
-                    }
-                    
-
-                } header: {
-                    Text("Enter Artists Here:")
-                }
-                
-                Section {
-                    Picker("Separator", selection: $selectedSeparator) {
-                        ForEach(separators, id: \.self) {
-                            Text($0)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: selectedSeparator, initial: true) {
-                        splitArtists()
-                    }
-                    
-                } header: {
-                    Text("Select a seperator:")
-                }
-                .listRowBackground(Color.clear)
-                
-                Section {
-                    Button {
-                        searchArtists()
-                    } label: {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                            Text("Search artists in Spotify")
+                            }
                             
                         }
+                        
+
+                    } header: {
+                        Text("Enter Artists Here:")
                     }
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                    .padding()
-                    .background(.green)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .listRowBackground(Color.clear)
-                
-                Section {
-                    if artists.isEmpty {
-                        Text("No artists added.")
-                    } else {
-                        List {
-                            ForEach(artists, id: \.self) {
-                                Text("\($0)")
+                    
+                    Section {
+                        Picker("Separator", selection: $selectedSeparator) {
+                            ForEach(separators, id: \.self) {
+                                Text($0)
                             }
-                            .onDelete(perform: removeArtist)
                         }
+                        .pickerStyle(.segmented)
+                        .onChange(of: selectedSeparator, initial: true) {
+                            splitArtists()
+                        }
+                        
+                    } header: {
+                        Text("Select a seperator:")
                     }
-                } header: {
-                    Text("Result:")
+                    .listRowBackground(Color.clear)
+                    
+                    Section {
+                        Button {
+                            searchArtists()
+                        } label: {
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                Text("Search artists in Spotify")
+                                
+                            }
+                        }
+                        .foregroundStyle(Theme(colorScheme).textColor)
+                        .padding()
+                        .background(.green)
+                        .clipShape(Capsule())
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    .listRowBackground(Color.clear)
+                    
+                    Section {
+                        if artists.isEmpty {
+                            Text("No artists added.")
+                        } else {
+                            List {
+                                ForEach(artists, id: \.self) {
+                                    Text("\($0)")
+                                }
+                                .onDelete(perform: removeArtist)
+                            }
+                        }
+                    } header: {
+                        Text("Result:")
+                    }
+                    
                 }
-                
+                .padding()
+                .scrollContentBackground(.hidden)
             }
-            .padding()
-            .scrollContentBackground(.hidden)
+            .navigationTitle("Enter artists")
+            .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea())
+            .navigationDestination(isPresented: $shouldNavigate) {
+                ArtistSearchResultsListView(spotify: spotify, artistsSearchResults: artistSearchResults)
+            }
+            .alert(item: $alertItem) { alert in
+                Alert(title: alert.title, message: alert.message)
+            }
+            
+            if searching {
+                ProgressView("Searching...", value: Double(artistSearchResults.count), total: Double(artists.count))
+                    .progressViewStyle(.circular)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
+            }
         }
-        .navigationTitle("Enter artists")
-        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea())
-        .navigationDestination(isPresented: $shouldNavigate) {
-            ArtistSearchResultsListView(spotify: spotify, artistsSearchResults: artistSearchResults)
-        }
-        .alert(item: $alertItem) { alert in
-            Alert(title: alert.title, message: alert.message)
-        }
-        ProgressView(value: remainingSearches)
-//                            .progressViewStyle(.circular)
     }
     
     private func splitArtists() -> Void {
@@ -180,8 +188,8 @@ struct ArtistTextSearchView: View {
         }
         
         searching = true
+        var remainingSearches = Double(artistNames.count)
         
-        remainingSearches = Double(artistNames.count)
         for artist in artistNames {
             let cancellable = spotify.api.search(
                 query: artist, categories: [.artist]
@@ -192,6 +200,7 @@ struct ArtistTextSearchView: View {
                         // Only navigate when all artists have been searched in Spotify
                         remainingSearches -= 1
                         if remainingSearches == 0 {
+                            self.searching = false
                             self.shouldNavigate = true
                         }
                         if case .failure(let error) = completion {
@@ -204,7 +213,10 @@ struct ArtistTextSearchView: View {
                     receiveValue: { searchResults in
                         // Add the first result to the list of artists to send to the next screen
                         if let artist = searchResults.artists?.items.first {
-                            self.artistSearchResults.append(ArtistSearchResult(artist: artist))
+                            // Check for duplicates after search
+                            if !self.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
+                                self.artistSearchResults.append(ArtistSearchResult(artist: artist))
+                            }
                         }
                     }
                 )

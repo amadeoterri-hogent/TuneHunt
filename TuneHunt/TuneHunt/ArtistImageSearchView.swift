@@ -17,105 +17,111 @@ struct ArtistImageSearchView: View {
     @State private var imageUploaded = false
     @State private var shouldNavigate = false
     @State private var artistSearchResults: [ArtistSearchResult] = []
-    @State private var selection: Int? = nil
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
+    @State private var searching: Bool = false
+    @State private var loading: Bool = false
     @State private var selectedSeparator = "Comma"
     
     var body: some View {
-        VStack {
-            Form {
-                Section {
-                    // Image Picker
-                    PhotosPicker(selection: $pickerItem, matching: .images) {
-                        HStack {
-                            Image(systemName: "square.and.arrow.up")
-                            Text("Upload an image")
-                        }
-                    }
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                    .padding()
-                    .background(.blue)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    
-                }
-                .listRowBackground(Color.clear)
-                
-                // TODO: Loading screen
-                if imageUploaded {
+        ZStack {
+            VStack {
+                Form {
                     Section {
-                        
-                        if let imagePreview = imagePreview {
-                            imagePreview
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 200)
-                                .padding()
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                    Section {
-                        // Extracted Artist List
-                        if artists.isEmpty {
-                            Text("No artists found.")
-                        } else {
-                            List {
-                                ForEach(artists, id: \.self) {
-                                    Text("\($0)")
-                                }
-                                .onDelete(perform: removeArtist)
-                            }
-                        }
-                    } header: {
-                        Text("Result:")
-                    }
-                    
-                    Section {
-                        Button {
-                            selection = 1
-                            searchArtists()
-                        } label: {
+                        // Image Picker
+                        PhotosPicker(selection: $pickerItem, matching: .images) {
                             HStack {
-                                Image(systemName: "magnifyingglass")
-                                Text("Search artists in Spotify")
-                                
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Upload an image")
                             }
-                            
                         }
                         .foregroundStyle(Theme(colorScheme).textColor)
                         .padding()
-                        .background(.green)
+                        .background(.blue)
                         .clipShape(Capsule())
                         .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .listRowBackground(Color.clear)
+                    
+                    if imageUploaded {
+                        Section {
+                            if let imagePreview = imagePreview {
+                                imagePreview
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width:200, height: 400)
+                                    .padding()
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                        }
+                        .listRowBackground(Color.clear)
+                        
+                        Section {
+                            Button {
+                                searchArtists()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "magnifyingglass")
+                                    Text("Search artists in Spotify")
+                                }
+                            }
+                            .foregroundStyle(Theme(colorScheme).textColor)
+                            .padding()
+                            .background(.green)
+                            .clipShape(Capsule())
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                        .listRowBackground(Color.clear)
+                        
+                        Section {
+                            // Extracted Artist List
+                            if artists.isEmpty {
+                                Text("No artists found.")
+                            } else {
+                                List {
+                                    ForEach(artists, id: \.self) {
+                                        Text("\($0)")
+                                    }
+                                    .onDelete(perform: removeArtist)
+                                }
+                            }
+                        } header: {
+                            Text("Result:")
+                        }
+                    }
                 }
-                
+                .scrollContentBackground(.hidden)
             }
-            .scrollContentBackground(.hidden)
-        }
-        .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea())
-        .onChange(of: pickerItem, initial: true) {
-            processPickerItem()
-        }
-        .alert(item: $alertItem) { alert in
-            Alert(title: alert.title, message: alert.message)
-        }
-        
-    }
-    
-    @ViewBuilder
-    func destinationView() -> some View {
-        switch selection {
-        case 1:
-            ArtistSearchResultsListView(spotify:spotify, artistsSearchResults: artistSearchResults)
-        default:
-            EmptyView()
+            .navigationDestination(isPresented: $shouldNavigate) {
+                ArtistSearchResultsListView(spotify:spotify, artistsSearchResults: artistSearchResults)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea())
+            .onChange(of: pickerItem, initial: true) {
+                processPickerItem()
+            }
+            .alert(item: $alertItem) { alert in
+                Alert(title: alert.title, message: alert.message)
+            }
+            
+            if searching {
+                ProgressView("Searching...", value: Double(artistSearchResults.count), total: Double(artists.count))
+                    .progressViewStyle(.circular)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
+            }
+            
+            if loading {
+                ProgressView("Loading data...")
+                    .progressViewStyle(.circular)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
+            }
         }
     }
     
@@ -124,6 +130,7 @@ struct ArtistImageSearchView: View {
             guard let data = try? await pickerItem?.loadTransferable(type: Data.self),
                   let uiImage = UIImage(data: data) else { return }
             
+            self.loading = true
             // Set image preview and perform text recognition
             selectedImage = uiImage
             imagePreview = Image(uiImage: uiImage)
@@ -165,7 +172,7 @@ struct ArtistImageSearchView: View {
                             .filter { !$0.isEmpty }
                             .removingDuplicates()
                     )
-                    print(artists)
+                    print(self.artists)
                 }
             }
         }
@@ -177,6 +184,7 @@ struct ArtistImageSearchView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try requestHandler.perform([request])
+                self.loading = false
             } catch {
                 print("Failed to perform text recognition: \(error)")
                 DispatchQueue.main.async {
@@ -200,7 +208,9 @@ struct ArtistImageSearchView: View {
             return
         }
         
-        var remainingSearches = artistNames.count
+        self.searching = true
+        var remainingSearches = Double(artistNames.count)
+        
         for artist in artistNames {
             let cancellable = spotify.api.search(
                 query: artist, categories: [.artist]
@@ -210,6 +220,7 @@ struct ArtistImageSearchView: View {
                     receiveCompletion: { completion in
                         remainingSearches -= 1
                         if remainingSearches == 0 {
+                            self.searching = false
                             self.shouldNavigate = true
                         }
                         if case .failure(let error) = completion {
@@ -221,8 +232,10 @@ struct ArtistImageSearchView: View {
                     },
                     receiveValue: { searchResults in
                         if let artist = searchResults.artists?.items.first {
-                            print("Add artist: \(artist.name)")
-                            self.artistSearchResults.append(ArtistSearchResult(artist: artist))
+                            // Check for duplicates after search
+                            if !self.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
+                                self.artistSearchResults.append(ArtistSearchResult(artist: artist))
+                            }
                         }
                     }
                 )

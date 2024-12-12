@@ -4,9 +4,10 @@ import SpotifyWebAPI
 
 struct ArtistCellView: View {
     @ObservedObject var spotify: Spotify
+    @Binding var artistSearchResult: ArtistSearchResult
+
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State var artistSearchResult: ArtistSearchResult
     
     let placeholderImage = Image(.spotifyLogoGreen)
 
@@ -66,10 +67,10 @@ struct ArtistCellView: View {
     }()
     
     return List {
-        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
-        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
-        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
-        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
     }
 }
 

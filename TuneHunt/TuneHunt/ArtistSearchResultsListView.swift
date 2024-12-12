@@ -33,8 +33,8 @@ struct ArtistSearchResultsListView: View {
                         .frame(alignment: .trailing)
                         .padding(8)
                     
-                    List(artistsSearchResults, id: \.id) { artistSearchResult in
-                        ArtistCellView(spotify: spotify, artistSearchResult: artistSearchResult)
+                    List($artistsSearchResults, id: \.id) { $artistSearchResult in
+                        ArtistCellView(spotify: spotify, artistSearchResult: $artistSearchResult)
                     }
                     .navigationTitle("Search Results")
                 } header: {
