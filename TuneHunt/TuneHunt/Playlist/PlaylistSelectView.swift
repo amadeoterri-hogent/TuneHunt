@@ -80,7 +80,9 @@ struct PlaylistSelectView: View {
                     .foregroundStyle(Theme(colorScheme).textColor)
             }
             .sheet(isPresented: $shouldCreatePlaylist) {
-                PlaylistCreateView(spotify: spotify)
+                PlaylistCreateView(spotify: spotify, onPlaylistCreated: { newPlaylist in
+                    playlists.insert(newPlaylist, at: 0)
+                })
             }
         }
         .onAppear(perform: retrievePlaylists)

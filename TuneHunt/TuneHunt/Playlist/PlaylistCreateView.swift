@@ -14,6 +14,8 @@ struct PlaylistCreateView: View {
     
     @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
     
+    var onPlaylistCreated: ((Playlist<PlaylistItemsReference>) -> Void)?
+        
     var body: some View {
         VStack {
             Form {
@@ -87,8 +89,23 @@ struct PlaylistCreateView: View {
                     }
                 },
                 receiveValue: { playlist in
-                    self.createdPlaylist = playlist
-                    print("Created playlist:", playlist)
+                    // Create a new Playlist<PlaylistItemsReference>
+                    let playlistReference = Playlist<PlaylistItemsReference>(
+                        name: playlist.name,
+                        items: PlaylistItemsReference(href: playlist.items.href, total: 0),
+                        owner: playlist.owner,
+                        isPublic: playlist.isPublic,
+                        isCollaborative: playlist.isCollaborative,
+                        description: playlist.description,
+                        snapshotId: playlist.snapshotId,
+                        externalURLs: playlist.externalURLs,
+                        followers: playlist.followers,
+                        href: playlist.href,
+                        id: playlist.id,
+                        uri: playlist.uri,
+                        images: playlist.images
+                    )
+                    onPlaylistCreated?(playlistReference)
                 }
             )
     }
