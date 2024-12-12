@@ -37,7 +37,7 @@ struct MenuListItemCell: View {
 }
 
 #Preview {
-    var menuItem: MenuItem = MenuItem(selection: 1,
+    let menuItem: MenuItem = MenuItem(selection: 1,
              imageSystemName: "person",
              listItemTitle: "Top tracks from single artist")
     

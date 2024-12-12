@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var showGrid = false
@@ -26,7 +26,7 @@ struct MenuView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                ProfileBarView(spotify:spotify)
+                ProfileBarView()
                 
                 HStack {
                     Text("Build playlist")
@@ -52,9 +52,9 @@ struct MenuView: View {
                 .padding(.top)
 
                 if !showGrid {
-                    MenuListView(spotify: spotify, menuItems: menuItems)
+                    MenuListView(menuItems: menuItems)
                 } else {
-                    MenuGridView(spotify: spotify, menuItems: menuItems)
+                    MenuGridView(menuItems: menuItems)
                 }
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
@@ -79,6 +79,7 @@ struct MenuView: View {
         return spotify
     }()
     
-    return MenuView(spotify: spotify)
+    return MenuView()
+        .environmentObject(spotify)
 }
 

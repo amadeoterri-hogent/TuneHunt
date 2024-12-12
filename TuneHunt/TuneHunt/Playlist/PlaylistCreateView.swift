@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct PlaylistCreateView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
 
@@ -118,5 +118,6 @@ struct PlaylistCreateView: View {
         return spotify
     }()
         
-    return PlaylistCreateView(spotify: spotify)
+    return PlaylistCreateView()
+        .environmentObject(spotify)
 }

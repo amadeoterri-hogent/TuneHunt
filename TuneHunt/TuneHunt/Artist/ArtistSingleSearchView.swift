@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct ArtistSingleSearchView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
 
     @State var artists: [Artist] = []
@@ -82,7 +82,7 @@ struct ArtistSingleSearchView: View {
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
         .navigationDestination(isPresented: $shouldNavigate) {
-        PlaylistSelectView(spotify: spotify, artists: spotifyArtists)
+        PlaylistSelectView(artists: spotifyArtists)
         }
     }
     
@@ -95,7 +95,7 @@ struct ArtistSingleSearchView: View {
             )
         }
         
-        guard let userURI = spotify.currentUser?.uri else {
+        guard spotify.currentUser?.uri != nil else {
             self.alert = AlertItem(
                 title: "User not found",
                 message: "Please make sure you are logged in."
@@ -140,5 +140,6 @@ struct ArtistSingleSearchView: View {
         return spotify
     }()
         
-    return ArtistSingleSearchView(spotify: spotify)
+    ArtistSingleSearchView()
+        .environmentObject(spotify)
 }

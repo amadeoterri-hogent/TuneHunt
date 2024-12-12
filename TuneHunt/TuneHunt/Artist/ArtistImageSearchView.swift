@@ -7,7 +7,7 @@ import Vision
 import NaturalLanguage
 
 struct ArtistImageSearchView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var pickerItem: PhotosPickerItem? = nil
@@ -93,7 +93,7 @@ struct ArtistImageSearchView: View {
                 .scrollContentBackground(.hidden)
             }
             .navigationDestination(isPresented: $shouldNavigate) {
-                ArtistSearchResultsListView(spotify:spotify, artistsSearchResults: artistSearchResults)
+                ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
@@ -257,10 +257,6 @@ struct ArtistImageSearchView: View {
         return spotify
     }()
     
-    let artists = [
-        ArtistSearchResult(artist: .pinkFloyd),
-        ArtistSearchResult(artist: .radiohead)
-    ]
-    
-    return ArtistImageSearchView(spotify: spotify)
+    ArtistImageSearchView()
+        .environmentObject(spotify)
 }

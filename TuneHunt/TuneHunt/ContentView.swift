@@ -12,10 +12,10 @@ struct ContentView: View {
     var body: some View {
         VStack() {
             if (!spotify.isAuthorized) {
-                LoginView(spotify: spotify)
+                LoginView()
                     .onOpenURL(perform: handleURL(_:))
             } else {
-                MenuView(spotify: spotify)
+                MenuView()
             }
         }
         .accentColor(Theme(colorScheme).textColor)

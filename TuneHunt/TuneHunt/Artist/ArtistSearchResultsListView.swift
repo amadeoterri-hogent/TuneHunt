@@ -4,7 +4,7 @@ import Combine
 
 
 struct ArtistSearchResultsListView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State var artistsSearchResults: [ArtistSearchResult]
@@ -34,7 +34,7 @@ struct ArtistSearchResultsListView: View {
                         .padding(8)
                     
                     List($artistsSearchResults, id: \.id) { $artistSearchResult in
-                        ArtistCellView(spotify: spotify, artistSearchResult: $artistSearchResult)
+                        ArtistCellView(artistSearchResult: $artistSearchResult)
                     }
                     .navigationTitle("Search Results")
                 } header: {
@@ -70,7 +70,7 @@ struct ArtistSearchResultsListView: View {
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .navigationDestination(isPresented: $shouldNavigate) {
-            PlaylistSelectView(spotify: spotify, artists: spotifyArtists)
+            PlaylistSelectView(artists: spotifyArtists)
         }
         
     }
@@ -89,7 +89,10 @@ struct ArtistSearchResultsListView: View {
         ArtistSearchResult(artist: .radiohead)
     ]
     
-    return ArtistSearchResultsListView(spotify: spotify, artistsSearchResults: artists)
+    ArtistSearchResultsListView(artistsSearchResults: artists)
+        .environmentObject(spotify)
+
+
     
 }
 

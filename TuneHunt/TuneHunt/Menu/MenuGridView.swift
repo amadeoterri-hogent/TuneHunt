@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuGridView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var profileImage = Image(systemName: "person.crop.circle")
@@ -41,11 +41,11 @@ struct MenuGridView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            ArtistSingleSearchView(spotify:spotify)
+            ArtistSingleSearchView()
         case 2:
-            ArtistMultipleSearchView(spotify: spotify)
+            ArtistMultipleSearchView()
         case 3:
-            ArtistImageSearchView(spotify: spotify)
+            ArtistImageSearchView()
         case 4:
             EmptyView()
         default:
@@ -62,7 +62,7 @@ struct MenuGridView: View {
         return spotify
     }()
     
-    var menuItems: [MenuItem] = [
+    let menuItems: [MenuItem] = [
         MenuItem(selection: 1,
                  imageSystemName: "person",
                  listItemTitle: "Top tracks from single artist"),
@@ -77,6 +77,7 @@ struct MenuGridView: View {
                  listItemTitle: "Find artists from other playlist")
     ]
     
-    MenuGridView(spotify:spotify, menuItems: menuItems)
+    MenuGridView(menuItems: menuItems)
+        .environmentObject(spotify)
 }
 

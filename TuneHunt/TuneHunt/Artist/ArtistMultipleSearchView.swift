@@ -4,7 +4,7 @@ import Foundation
 import SpotifyWebAPI
 
 struct ArtistMultipleSearchView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var searchText: String = ""
@@ -45,8 +45,8 @@ struct ArtistMultipleSearchView: View {
                                         searchText.append(textFromPasteboard)
                                     }
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
+                                
+                                Spacer()
                                                     
                                 Button {
                                 } label: {
@@ -59,13 +59,8 @@ struct ArtistMultipleSearchView: View {
                                     artistsSearch = ""
                                     artists = []
                                 }
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-
                             }
-                            
                         }
-                        
-
                     } header: {
                         Text("Enter Artists Here:")
                     }
@@ -80,7 +75,7 @@ struct ArtistMultipleSearchView: View {
                         .onChange(of: selectedSeparator, initial: true) {
                             splitArtists()
                         }
-                        
+
                     } header: {
                         Text("Select a seperator:")
                     }
@@ -93,7 +88,6 @@ struct ArtistMultipleSearchView: View {
                             HStack {
                                 Image(systemName: "magnifyingglass")
                                 Text("Search artists in Spotify")
-                                
                             }
                         }
                         .foregroundStyle(Theme(colorScheme).textColor)
@@ -101,6 +95,7 @@ struct ArtistMultipleSearchView: View {
                         .background(.green)
                         .clipShape(Capsule())
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .disabled(artists.isEmpty)
                     }
                     .listRowBackground(Color.clear)
                     
@@ -127,7 +122,7 @@ struct ArtistMultipleSearchView: View {
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
             .navigationDestination(isPresented: $shouldNavigate) {
-                ArtistSearchResultsListView(spotify: spotify, artistsSearchResults: artistSearchResults)
+                ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
             }
             .alert(item: $alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)
@@ -232,6 +227,6 @@ struct ArtistMultipleSearchView: View {
         return spotify
     }()
     
-    return ArtistMultipleSearchView(spotify:spotify)
-    
+    ArtistMultipleSearchView()
+        .environmentObject(spotify)
 }

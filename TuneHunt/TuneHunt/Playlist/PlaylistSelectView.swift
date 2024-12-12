@@ -6,8 +6,7 @@ import SpotifyExampleContent
 
 
 struct PlaylistSelectView: View {
-    @ObservedObject var spotify: Spotify
-
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var alert: AlertItem? = nil
@@ -22,16 +21,14 @@ struct PlaylistSelectView: View {
     
     @State var artists: [Artist] = []
     
-    init(spotify: Spotify, artists: [Artist]) {
+    init(artists: [Artist]) {
         self.artists = artists
-        self.spotify = spotify
     }
     
     /// Used only by the preview provider to provide sample data.
-    fileprivate init(spotify: Spotify,samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
+    fileprivate init(samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
         self._playlists = State(initialValue: samplePlaylists)
         self.artists = sampleArtists
-        self.spotify = spotify
     }
     
     var body: some View {
@@ -50,7 +47,7 @@ struct PlaylistSelectView: View {
 
             List {
                 ForEach(playlists, id: \.uri) { playlist in
-                    PlaylistCellView(spotify: spotify, shouldNavigate: $shouldNavigate, selectedPlaylist: $selectedPlaylist, playlist: playlist)
+                    PlaylistCellView(shouldNavigate: $shouldNavigate, selectedPlaylist: $selectedPlaylist, playlist: playlist)
                 }
             }
             .scrollContentBackground(.hidden)
@@ -61,9 +58,7 @@ struct PlaylistSelectView: View {
         .foregroundStyle(Theme(colorScheme).textColor)
         .navigationDestination(isPresented: $shouldNavigate) {
             if let playlist = selectedPlaylist {
-                FinishView(spotify:spotify, playlist: playlist, artists: artists)
-            } else {
-                EmptyView()
+                FinishView(playlist: playlist, artists: artists)
             }
         }
         .alert(item: $alert) { alert in
@@ -80,7 +75,7 @@ struct PlaylistSelectView: View {
                     .foregroundStyle(Theme(colorScheme).textColor)
             }
             .sheet(isPresented: $shouldCreatePlaylist) {
-                PlaylistCreateView(spotify: spotify, onPlaylistCreated: { newPlaylist in
+                PlaylistCreateView(onPlaylistCreated: { newPlaylist in
                     playlists.insert(newPlaylist, at: 0)
                 })
             }
@@ -142,6 +137,6 @@ struct PlaylistSelectView: View {
         .pinkFloyd,.radiohead
     ]
     
-    return PlaylistSelectView(spotify: spotify, samplePlaylists: playlists, sampleArtists: artists)
-    
+    return PlaylistSelectView(samplePlaylists: playlists, sampleArtists: artists)
+        .environmentObject(spotify)
 }

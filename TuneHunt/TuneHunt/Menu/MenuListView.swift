@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuListView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var menuImage = Image(.recordPlayer)
@@ -32,11 +32,11 @@ struct MenuListView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            ArtistSingleSearchView(spotify:spotify)
+            ArtistSingleSearchView()
         case 2:
-            ArtistMultipleSearchView(spotify:spotify)
+            ArtistMultipleSearchView()
         case 3:
-            ArtistImageSearchView(spotify:spotify)
+            ArtistImageSearchView()
         case 4:
             // TODO: build from other playlist
             EmptyView()
@@ -53,7 +53,7 @@ struct MenuListView: View {
         return spotify
     }()
     
-    var menuItems: [MenuItem] = [
+    let menuItems: [MenuItem] = [
         MenuItem(selection: 1,
                  imageSystemName: "person",
                  listItemTitle: "Top tracks from single artist"),
@@ -68,5 +68,6 @@ struct MenuListView: View {
                  listItemTitle: "Find artists from other playlist")
     ]
     
-    MenuListView(spotify: spotify, menuItems: menuItems)
+    MenuListView(menuItems: menuItems)
+        .environmentObject(spotify)
 }

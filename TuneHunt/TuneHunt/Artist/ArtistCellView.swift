@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct ArtistCellView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Binding var artistSearchResult: ArtistSearchResult
 
     @State private var didRequestImage = false
@@ -58,7 +58,7 @@ struct ArtistCellView: View {
 }
 
 #Preview {
-    var artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
+    let artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
     
     let spotify: Spotify = {
         let spotify = Spotify()
@@ -66,11 +66,13 @@ struct ArtistCellView: View {
         return spotify
     }()
     
-    return List {
-        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(spotify: spotify, artistSearchResult: .constant(artistSearchResult))
+    List {
+        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
     }
+    .environmentObject(spotify)
+
 }
 

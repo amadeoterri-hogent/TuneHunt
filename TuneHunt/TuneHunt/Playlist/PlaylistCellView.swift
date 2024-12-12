@@ -4,7 +4,7 @@ import Foundation
 import SpotifyWebAPI
 
 struct PlaylistCellView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Binding var shouldNavigate: Bool
     @Binding var selectedPlaylist: Playlist<PlaylistItems>?
 

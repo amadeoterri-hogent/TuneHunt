@@ -2,8 +2,8 @@ import SwiftUI
 import SpotifyWebAPI
 
 struct LoginView: View {
-    @ObservedObject var spotify: Spotify
-    
+    @EnvironmentObject var spotify: Spotify
+
     var body: some View {
         ZStack {
             Image(.login)
@@ -51,5 +51,7 @@ struct LoginView: View {
         return spotify
     }()
     
-    return LoginView(spotify: spotify)
+    LoginView()
+        .environmentObject(spotify)
+
 }

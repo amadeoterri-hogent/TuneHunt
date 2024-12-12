@@ -7,7 +7,7 @@ import Foundation
 // TODO: Skip track on error and print after which ones didn't succeed
 // Because now I get error message with a lot of tracks but the tracks were added to the playlist
 struct FinishView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State var tracks: [Track] = []
@@ -189,7 +189,9 @@ extension Array {
         .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
     ]
 
-    return FinishView(spotify:spotify, tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
+    FinishView(tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
+        .environmentObject(spotify)
+
     
 }
 

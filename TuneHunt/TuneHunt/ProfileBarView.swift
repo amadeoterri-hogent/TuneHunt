@@ -4,14 +4,14 @@ import Foundation
 import SpotifyWebAPI
 
 struct ProfileBarView: View {
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @State private var profileImage = Image(systemName: "person.crop.circle")
     @State private var loadImageCancellable: AnyCancellable? = nil
 
     var body: some View {
-        if let user = spotify.currentUser {
+        if spotify.currentUser != nil {
             HStack {
                 Button {
                     spotify.api.authorizationManager.deauthorize()
@@ -78,5 +78,6 @@ struct ProfileBarView: View {
         return spotify
     }()
     
-    return ProfileBarView(spotify: spotify)
+    ProfileBarView()
+        .environmentObject(spotify)
 }
