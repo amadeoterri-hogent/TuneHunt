@@ -111,6 +111,7 @@ struct FinishView: View {
                 // Handle artists without a URI (optional improvement)
                 remainingRequests -= 1
                 if remainingRequests == 0 {
+                    self.tracks = self.tracks.removingDuplicates()
                     self.isSearching = false
                 }
             }

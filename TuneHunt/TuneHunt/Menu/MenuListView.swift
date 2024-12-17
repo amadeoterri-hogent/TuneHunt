@@ -38,8 +38,7 @@ struct MenuListView: View {
         case 3:
             ArtistImageSearchView()
         case 4:
-            // TODO: build from other playlist
-            EmptyView()
+            PlaylistSearchArtistsView()
         default:
             EmptyView()
         }

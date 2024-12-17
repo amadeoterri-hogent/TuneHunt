@@ -47,7 +47,7 @@ struct MenuGridView: View {
         case 3:
             ArtistImageSearchView()
         case 4:
-            EmptyView()
+            PlaylistSearchArtistsView()
         default:
             EmptyView()
         }

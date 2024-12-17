@@ -10,7 +10,6 @@ struct PlaylistSelectView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var alert: AlertItem? = nil
-    @State private var playlists: [Playlist<PlaylistItemsReference>] = []
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var isLoadingPlaylists = false
     @State private var couldntLoadPlaylists = false
@@ -19,17 +18,14 @@ struct PlaylistSelectView: View {
     @State private var shouldCreatePlaylist: Bool = false
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
     
-    @State var artists: [Artist] = []
+    @State var playlists: [Playlist<PlaylistItemsReference>] = []
+    @Binding var artists: [Artist]
     
-    init(artists: [Artist]) {
-        self.artists = artists
-    }
-    
-    /// Used only by the preview provider to provide sample data.
-    fileprivate init(samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
-        self._playlists = State(initialValue: samplePlaylists)
-        self.artists = sampleArtists
-    }
+//    /// Used only by the preview provider to provide sample data.
+//    fileprivate init(samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
+//        self._playlists = State(initialValue: samplePlaylists)
+//        self.artists = sampleArtists
+//    }
     
     var body: some View {
         VStack {
@@ -137,6 +133,6 @@ struct PlaylistSelectView: View {
         .pinkFloyd,.radiohead
     ]
     
-    return PlaylistSelectView(samplePlaylists: playlists, sampleArtists: artists)
+    PlaylistSelectView(playlists: playlists, artists: .constant(artists))
         .environmentObject(spotify)
 }

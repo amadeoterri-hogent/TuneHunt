@@ -62,7 +62,7 @@ struct ArtistSingleSearchView: View {
                         List {
                             ForEach(artists, id: \.self) { artist in
                                 Button {
-                                    spotifyArtists.append(artist)
+                                    spotifyArtists = [artist]
                                     shouldNavigate = true
                                 } label: {
                                     Text("\(artist.name)")
@@ -82,7 +82,9 @@ struct ArtistSingleSearchView: View {
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
         .navigationDestination(isPresented: $shouldNavigate) {
-        PlaylistSelectView(artists: spotifyArtists)
+            if !spotifyArtists.isEmpty {
+                PlaylistSelectView(artists: $spotifyArtists)
+            }
         }
     }
     
@@ -104,8 +106,6 @@ struct ArtistSingleSearchView: View {
         }
         
         self.artists = []
-        
-        if self.nameArtist.isEmpty { return }
 
         print("searching with query '\(self.nameArtist)'")
         self.isSearching = true

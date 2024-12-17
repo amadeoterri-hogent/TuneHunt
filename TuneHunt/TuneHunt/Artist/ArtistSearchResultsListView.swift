@@ -70,7 +70,7 @@ struct ArtistSearchResultsListView: View {
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .navigationDestination(isPresented: $shouldNavigate) {
-            PlaylistSelectView(artists: spotifyArtists)
+            PlaylistSelectView(artists: $spotifyArtists)
         }
         
     }
