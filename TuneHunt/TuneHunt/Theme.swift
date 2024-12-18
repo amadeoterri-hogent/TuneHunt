@@ -11,6 +11,10 @@ struct Theme {
         colorScheme == .dark ? .white : .black
     }
     
+    var bgColor: Color {
+        colorScheme == .dark ? .black : .white
+    }
+    
     var primaryColor: Color {
         colorScheme == .dark ? .darkPrimaryColor : .lightPrimaryColor
     }
