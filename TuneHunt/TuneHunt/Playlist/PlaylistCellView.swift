@@ -5,6 +5,7 @@ import SpotifyWebAPI
 
 struct PlaylistCellView: View {
     @EnvironmentObject var spotify: Spotify
+    @Binding var isLoading: Bool
     @Binding var shouldNavigate: Bool
     @Binding var selectedPlaylist: Playlist<PlaylistItems>?
 
@@ -23,7 +24,7 @@ struct PlaylistCellView: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width:48,height: 48)
+                    .frame(width:48, height: 48)
                     .padding(.trailing, 4)
                 VStack {
                     Text("\(playlist.name)")
@@ -52,10 +53,12 @@ struct PlaylistCellView: View {
     }
     
     func loadPlaylist() {
+        self.isLoading = true
         self.loadPlaylistCancellable =  spotify.api.playlist(playlist)
             .receive(on: RunLoop.main)
             .sink(
                 receiveCompletion:{ _ in
+                    isLoading = false
                     shouldNavigate = true
                 },
                 receiveValue: { playlist in

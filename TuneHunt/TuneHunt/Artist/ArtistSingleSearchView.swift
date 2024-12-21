@@ -62,7 +62,7 @@ struct ArtistSingleSearchView: View {
                         .font(.title)
                         .opacity(0.6)
                         .foregroundColor(.secondary)
-                        .padding(.bottom, 96)
+                        .padding(.bottom, 48)
                 }
                 else {
                     List {

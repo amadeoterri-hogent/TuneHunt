@@ -8,103 +8,112 @@ import SpotifyExampleContent
 struct PlaylistSelectView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
+    @Binding var artists: [Artist]
     
-    @State private var alert: AlertItem? = nil
+    @State var playlists: [Playlist<PlaylistItemsReference>] = []
+    @State private var alertItem: AlertItem? = nil
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var isLoadingPlaylists = false
-    @State private var couldntLoadPlaylists = false
+    @State private var isLoading = false
     @State private var showingAlert = false
     @State private var shouldNavigate: Bool = false
     @State private var shouldCreatePlaylist: Bool = false
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
-    
-    @State var playlists: [Playlist<PlaylistItemsReference>] = []
-    @Binding var artists: [Artist]
-    
-//    /// Used only by the preview provider to provide sample data.
-//    fileprivate init(samplePlaylists: [Playlist<PlaylistItemsReference>], sampleArtists: [Artist]) {
-//        self._playlists = State(initialValue: samplePlaylists)
-//        self.artists = sampleArtists
-//    }
+
     
     var body: some View {
-        VStack {
-            Text(
-                """
-                Select a playlist to add the tracks or
-                create a new playlist
-                """
-            )
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top)
-            .padding(.horizontal, 24)
-
-            List {
-                ForEach(playlists, id: \.uri) { playlist in
-                    PlaylistCellView(shouldNavigate: $shouldNavigate, selectedPlaylist: $selectedPlaylist, playlist: playlist)
+        ZStack {
+            VStack {
+                Text("Select a Playlist")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                if !playlists.isEmpty {
+                    Text("Tap a playlist to proceed")
+                        .font(.caption2)
+                        .foregroundColor(Theme(colorScheme).textColor)
+                        .opacity(0.4)
+                        .padding(.horizontal)
+                        .padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    List {
+                        ForEach(playlists, id: \.uri) { playlist in
+                            PlaylistCellView(isLoading: $isLoading, shouldNavigate: $shouldNavigate, selectedPlaylist: $selectedPlaylist, playlist: playlist)
+                        }
+                        .listRowBackground(Color.clear)
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                }
+                else {
+                    Text("No results")
+                        .frame(maxHeight: .infinity, alignment: .center)
+                        .foregroundColor(Theme(colorScheme).textColor)
+                        .font(.title)
+                        .opacity(0.6)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 48)
                 }
             }
-            .scrollContentBackground(.hidden)
+            .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea())
+            .foregroundStyle(Theme(colorScheme).textColor)
+            .navigationDestination(isPresented: $shouldNavigate) {
+                if let playlist = selectedPlaylist {
+                    FinishView(playlist: playlist, artists: artists)
+                }
+            }
+            .alert(item: $alertItem) { alert in
+                Alert(title: alert.title, message: alert.message)
+            }
+            .toolbar {
+                Button {
+                    shouldCreatePlaylist = true
+                } label: {
+                    Image(systemName: "plus" )
+                        .font(.title2)
+                        .frame(width:48, height: 48)
+                        .foregroundStyle(Theme(colorScheme).textColor)
+                }
+                .sheet(isPresented: $shouldCreatePlaylist) {
+                    PlaylistCreateView(onPlaylistCreated: { newPlaylist in
+                        playlists.insert(newPlaylist, at: 0)
+                    })
+                }
+            }
+            .onAppear(perform: retrievePlaylists)
             
-        }
-        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea())
-        .foregroundStyle(Theme(colorScheme).textColor)
-        .navigationDestination(isPresented: $shouldNavigate) {
-            if let playlist = selectedPlaylist {
-                FinishView(playlist: playlist, artists: artists)
+            if isLoading || isLoadingPlaylists {
+                ProgressView("Loading...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
             }
         }
-        .alert(item: $alert) { alert in
-            Alert(title: alert.title, message: alert.message)
-        }
-        .navigationTitle("Your Playlists")
-        .toolbar {
-            Button {
-                shouldCreatePlaylist = true
-            } label: {
-                Image(systemName: "plus" )
-                    .font(.title2)
-                    .frame(width:48,height: 48)
-                    .foregroundStyle(Theme(colorScheme).textColor)
-            }
-            .sheet(isPresented: $shouldCreatePlaylist) {
-                PlaylistCreateView(onPlaylistCreated: { newPlaylist in
-                    playlists.insert(newPlaylist, at: 0)
-                })
-            }
-        }
-        .onAppear(perform: retrievePlaylists)
     }
     
     
     func retrievePlaylists() {
         // Don't try to load any playlists if we're in preview mode.
         if ProcessInfo.processInfo.isPreviewing { return }
-        print("Retrieving playlists")
 
         self.isLoadingPlaylists = true
         self.playlists = []
         
         spotify.api.currentUserPlaylists(limit: 50)
-        // Gets all pages of playlists.
             .extendPages(spotify.api)
             .receive(on: RunLoop.main)
             .sink(
                 receiveCompletion: { completion in
-                    self.isLoadingPlaylists = false
-                    switch completion {
-                    case .finished:
-                        self.couldntLoadPlaylists = false
-                    case .failure(let error):
-                        self.couldntLoadPlaylists = true
-                        self.alert = AlertItem(
-                            title: "Couldn't Retrieve Playlists",
+                    if case .failure(let error) = completion {
+                        self.alertItem = AlertItem(
+                            title: "Couldn't Perform Search",
                             message: error.localizedDescription
                         )
                     }
+                    self.isLoadingPlaylists = false
                 },
                 receiveValue: { playlistsPage in
                     let playlists = playlistsPage.items
@@ -129,10 +138,12 @@ struct PlaylistSelectView: View {
         .thisIsSkinshape
     ]
     
+//    let playlists: [Playlist<PlaylistItemsReference>] = []
+
     let artists: [Artist] = [
         .pinkFloyd,.radiohead
     ]
     
-    PlaylistSelectView(playlists: playlists, artists: .constant(artists))
+    PlaylistSelectView(artists: .constant(artists), playlists: playlists)
         .environmentObject(spotify)
 }
