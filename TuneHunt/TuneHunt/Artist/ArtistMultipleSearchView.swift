@@ -7,7 +7,8 @@ struct ArtistMultipleSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var searchText: String = ""
+    @FocusState private var searchTextIsFocused: Bool
+    
     @State private var artistsSearch: String = ""
     @State var artists: [String] = []
     @State var artistSearchResults: [ArtistSearchResult] = []
@@ -16,72 +17,30 @@ struct ArtistMultipleSearchView: View {
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
     @State private var searching: Bool = false
-        
+    @State private var showPreview: Bool = false
+    
     let separators = ["Auto","Comma", "Space", "Newline"]
     let pasteboard = UIPasteboard.general
     
+    @State var searchText: String = ""
+    
     var body: some View {
         ZStack {
-            VStack {
-                Form {
-                    Section {
-                        VStack {
-                            TextEditor(text: $searchText)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                                .frame(height: 200)
-                                .onChange(of: searchText, initial: true) {
-                                    splitArtists()
-                                }
-                            
-                            HStack {
-                                Button {
-                                } label: {
-                                    Image(systemName: "list.clipboard")
-                                }
-                                .foregroundStyle(Theme(colorScheme).textColor)
-                                .onTapGesture {
-                                    if let textFromPasteboard = pasteboard.string {
-                                        searchText.append(textFromPasteboard)
-                                    }
-                                }
-                                
-                                Spacer()
-                                                    
-                                Button {
-                                } label: {
-                                    Image(systemName: "clear")
-                                }
-                                .foregroundStyle(Theme(colorScheme).textColor)
-                                .onTapGesture {
-                                    print("Text cleared")
-                                    searchText = ""
-                                    artistsSearch = ""
-                                    artists = []
-                                }
-                            }
+            ScrollView {
+                ZStack {
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            searchTextIsFocused = false
                         }
-                    } header: {
-                        Text("Enter Artists Here:")
-                    }
-                    
-                    Section {
-                        Picker("Separator", selection: $selectedSeparator) {
-                            ForEach(separators, id: \.self) {
-                                Text($0)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .onChange(of: selectedSeparator, initial: true) {
-                            splitArtists()
-                        }
-
-                    } header: {
-                        Text("Select a seperator:")
-                    }
-                    .listRowBackground(Color.clear)
-                    
-                    Section {
+                    VStack {
+                        
+                        Text("Enter artists")
+                            .font(.largeTitle)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.bottom, 24)
+                        
                         Button {
                             searchArtists()
                         } label: {
@@ -89,43 +48,102 @@ struct ArtistMultipleSearchView: View {
                                 Image(systemName: "magnifyingglass")
                                 Text("Search artists in Spotify")
                             }
+                            .frame(maxWidth: .infinity)
                         }
                         .foregroundStyle(Theme(colorScheme).textColor)
                         .padding()
-                        .background(.green)
+                        .background(.blue)
                         .clipShape(Capsule())
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .disabled(artists.isEmpty)
-                    }
-                    .listRowBackground(Color.clear)
-                    
-                    Section {
-                        if artists.isEmpty {
-                            Text("No artists added.")
-                        } else {
-                            List {
-                                ForEach(artists, id: \.self) {
-                                    Text("\($0)")
-                                }
-                                .onDelete(perform: removeArtist)
+                        
+                        TextEditor(text: $searchText)
+                            .contentMargins(12)
+                            .focused($searchTextIsFocused)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .frame(height: 480)
+                            .cornerRadius(12)
+                            .onChange(of: searchText, initial: true) {
+                                splitArtists()
                             }
+                            .padding(.top, 24)
+                    }
+                }
+            }
+            .toolbar {
+                Menu {
+                    Button {
+                        showPreview = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "eye")
+                            Text("Preview")
                         }
-                    } header: {
-                        Text("Result:")
                     }
                     
+                    Button {
+                        if let textFromPasteboard = pasteboard.string {
+                            searchText.append(textFromPasteboard)
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "list.clipboard")
+                            Text("Paste from clipboard")
+                        }
+                    }
+                    
+                    Button {
+                        searchText = ""
+                        artistsSearch = ""
+                        artists = []
+                    } label: {
+                        HStack {
+                            Image(systemName: "clear")
+                            Text("Clear text")
+                        }
+                    }
+                    
+                    Picker("Separator", selection: $selectedSeparator) {
+                        ForEach(separators, id: \.self) {
+                            Text($0)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: selectedSeparator, initial: false) {
+                        splitArtists()
+                    }
                 }
-                .padding()
-                .scrollContentBackground(.hidden)
+                label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .foregroundStyle(Theme(colorScheme).textColor)
             }
-            .navigationTitle("Enter artists")
+            .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea())
+                        //                .ignoresSafeArea()
+            )
             .navigationDestination(isPresented: $shouldNavigate) {
                 ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
             }
             .alert(item: $alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)
+            }
+            // TODO: Fix sheet with new view
+            .sheet(isPresented: $showPreview) {
+                if artists.isEmpty {
+                    Text("No artists added.")
+                    Spacer()
+                } else {
+                    List {
+                        ForEach(artists, id: \.self) {
+                            Text("\($0)")
+                                .listRowBackground(Color.clear)
+                                .foregroundStyle(Theme(colorScheme).textColor)
+                            
+                        }
+                        .onDelete(perform: removeArtist)
+                    }
+                    .listStyle(.plain)
+                }
             }
             
             if searching {
@@ -137,7 +155,9 @@ struct ArtistMultipleSearchView: View {
                     .shadow(radius: 10)
             }
         }
+        
     }
+    //    }
     
     private func splitArtists() -> Void {
         let separator: Character
@@ -145,9 +165,9 @@ struct ArtistMultipleSearchView: View {
         switch selectedSeparator {
         case "Auto":
             artistsSearch = artistsSearch
-                            .replacingOccurrences(of: "•", with: ",")
-                            .replacingOccurrences(of: "-", with: ",")
-                            .replacingOccurrences(of: "\n", with: ",")
+                .replacingOccurrences(of: "•", with: ",")
+                .replacingOccurrences(of: "-", with: ",")
+                .replacingOccurrences(of: "\n", with: ",")
             separator = ","
         case "Comma":
             separator = ","
@@ -221,7 +241,7 @@ struct ArtistMultipleSearchView: View {
 }
 
 #Preview {
-     let spotify: Spotify = {
+    let spotify: Spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify

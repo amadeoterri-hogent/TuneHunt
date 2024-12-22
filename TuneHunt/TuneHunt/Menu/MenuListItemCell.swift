@@ -22,7 +22,6 @@ struct MenuListItemCell: View {
                     .foregroundStyle(Theme(colorScheme).textColor)
                 
                 Text(menuItem.listItemTitle)
-                    .font(.title3)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -11,16 +11,16 @@ struct MenuView: View {
     var menuItems: [MenuItem] = [
         MenuItem(selection: 1,
                  imageSystemName: "person",
-                 listItemTitle: "Top tracks from single artist"),
+                 listItemTitle: "From top tracks by one artist"),
         MenuItem(selection: 2,
                  imageSystemName: "person.3",
-                 listItemTitle: "Top tracks from multiple artists"),
+                 listItemTitle: "From top tracks by multiple artists"),
         MenuItem(selection: 3,
                  imageSystemName: "photo",
-                 listItemTitle: "Find artists from image"),
+                 listItemTitle: "By finding artists from image"),
         MenuItem(selection: 4,
                  imageSystemName: "music.note.list",
-                 listItemTitle: "Find artists from other playlist")
+                 listItemTitle: "By finding artists from another playlist")
     ]
     
     var body: some View {

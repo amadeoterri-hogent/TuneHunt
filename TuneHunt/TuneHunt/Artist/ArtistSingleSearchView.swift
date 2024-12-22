@@ -42,6 +42,7 @@ struct ArtistSingleSearchView: View {
                                 }
                             }
                         )
+                        .submitLabel(.search)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 8)
                         .background(Color(.secondarySystemBackground))
