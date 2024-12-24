@@ -37,7 +37,6 @@ struct ArtistCellView: View {
     
     
     func loadImage() {
-        print("Searching image \(artistSearchResult.artist.name)")
         if self.didRequestImage { return }
         self.didRequestImage = true
         
@@ -54,7 +53,6 @@ struct ArtistCellView: View {
                 }
             )
     }
-    
 }
 
 #Preview {

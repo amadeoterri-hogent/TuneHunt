@@ -6,7 +6,7 @@ struct MenuView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var showGrid = false
+    @State private var menuStyle: MenuStyle = .list
     
     var menuItems: [MenuItem] = [
         MenuItem(selection: 1,
@@ -26,36 +26,26 @@ struct MenuView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                ProfileBarView()
-                
                 HStack {
                     Text("Build playlist")
                         .font(.largeTitle)
                         .bold()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    HStack {
-                        Image(systemName:"text.justify")
-                        Toggle("", isOn: $showGrid)
-                            .labelsHidden()
-                            .tint(.clear)
-                        Image(systemName:"square.grid.3x3")
-                    }
-                    .frame(alignment: .trailing)
-                    .padding(.top, 4)
-                    .font(.caption2)
-                    .opacity(0.7)
                 }
                 .frame(height:48)
                 .lineLimit(1)
                 .padding(.horizontal)
                 .padding(.top)
 
-                if !showGrid {
+                switch menuStyle {
+                case .list:
                     MenuListView(menuItems: menuItems)
-                } else {
+                case .grid:
                     MenuGridView(menuItems: menuItems)
                 }
+            }
+            .toolbar {
+                MenuProfileBarView(menuStyle: $menuStyle)
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())

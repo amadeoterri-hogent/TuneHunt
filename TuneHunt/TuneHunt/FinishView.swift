@@ -5,7 +5,10 @@ import Foundation
 
 // TODO: Add back to home button
 // TODO: Skip track on error and print after which ones didn't succeed
-// Because now I get error message with a lot of tracks but the tracks were added to the playlist
+// TODO: Because now you get an error message with a lot of tracks but the tracks were added to the playlist
+// TODO: lazy load list
+// TODO: card view playlist and playlist name
+// TODO: play playlist?
 struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
@@ -21,43 +24,42 @@ struct FinishView: View {
     
     var body: some View {
         VStack {
-            Form {
-                Section {
-                    Button {
-                        finish()
-                    } label: {
-                        Text("Add tracks to playlist")
-                    }
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                    .padding()
-                    .background(.green)
-                    .clipShape(Capsule())
+            Text("Complete Playlist")
+                .font(.largeTitle)
+                .bold()
+                .padding(.horizontal)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text("Playlist: \(playlist.name)")
+            Text("Number of artists: \(artists.count) ")
+            
+            Button {
+                finish()
+            } label: {
+                Text("Add tracks to playlist")
+            }
+            .foregroundStyle(Theme(colorScheme).textColor)
+            .padding()
+            .background(.green)
+            .clipShape(Capsule())
+            .frame(maxWidth: .infinity, alignment: .center)
+            
+            
+            if isSearching {
+                ProgressView("Searching top tracks...")
                     .frame(maxWidth: .infinity, alignment: .center)
-                }
-                .listRowBackground(Color.clear)
-                
-                Section {
-                    Text("Playlist: \(playlist.name)")
-                    Text("Number of artists: \(artists.count) ")
-                }
-                
-                Section {
-                    if isSearching {
-                        ProgressView("Searching top tracks...")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    } else {
-                        List {
-                            ForEach(tracks, id: \.self) { track in
-                                Text("\(track.name)")
-                            }
-                            .onDelete(perform: removeTrack)
+            } else {
+                List {
+                    ForEach(tracks, id: \.self) { track in
+                        if let artist = track.artists?[0] {
+                            Text("\(artist.name) - \(track.name)")
+                                .listRowBackground(Color.clear)
                         }
                     }
-                } header: {
-                    Text("Track names:")
+                    .onDelete(perform: removeTrack)
                 }
+                .listStyle(.plain)
             }
-            .scrollContentBackground(.hidden)
         }
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
@@ -102,8 +104,11 @@ struct FinishView: View {
                             }
                         },
                         receiveValue: { searchResults in
-                            self.tracks.append(contentsOf: searchResults)
-                            print("received \(self.tracks.count) tracks")
+                            for track in searchResults {
+                                if !self.tracks.contains(where: { $0.id == track.id }) {
+                                    self.tracks.append(track)
+                                }
+                            }
                         }
                     )
                     .store(in: &searchCancellables)
@@ -174,7 +179,7 @@ extension Array {
 }
 
 #Preview {
-
+    
     let spotify: Spotify = {
         let spotify = Spotify()
         //        spotify.isAuthorized = false
@@ -189,10 +194,10 @@ extension Array {
     let tracks: [Track] = [
         .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
     ]
-
+    
     FinishView(tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
         .environmentObject(spotify)
-
+    
     
 }
 

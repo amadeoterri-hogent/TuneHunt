@@ -3,47 +3,48 @@ import Combine
 import Foundation
 import SpotifyWebAPI
 
-struct ProfileBarView: View {
+struct MenuProfileBarView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
+    @Binding var menuStyle: MenuStyle
     
     @State private var profileImage = Image(systemName: "person.crop.circle")
     @State private var loadImageCancellable: AnyCancellable? = nil
-
+    
     var body: some View {
         if spotify.currentUser != nil {
-            HStack {
+            Menu {
+                Picker("Menu layout", selection: $menuStyle) {
+                    ForEach(MenuStyle.allCases) { style in
+                        Label(style.label, systemImage: style.systemImage)
+                            .tag(style)
+                    }
+                }
+                
+                Divider()
+                
                 Button {
+                
+                } label: {
+                    Label("Settings", systemImage: "gear")
+                }
+                
+                Button (role: .destructive){
                     spotify.api.authorizationManager.deauthorize()
                 } label: {
-                    profileImage
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(Circle())
-                        .frame(width: 48, height: 48)
+                    Label("Logout", systemImage: "rectangle.portrait.and.arrow.forward")
+                        .foregroundStyle(.red)
                 }
-                .foregroundStyle(Theme(colorScheme).textColor)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing)
+                
+            } label: {
+                profileImage
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(Circle())
+                    .frame(width: 48, height: 48)
             }
+            .foregroundStyle(Theme(colorScheme).textColor)
             .onAppear(perform: loadProfileImage)
-        }
-        else {
-            HStack {
-                Button {
-                    spotify.api.authorizationManager.deauthorize()
-                } label: {
-                    profileImage
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(Circle())
-                        .frame(width: 48, height: 48)
-                }
-                .foregroundStyle(Theme(colorScheme).textColor)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing)
-            }
-            .padding(.bottom)
         }
     }
     
@@ -78,6 +79,6 @@ struct ProfileBarView: View {
         return spotify
     }()
     
-    ProfileBarView()
+    MenuProfileBarView(menuStyle: .constant(.list))
         .environmentObject(spotify)
 }

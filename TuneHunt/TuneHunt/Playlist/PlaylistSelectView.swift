@@ -17,7 +17,7 @@ struct PlaylistSelectView: View {
     @State private var isLoading = false
     @State private var showingAlert = false
     @State private var shouldNavigate: Bool = false
-    @State private var shouldCreatePlaylist: Bool = false
+    @State private var showCreatePlaylist: Bool = false
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
 
     
@@ -71,14 +71,14 @@ struct PlaylistSelectView: View {
             }
             .toolbar {
                 Button {
-                    shouldCreatePlaylist = true
+                    showCreatePlaylist = true
                 } label: {
                     Image(systemName: "plus" )
                         .font(.title2)
                         .frame(width:48, height: 48)
                         .foregroundStyle(Theme(colorScheme).textColor)
                 }
-                .sheet(isPresented: $shouldCreatePlaylist) {
+                .sheet(isPresented: $showCreatePlaylist) {
                     PlaylistCreateView(onPlaylistCreated: { newPlaylist in
                         playlists.insert(newPlaylist, at: 0)
                     })

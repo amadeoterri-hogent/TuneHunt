@@ -8,12 +8,11 @@ struct PlaylistSearchArtistsView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var playlists: [Playlist<PlaylistItemsReference>] = []
-    @State private var isSearchingPlaylists = false
-    @State private var isSearchingArtists = false
+    @State private var isSearching = false
     @State private var namePlaylist: String = ""
     @State private var shouldNavigate = false
     @State var artistsSearchResults: [ArtistSearchResult] = []
-    @State private var alert: AlertItem? = nil
+    @State private var alertItem: AlertItem? = nil
     @State private var searchCancellable: AnyCancellable? = nil
     @State private var artistsCancellables: Set<AnyCancellable> = []
     @State private var loadPlaylistCancellable: AnyCancellable? = nil
@@ -21,92 +20,102 @@ struct PlaylistSearchArtistsView: View {
     var body: some View {
         ZStack {
             VStack {
-                Form {
-                    Section {
-                        TextField("Enter playlist name...",text: $namePlaylist)
-                    }
-                    
-                    Section {
-                        VStack {
-                            Button {
-                                isSearchingPlaylists = true
-                                searchPlaylist()
-                            } label: {
-                                HStack {
-                                    Image(systemName: "magnifyingglass")
-                                    Text("Search playlists in Spotify")
-                                }
-                            }
-                            .foregroundStyle(Theme(colorScheme).textColor)
-                            .padding()
-                            .background(.green)
-                            .clipShape(Capsule())
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            
-                            Text("Tap a playlist to proceed.")
-                                .font(.caption)
-                                .foregroundColor(Theme(colorScheme).textColor)
-                                .opacity(0.4)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                    
-                    Section {
-                        if playlists.isEmpty {
-                            if isSearchingPlaylists {
-                                ProgressView("Searching playlists...")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            }
-                            else {
-                                Text("No results")
-                                    .foregroundColor(Theme(colorScheme).textColor)
-                            }
-                        }
-                        else {
-                            List {
-                                ForEach(playlists, id: \.self) { playlist in
-                                    Button {
-                                        self.isSearchingArtists = true
-                                        findArtists(playlist:playlist)
-                                    } label: {
-                                        Text("\(playlist.name)")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    header: {
-                        Text("Result:")
-                    }
-                }
-                .scrollContentBackground(.hidden)
+                Text("Search For Playlist")
+                    .font(.largeTitle)
+                    .bold()
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 
+                HStack {
+                    TextField("Search playlist in spotify...",text: $namePlaylist, onCommit: searchPlaylist)
+                        .padding(.leading, 28)
+                        .overlay(
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                if !namePlaylist.isEmpty {
+                                    Button(action: {
+                                        self.namePlaylist = ""
+                                        self.playlists = []
+                                    }, label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.secondary)
+                                    })
+                                }
+                            }
+                        )
+                        .submitLabel(.search)
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
+
+                
+                Text("Tap a playlist to proceed")
+                    .font(.caption2)
+                    .foregroundColor(Theme(colorScheme).textColor)
+                    .opacity(0.4)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                
+                if playlists.isEmpty && !isSearching {
+                    Text("No results")
+                        .frame(maxHeight: .infinity, alignment: .center)
+                        .foregroundColor(Theme(colorScheme).textColor)
+                        .font(.title)
+                        .opacity(0.6)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 48)
+                }
+                else {
+                    List {
+                        ForEach(playlists, id: \.self) { playlist in
+                            Button {
+                                findArtists(playlist:playlist)
+                            } label: {
+                                Text("\(playlist.name)")
+                            }
+                            .listRowBackground(Color.clear)
+                        }
+                    }
+                    .listStyle(.plain)
+                    .padding()
+                }
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
             .foregroundStyle(Theme(colorScheme).textColor)
             .navigationDestination(isPresented: $shouldNavigate) {
-                ArtistSearchResultsListView(artistsSearchResults: artistsSearchResults)
+                if !artistsSearchResults.isEmpty {
+                    ArtistSearchResultsListView(artistsSearchResults: artistsSearchResults)
+                }
+            }
+            .alert(item: $alertItem) { alert in
+                Alert(title: alert.title, message: alert.message)
             }
             
-            if isSearchingArtists {
-                ProgressView("Searching artists...")
-                    .frame(maxWidth: .infinity, alignment: .center)
+            if isSearching {
+                ProgressView("Searching...")
+                    .progressViewStyle(.circular)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
             }
         }
     }
     
     func searchPlaylist() {
         if self.namePlaylist == "" {
-            self.alert = AlertItem(
+            self.alertItem = AlertItem(
                 title: "Couldn't search artist",
                 message: "Artist name is empty."
             )
         }
         
         guard spotify.currentUser?.uri != nil else {
-            self.alert = AlertItem(
+            self.alertItem = AlertItem(
                 title: "User not found",
                 message: "Please make sure you are logged in."
             )
@@ -114,7 +123,7 @@ struct PlaylistSearchArtistsView: View {
         }
         
         self.playlists = []
-        self.isSearchingPlaylists = true
+        self.isSearching = true
         
         self.searchCancellable = spotify.api.search(
             query: self.namePlaylist, categories: [.playlist]
@@ -122,9 +131,9 @@ struct PlaylistSearchArtistsView: View {
         .receive(on: RunLoop.main)
         .sink(
             receiveCompletion: { completion in
-                self.isSearchingPlaylists = false
+                self.isSearching = false
                 if case .failure(let error) = completion {
-                    self.alert = AlertItem(
+                    self.alertItem = AlertItem(
                         title: "Couldn't Perform Search",
                         message: error.localizedDescription
                     )
@@ -138,6 +147,7 @@ struct PlaylistSearchArtistsView: View {
     }
     
     func findArtists(playlist: Playlist<PlaylistItemsReference>) {
+        self.isSearching = true
         self.loadPlaylistCancellable =  spotify.api.playlistItems(playlist.uri)
             .extendPagesConcurrently(self.spotify.api)
             .receive(on: DispatchQueue.main)
@@ -147,45 +157,54 @@ struct PlaylistSearchArtistsView: View {
             )
     }
     
-    
     func addArtistsFromPlaylist(page: PlaylistItems) {
-        let playlistItems = page.items.map(\.item)
-        var remainingRequests = playlistItems.count
-        
+        let playlistItems = page.items.compactMap(\.item)
+        var remainingRequests = 0
+
         for playlistItem in playlistItems {
+            guard case .track(let track) = playlistItem else { continue }
             
-            guard let playlistItem = playlistItem else {
-                continue
-            }
-            
-            if case .track(let track) = playlistItem {
-                for artist in track.artists! {
-                    if !self.artistsSearchResults.contains(where: { $0.artist.id == artist.id }) {
-                        if let uri = artist.uri {
-                            spotify.api.artist(uri)
-                                .receive(on: RunLoop.main)
-                                .sink(
-                                    receiveCompletion: { completion in
-                                        if case .failure(let error) = completion {
-                                            self.alert = AlertItem(
-                                                title: "Couldn't Perform Search",
-                                                message: error.localizedDescription
-                                            )
-                                        }  
-                                    },
-                                    receiveValue: { artist in
-                                        self.artistsSearchResults.append(ArtistSearchResult(artist: artist))
-                                    }
+            for artist in track.artists ?? [] {
+                guard let uri = artist.uri,
+                      !self.artistsSearchResults.contains(where: { $0.artist.id == artist.id }) else { continue }
+                
+                remainingRequests += 1
+
+                spotify.api.artist(uri)
+                    .receive(on: RunLoop.main)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                self.alertItem = AlertItem(
+                                    title: "Couldn't Perform Search",
+                                    message: error.localizedDescription
                                 )
-                                .store(in: &artistsCancellables)
+                            }
+                            self.decrementRemainingRequests(&remainingRequests)
+                        },
+                        receiveValue: { artist in
+                            if !self.artistsSearchResults.contains(where: { $0.artist.id == artist.id }) {
+                                self.artistsSearchResults.append(ArtistSearchResult(artist: artist))
+                            }
                         }
-                    }
-                }
+                    )
+                    .store(in: &artistsCancellables)
             }
         }
-        
-        self.isSearchingArtists = false
-        self.shouldNavigate = true
+
+        // If no requests were made, mark as done immediately
+        if remainingRequests == 0 {
+            self.isSearching = false
+            self.shouldNavigate = true
+        }
+    }
+
+    private func decrementRemainingRequests(_ remainingRequests: inout Int) {
+        remainingRequests -= 1
+        if remainingRequests == 0 {
+            self.isSearching = false
+            self.shouldNavigate = true
+        }
     }
 }
 

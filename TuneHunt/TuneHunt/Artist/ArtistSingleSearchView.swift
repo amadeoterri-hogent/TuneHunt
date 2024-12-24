@@ -6,13 +6,14 @@ struct ArtistSingleSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State var artists: [Artist] = []
     @State private var nameArtist: String = ""
     @State private var alertItem: AlertItem? = nil
     @State private var searchCancellable: AnyCancellable? = nil
     @State private var isSearching = false
     @State private var shouldNavigate = false
     @State private var spotifyArtists: [Artist] = []
+    
+    @State var artists: [Artist] = []
     
     var body: some View {
         ZStack {
@@ -24,7 +25,7 @@ struct ArtistSingleSearchView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 HStack {
-                    TextField("Search artist in spotify",text: $nameArtist,onCommit:searchArtist)
+                    TextField("Search artist in spotify...",text: $nameArtist,onCommit:searchArtist)
                         .padding(.leading, 28)
                         .overlay(
                             HStack {
@@ -43,8 +44,7 @@ struct ArtistSingleSearchView: View {
                             }
                         )
                         .submitLabel(.search)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 8)
+                        .padding()
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(10)
                 }

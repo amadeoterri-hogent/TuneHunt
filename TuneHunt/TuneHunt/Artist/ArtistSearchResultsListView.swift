@@ -27,46 +27,44 @@ struct ArtistSearchResultsListView: View {
         )
         
         VStack {
-            Form {
-                Section {
-                    Toggle("Select All", isOn: selectAll)
-                        .frame(alignment: .trailing)
-                        .padding(8)
-                    
-                    List($artistsSearchResults, id: \.id) { $artistSearchResult in
-                        ArtistCellView(artistSearchResult: $artistSearchResult)
+            Text("Select artists")
+                .font(.largeTitle)
+                .bold()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 24)
+            
+            Button {
+                selection = 1
+                for artistsSearchResult in artistsSearchResults {
+                    if artistsSearchResult.addToPlaylist {
+                        spotifyArtists.append(artistsSearchResult.artist)
                     }
-                    .navigationTitle("Search Results")
-                } header: {
-                    Text("Select artists")
                 }
-                
-                Section {
-                    Button {
-                        selection = 1
-                        for artistsSearchResult in artistsSearchResults {
-                            if artistsSearchResult.addToPlaylist {
-                                spotifyArtists.append(artistsSearchResult.artist)
-                            }
-                        }
-                        shouldNavigate = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                            Text("Choose playlist")
-                        }
-                        
-                    }
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                    .padding()
-                    .background(.green)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .center)
+                shouldNavigate = true
+            } label: {
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                    Text("Choose playlist")
                 }
-                .listRowBackground(Color.clear)
+                .frame(maxWidth: .infinity)
             }
-            .scrollContentBackground(.hidden)
+            .foregroundStyle(Theme(colorScheme).textColor)
+            .padding()
+            .background(.blue)
+            .clipShape(Capsule())
+            
+            Toggle("Select All", isOn: selectAll)
+                .frame(alignment: .trailing)
+                .padding(.horizontal, 28)
+                .padding(.vertical, 12)
+            
+            List($artistsSearchResults, id: \.id) { $artistSearchResult in
+                ArtistCellView(artistSearchResult: $artistSearchResult)
+                    .listRowBackground(Color.clear)
+            }
+            .listStyle(.plain)
         }
+        .padding()
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .navigationDestination(isPresented: $shouldNavigate) {
@@ -91,8 +89,8 @@ struct ArtistSearchResultsListView: View {
     
     ArtistSearchResultsListView(artistsSearchResults: artists)
         .environmentObject(spotify)
-
-
+    
+    
     
 }
 

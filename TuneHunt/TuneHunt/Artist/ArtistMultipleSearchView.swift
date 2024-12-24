@@ -127,23 +127,8 @@ struct ArtistMultipleSearchView: View {
             .alert(item: $alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)
             }
-            // TODO: Fix sheet with new view
             .sheet(isPresented: $showPreview) {
-                if artists.isEmpty {
-                    Text("No artists added.")
-                    Spacer()
-                } else {
-                    List {
-                        ForEach(artists, id: \.self) {
-                            Text("\($0)")
-                                .listRowBackground(Color.clear)
-                                .foregroundStyle(Theme(colorScheme).textColor)
-                            
-                        }
-                        .onDelete(perform: removeArtist)
-                    }
-                    .listStyle(.plain)
-                }
+                ArtistPreviewView(artists: $artists)
             }
             
             if searching {
@@ -155,9 +140,7 @@ struct ArtistMultipleSearchView: View {
                     .shadow(radius: 10)
             }
         }
-        
     }
-    //    }
     
     private func splitArtists() -> Void {
         let separator: Character
