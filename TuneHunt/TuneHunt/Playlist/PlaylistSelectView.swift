@@ -23,8 +23,7 @@ struct PlaylistSelectView: View {
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
     @State var tracks: [Track] = []
     
-//    var topTracks = UserDefaults.standard.integer(forKey: "topTracks")
-    var topTracks = 10
+    var topTracks = UserDefaults.standard.integer(forKey: "topTracks")
     var selectedCountryCode: String = UserDefaults.standard.string(forKey: "Country") ?? "BE"
     var isPreview = false
     
@@ -43,7 +42,7 @@ struct PlaylistSelectView: View {
                         .foregroundColor(Theme(colorScheme).textColor)
                         .opacity(0.4)
                         .padding(.horizontal)
-                        .padding(.top)
+                        .padding(.top,6)
                         .frame(maxWidth: .infinity, alignment: .center)
                     
                     List {

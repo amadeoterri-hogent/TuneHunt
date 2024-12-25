@@ -7,7 +7,7 @@ struct PlaylistCreateView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
-
+    
     @State private var createPlaylistCancellable: AnyCancellable?
     @State private var namePlaylist: String = ""
     @State private var alert: AlertItem? = nil
@@ -16,35 +16,54 @@ struct PlaylistCreateView: View {
     @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
     
     var onPlaylistCreated: ((Playlist<PlaylistItemsReference>) -> Void)?
-        
+    
     var body: some View {
         VStack {
-            Form {
-                Section {
-                    TextField("Enter playlist name...",text: $namePlaylist)
-                }
-
-                Section {
-                    Button {
-                        // Create playlist and dismiss sheet
-                        createPlaylist()
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus")
-                            Text("Create playlist")
+            TextField("Enter playlist name...",text: $namePlaylist)
+                .padding(.leading, 28)
+                .overlay(
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        if !namePlaylist.isEmpty {
+                            Button(action: {
+                                self.namePlaylist = ""
+                            }, label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            })
                         }
                     }
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                    .padding()
-                    .background(.green)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .center)
+                )
+                .submitLabel(.search)
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(10)
+            
+            HStack {
+                Button {
+                    // Create playlist and dismiss sheet
+                    createPlaylist()
+                } label: {
+                    HStack {
+                        Image(systemName: "plus")
+                        Text("Create playlist")
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                .listRowBackground(Color.clear)
-
+                .foregroundStyle(Theme(colorScheme).textColor)
+                .padding()
+                .background(.blue)
+                .clipShape(Capsule())
+                .frame(maxWidth: .infinity, alignment: .center)
             }
-            .scrollContentBackground(.hidden)
+            .padding(.vertical)
+
+            Spacer()
+            
         }
+        .padding()
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
@@ -118,7 +137,7 @@ struct PlaylistCreateView: View {
         spotify.isAuthorized = true
         return spotify
     }()
-        
+    
     return PlaylistCreateView()
         .environmentObject(spotify)
 }
