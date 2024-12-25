@@ -13,13 +13,20 @@ struct PlaylistSelectView: View {
     @State var playlists: [Playlist<PlaylistItemsReference>] = []
     @State private var alertItem: AlertItem? = nil
     @State private var cancellables: Set<AnyCancellable> = []
-    @State private var isLoadingPlaylists = false
+    @State private var searchCancellables: Set<AnyCancellable> = []
+    @State private var loadPlaylistCancellable: AnyCancellable? = nil
     @State private var isLoading = false
+    @State private var isSearchingTracks = false
     @State private var showingAlert = false
     @State private var shouldNavigate: Bool = false
     @State private var showCreatePlaylist: Bool = false
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
-
+    @State var tracks: [Track] = []
+    
+//    var topTracks = UserDefaults.standard.integer(forKey: "topTracks")
+    var topTracks = 10
+    var selectedCountryCode: String = UserDefaults.standard.string(forKey: "Country") ?? "BE"
+    var isPreview = false
     
     var body: some View {
         ZStack {
@@ -41,7 +48,9 @@ struct PlaylistSelectView: View {
                     
                     List {
                         ForEach(playlists, id: \.uri) { playlist in
-                            PlaylistCellView(isLoading: $isLoading, shouldNavigate: $shouldNavigate, selectedPlaylist: $selectedPlaylist, playlist: playlist)
+                            PlaylistCellView(playlist: playlist, loadPlaylist: { playlist in
+                                loadPlaylist(selectedPlaylist: playlist)
+                            })
                         }
                         .listRowBackground(Color.clear)
                     }
@@ -63,7 +72,7 @@ struct PlaylistSelectView: View {
             .foregroundStyle(Theme(colorScheme).textColor)
             .navigationDestination(isPresented: $shouldNavigate) {
                 if let playlist = selectedPlaylist {
-                    FinishView(playlist: playlist, artists: artists)
+                    FinishView(tracks: tracks, playlist: playlist, artists: artists)
                 }
             }
             .alert(item: $alertItem) { alert in
@@ -86,10 +95,22 @@ struct PlaylistSelectView: View {
             }
             .onAppear(perform: retrievePlaylists)
             
-            if isLoading || isLoadingPlaylists {
+            if isLoading {
                 ProgressView("Loading...")
-                    .frame(maxWidth: .infinity, alignment: .center)
+                    .progressViewStyle(.circular)
                     .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
+            }
+            
+            if isSearchingTracks {
+                ProgressView("Searching tracks...")
+                    .progressViewStyle(.circular)
+                    .padding()
+                    .background(Color(UIColor.systemBackground))
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
             }
         }
     }
@@ -99,7 +120,7 @@ struct PlaylistSelectView: View {
         // Don't try to load any playlists if we're in preview mode.
         if ProcessInfo.processInfo.isPreviewing { return }
 
-        self.isLoadingPlaylists = true
+        self.isLoading = true
         self.playlists = []
         
         spotify.api.currentUserPlaylists(limit: 50)
@@ -113,7 +134,7 @@ struct PlaylistSelectView: View {
                             message: error.localizedDescription
                         )
                     }
-                    self.isLoadingPlaylists = false
+                    self.isLoading = false
                 },
                 receiveValue: { playlistsPage in
                     let playlists = playlistsPage.items
@@ -121,6 +142,69 @@ struct PlaylistSelectView: View {
                 }
             )
             .store(in: &cancellables)
+    }
+    
+    func loadPlaylist(selectedPlaylist: Playlist<PlaylistItemsReference>) {
+        self.isSearchingTracks = true
+        self.loadPlaylistCancellable =  spotify.api.playlist(selectedPlaylist)
+            .receive(on: RunLoop.main)
+            .sink(
+                receiveCompletion:{ _ in
+                    searchTopTracks()
+                },
+                receiveValue: { playlist in
+                    self.selectedPlaylist = playlist
+                }
+            )
+    }
+    
+    func searchTopTracks() {
+        if isPreview {
+            return
+        }
+        self.tracks = []
+        var remainingRequests = artists.count
+        
+        for artist in artists {
+            if let uri = artist.uri {
+                spotify.api.artistTopTracks(uri, country: selectedCountryCode)
+                    .receive(on: RunLoop.main)
+                    .sink(
+                        receiveCompletion: { completion in
+                            if case .failure(let error) = completion {
+                                self.alertItem = AlertItem(
+                                    title: "Couldn't Perform Search",
+                                    message: error.localizedDescription
+                                )
+                            }
+                            
+                            remainingRequests -= 1
+                            if remainingRequests == 0 {
+                                self.tracks = self.tracks.removingDuplicates()
+                                self.isSearchingTracks = false
+                                self.shouldNavigate = true
+                            }
+                        },
+                        receiveValue: { searchResults in
+                            let topTracks = searchResults.prefix(topTracks)
+                            for track in topTracks {
+                                if !self.tracks.contains(where: { $0.id == track.id }) {
+                                    self.tracks.append(track)
+                                }
+                            }
+                        }
+                    )
+                    .store(in: &searchCancellables)
+            } else {
+                // Handle artists without a URI (optional improvement)
+                remainingRequests -= 1
+                if remainingRequests == 0 {
+                    self.tracks = self.tracks.removingDuplicates()
+                    self.isSearchingTracks = false
+                    self.shouldNavigate = true
+                }
+            }
+        }
     }
 }
 

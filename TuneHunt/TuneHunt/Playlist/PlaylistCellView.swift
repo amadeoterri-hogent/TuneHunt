@@ -5,20 +5,17 @@ import SpotifyWebAPI
 
 struct PlaylistCellView: View {
     @EnvironmentObject var spotify: Spotify
-    @Binding var isLoading: Bool
-    @Binding var shouldNavigate: Bool
-    @Binding var selectedPlaylist: Playlist<PlaylistItems>?
 
     @State private var image = Image(.spotifyLogoGreen)
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var loadPlaylistCancellable: AnyCancellable? = nil
     
     var playlist: Playlist<PlaylistItemsReference>
+    var loadPlaylist: ((Playlist<PlaylistItemsReference>) -> Void)?
     
     var body: some View {
         Button {
-            loadPlaylist()
+            loadPlaylist?(playlist)
         } label: {
             HStack {
                 image
@@ -48,21 +45,6 @@ struct PlaylistCellView: View {
                 receiveCompletion: { _ in },
                 receiveValue: { image in
                     self.image = image
-                }
-            )
-    }
-    
-    func loadPlaylist() {
-        self.isLoading = true
-        self.loadPlaylistCancellable =  spotify.api.playlist(playlist)
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion:{ _ in
-                    isLoading = false
-                    shouldNavigate = true
-                },
-                receiveValue: { playlist in
-                    self.selectedPlaylist = playlist
                 }
             )
     }

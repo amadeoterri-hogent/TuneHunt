@@ -13,14 +13,11 @@ struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State var tracks: [Track] = []
-    @State private var searchCancellables: Set<AnyCancellable> = []
-    @State private var isSearching = false
+    @State var tracks: [Track]
     @State private var alert: AlertItem? = nil
     
     var playlist: Playlist<PlaylistItems>
     var artists: [Artist]
-    var isPreview = false
     
     var body: some View {
         VStack {
@@ -44,82 +41,28 @@ struct FinishView: View {
             .clipShape(Capsule())
             .frame(maxWidth: .infinity, alignment: .center)
             
-            
-            if isSearching {
-                ProgressView("Searching top tracks...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-            } else {
-                List {
-                    ForEach(tracks, id: \.self) { track in
-                        if let artist = track.artists?[0] {
-                            Text("\(artist.name) - \(track.name)")
-                                .listRowBackground(Color.clear)
-                        }
+            List {
+                ForEach(tracks, id: \.self) { track in
+                    if let artist = track.artists?[0] {
+                        Text("\(artist.name) - \(track.name)")
+                            .listRowBackground(Color.clear)
                     }
-                    .onDelete(perform: removeTrack)
                 }
-                .listStyle(.plain)
+                .onDelete(perform: removeTrack)
             }
+            .listStyle(.plain)
+            
         }
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .alert(item: $alert) { alert in
             Alert(title: alert.title, message: alert.message)
         }
-        .onAppear {
-            search()
-        }
     }
     
     private func removeTrack(at offsets: IndexSet) {
         withAnimation {
             tracks.remove(atOffsets: offsets)
-        }
-    }
-    
-    func search() {
-        if isPreview {
-            return
-        }
-        self.tracks = []
-        self.isSearching = true
-        var remainingRequests = artists.count
-        
-        for artist in artists {
-            if let uri = artist.uri {
-                spotify.api.artistTopTracks(uri, country: "BE")
-                    .receive(on: RunLoop.main)
-                    .sink(
-                        receiveCompletion: { completion in
-                            if case .failure(let error) = completion {
-                                self.alert = AlertItem(
-                                    title: "Couldn't Perform Search",
-                                    message: error.localizedDescription
-                                )
-                            }
-                            
-                            remainingRequests -= 1
-                            if remainingRequests == 0 {
-                                self.isSearching = false
-                            }
-                        },
-                        receiveValue: { searchResults in
-                            for track in searchResults {
-                                if !self.tracks.contains(where: { $0.id == track.id }) {
-                                    self.tracks.append(track)
-                                }
-                            }
-                        }
-                    )
-                    .store(in: &searchCancellables)
-            } else {
-                // Handle artists without a URI (optional improvement)
-                remainingRequests -= 1
-                if remainingRequests == 0 {
-                    self.tracks = self.tracks.removingDuplicates()
-                    self.isSearching = false
-                }
-            }
         }
     }
     
@@ -195,7 +138,7 @@ extension Array {
         .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
     ]
     
-    FinishView(tracks: tracks, playlist: playlist , artists: artists, isPreview: true)
+    FinishView(tracks: tracks, playlist: playlist , artists: artists)
         .environmentObject(spotify)
     
     

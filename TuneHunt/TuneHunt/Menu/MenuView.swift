@@ -46,6 +46,7 @@ struct MenuView: View {
             }
             .toolbar {
                 MenuProfileBarView(menuStyle: $menuStyle)
+                    .padding(.vertical)
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())

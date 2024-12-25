@@ -10,6 +10,7 @@ struct MenuProfileBarView: View {
     
     @State private var profileImage = Image(systemName: "person.crop.circle")
     @State private var loadImageCancellable: AnyCancellable? = nil
+    @State private var shouldNavigate: Bool = false
     
     var body: some View {
         if spotify.currentUser != nil {
@@ -24,7 +25,7 @@ struct MenuProfileBarView: View {
                 Divider()
                 
                 Button {
-                
+                    shouldNavigate = true
                 } label: {
                     Label("Settings", systemImage: "gear")
                 }
@@ -45,6 +46,9 @@ struct MenuProfileBarView: View {
             }
             .foregroundStyle(Theme(colorScheme).textColor)
             .onAppear(perform: loadProfileImage)
+            .navigationDestination(isPresented: $shouldNavigate) {
+                SettingsView()
+            }
         }
     }
     
