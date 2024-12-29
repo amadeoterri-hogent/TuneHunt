@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct NavigationTitleView: View {
+struct DefaultNavigationTitleView: View {
     var titleText = ""
     
     var body: some View {
