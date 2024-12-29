@@ -27,7 +27,7 @@ struct ArtistSingleSearchView: View {
     
     var artistSingleSearchView: some View {
         VStack {
-            NavigationTitleView(titleText: "Search For Artist")
+            DefaultNavigationTitleView(titleText: "Search For Artist")
             searchBar
             DefaultCaption(captionText: "Tap an artist to proceed")
             

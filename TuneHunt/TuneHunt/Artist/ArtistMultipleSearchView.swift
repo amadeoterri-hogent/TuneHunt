@@ -34,7 +34,7 @@ struct ArtistMultipleSearchView: View {
                             searchTextIsFocused = false
                         }
                     VStack {
-                        NavigationTitleView(titleText: "Enter artists")
+                        DefaultNavigationTitleView(titleText: "Enter artists")
                         btnSearchSpotify
                         txtEditor
                     }

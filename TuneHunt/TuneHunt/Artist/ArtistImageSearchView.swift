@@ -23,23 +23,12 @@ struct ArtistImageSearchView: View {
     var body: some View {
         ZStack {
             VStack {
-                NavigationTitleView(titleText: "Select Image")
+                DefaultNavigationTitleView(titleText: "Select Image")
                 btnUploadImage
                 DefaultCaption(captionText: "Tap the image to extract text from image")
-                
-                if imageUploaded, let imgImagePreview = self.imagePreview {
-                    imgImagePreview
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 280, height: 480)
-                        .shadow(radius: 12)
-                        .cornerRadius(12)
-                        .padding(24)
-                        .onTapGesture {
-                            guard let image = selectedImage else { return }
-                            self.isLoading = true
-                            self.performTextRecognition(on: image)
-                        }
+
+                if imageUploaded {
+                    imgPreview
                 } else {
                     txtNoImage
                 }
@@ -80,6 +69,25 @@ struct ArtistImageSearchView: View {
         .background(.blue)
         .clipShape(Capsule())
         .frame(maxWidth: .infinity, alignment: .center)
+    }
+    
+    var imgPreview: some View {
+        Group {
+            if let imgUploadedImagePreview = self.imagePreview {
+                imgUploadedImagePreview
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 280, height: 480)
+                    .shadow(radius: 12)
+                    .cornerRadius(12)
+                    .padding(24)
+                    .onTapGesture {
+                        guard let image = selectedImage else { return }
+                        self.isLoading = true
+                        self.performTextRecognition(on: image)
+                    }
+            }
+        }
     }
     
     var txtNoImage: some View {

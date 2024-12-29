@@ -26,7 +26,7 @@ struct MenuView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                NavigationTitleView(titleText: "Build playlist")
+                DefaultNavigationTitleView(titleText: "Build playlist")
 
                 switch menuStyle {
                     case .list:
