@@ -10,7 +10,7 @@ struct MenuListView: View {
     @State private var didRequestImage = false
     @State private var showInfoText = false
     @State private var showInfoImage = false
-    @State private var selection: Int = 0
+    @State private var selection = 0
     @State private var shouldNavigate = false
     
     var menuItems: [MenuItem]
@@ -22,7 +22,6 @@ struct MenuListView: View {
             }
             Spacer()
         }
-        .padding(.top)
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .foregroundStyle(Theme(colorScheme).textColor)
         
@@ -46,13 +45,13 @@ struct MenuListView: View {
 }
 
 #Preview {
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
     }()
     
-    let menuItems: [MenuItem] = [
+    let menuItems = [
         MenuItem(selection: 1,
                  imageSystemName: "person",
                  listItemTitle: "Top tracks from single artist"),

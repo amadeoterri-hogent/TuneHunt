@@ -11,32 +11,45 @@ struct MenuListItemCell: View {
     var menuItem: MenuItem
     
     var body: some View {
+        btnMenuListItem
+    }
+    
+    var btnMenuListItem: some View {
         Button {
             selection = menuItem.selection
             shouldNavigate = true
         } label: {
-            HStack {
-                Image(systemName: menuItem.imageSystemName )
-                    .font(.title2)
-                    .frame(width: 48,height: 48)
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                
-                Text(menuItem.listItemTitle)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 12)
-                    .foregroundStyle(Theme(colorScheme).textColor)
-
-            }
-            .padding(12)
+            lblMenuListItem
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    var lblMenuListItem: some View {
+        HStack {
+            imgLabelListItem
+            txtLabelListItem
+        }
+        .foregroundStyle(Theme(colorScheme).textColor)
+        .padding(12)
+    }
+    
+    var imgLabelListItem: some View {
+        Image(systemName: menuItem.imageSystemName )
+            .font(.title2)
+            .frame(width: 48,height: 48)
+    }
+    
+    var txtLabelListItem: some View {
+        Text(menuItem.listItemTitle)
+            .multilineTextAlignment(.leading)
+            .lineLimit(2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 12)
     }
 }
 
 #Preview {
-    let menuItem: MenuItem = MenuItem(selection: 1,
+    let menuItem = MenuItem(selection: 1,
              imageSystemName: "person",
              listItemTitle: "Top tracks from single artist")
     

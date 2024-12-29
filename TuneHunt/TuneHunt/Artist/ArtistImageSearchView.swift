@@ -20,7 +20,6 @@ struct ArtistImageSearchView: View {
     @State var imagePreview: Image? = nil
     @State var searchText: String = ""
     
-    // TODO: Fix artistmultiplesearchview, because artists is empty
     var body: some View {
         ZStack {
             VStack {

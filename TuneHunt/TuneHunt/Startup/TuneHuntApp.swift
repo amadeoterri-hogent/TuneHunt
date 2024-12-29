@@ -4,8 +4,8 @@ import SwiftData
 @main
 struct TuneHuntApp: App {
     @StateObject var spotify = Spotify()
-    @AppStorage("topTracks") private var topTracks: Int = 10
-    @AppStorage("country") private var country: String = "BE"
+    @AppStorage("topTracks") private var topTracks = 10
+    @AppStorage("country") private var country = "BE"
 
     var body: some Scene {
         WindowGroup {

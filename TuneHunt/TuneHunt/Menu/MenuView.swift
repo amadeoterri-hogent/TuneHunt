@@ -26,33 +26,22 @@ struct MenuView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                HStack {
-                    Text("Build playlist")
-                        .font(.largeTitle)
-                        .bold()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(height:48)
-                .lineLimit(1)
-                .padding(.horizontal)
-                .padding(.top)
-
                 switch menuStyle {
-                case .list:
-                    MenuListView(menuItems: menuItems)
-                case .grid:
-                    MenuGridView(menuItems: menuItems)
+                    case .list:
+                        MenuListView(menuItems: menuItems)
+                    case .grid:
+                        MenuGridView(menuItems: menuItems)
                 }
             }
+            .navigationBarBackButtonHidden()
+            .navigationTitle("Build playlist")
             .toolbar {
                 MenuProfileBarView(menuStyle: $menuStyle)
-                    .padding(.vertical)
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
         }
     }
-    
 }
 
 #Preview {
@@ -63,7 +52,7 @@ struct MenuView: View {
         href: URL(string: "www.google.com")!
     )
     
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         spotify.currentUser = demoUser

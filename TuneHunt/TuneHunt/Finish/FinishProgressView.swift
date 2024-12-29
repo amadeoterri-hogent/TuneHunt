@@ -1,6 +1,7 @@
 import SwiftUI
 import SpotifyWebAPI
 
+// TODO: Skip track on error and print after which ones didn't succeed
 // TODO: play playlist?
 // TODO: new Navigationstack??
 
@@ -72,7 +73,6 @@ struct FinishProgressView: View {
         )
         .onAppear() {
             Task {
-//                await startAsyncTask()
                 await finish()
             }
         }
@@ -81,14 +81,6 @@ struct FinishProgressView: View {
     func finish() async {
         let playlistURI = playlist.uri
         let trackURIs = tracks.compactMap { $0.uri }
-        
-//        guard !trackURIs.isEmpty else {
-//            self.alert = AlertItem(
-//                title: "Error",
-//                message: "No tracks to add to the playlist."
-//            )
-//            return
-//        }
                 
         // Split track URIs into batches of 100
         let chunks = trackURIs.chunked(into: 100)
@@ -109,17 +101,8 @@ struct FinishProgressView: View {
 //                            remainingChunks = 0 // Stop processing if there's an error
 //                        } else {
                             remainingChunks -= 1
-//                            if remainingChunks == 0 {
-//                                self.alert = AlertItem(
-//                                    title: "Success",
-//                                    message: "All tracks added to the playlist successfully."
-//                                )
-//                            }
-//                        }
                     },
-                    receiveValue: { _ in
-                        print("A batch of tracks added to playlist \(playlist.name)")
-                    }
+                    receiveValue: { _ in }
                 )
                 .store(in: &spotify.cancellables)
         }
@@ -132,9 +115,7 @@ struct FinishProgressView: View {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
             progress = Double(i) / totalChunks
         }
-        // reset value
         animationAmount = 1.0
-
     }
 }
 

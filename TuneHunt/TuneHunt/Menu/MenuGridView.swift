@@ -7,12 +7,8 @@ struct MenuGridView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var profileImage = Image(systemName: "person.crop.circle")
-    @State private var textImage = Image(.recordPlayer)
-    @State private var pictureImage = Image(.camera)
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var showInfoText = false
-    @State private var showInfoImage = false
     @State private var shouldNavigate = false
     @State private var selection: Int = 0
     
@@ -25,8 +21,7 @@ struct MenuGridView: View {
             LazyVGrid (columns: columns) {
                 ForEach(menuItems, id: \.self) { menuItem in
                     MenuGridItemCell(shouldNavigate: $shouldNavigate, selection: $selection, menuItem: menuItem)
-                        .padding(.horizontal,24)
-                        .padding(.top,24)
+                        .padding(12)
                 }
             }
             Spacer()
@@ -34,7 +29,6 @@ struct MenuGridView: View {
         }
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .foregroundStyle(Theme(colorScheme).textColor)
-                
     }
     
     @ViewBuilder
@@ -56,13 +50,13 @@ struct MenuGridView: View {
 }
 
 #Preview {
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
     }()
     
-    let menuItems: [MenuItem] = [
+    let menuItems = [
         MenuItem(selection: 1,
                  imageSystemName: "person",
                  listItemTitle: "Top tracks from single artist"),

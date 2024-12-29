@@ -6,42 +6,49 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            Image(.login)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-            VStack {
-                Button {
-                    spotify.authorize()
-                } label: {
-                    HStack {
-                        Image(.spotifyLogoGreen)
-                            .resizable()
-                            .scaledToFit()
-                            .containerRelativeFrame(.horizontal) { size, axis in
-                                size * 0.1
-                            }
-                        
-                        Text("Sign in with Spotify")
-                            .padding(12)
-                            .foregroundColor(.black)
-                        
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray, lineWidth: 1)
-                    )
-                }
-                
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+            imgLoginBackground
+            btnLogin
         }
     }
+    
+    var imgLoginBackground: some View {
+        Image(.login)
+            .resizable()
+            .scaledToFill()
+            .ignoresSafeArea()
+    }
+    
+    var btnLogin: some View {
+        Button {
+            spotify.authorize()
+        } label: {
+            lblLogin
+            }
+            .padding()
+            .background(Color.white)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray, lineWidth: 1)
+            )
+        }
+    }
+    
+    var lblLogin: some View {
+        HStack {
+            Image(.spotifyLogoGreen)
+                .resizable()
+                .scaledToFit()
+                .containerRelativeFrame(.horizontal) { size, axis in
+                    size * 0.1
+                }
+            
+            Text("Sign in with Spotify")
+                .padding(12)
+                .foregroundColor(.black)
+    }
+        
+
 }
 
 #Preview {
@@ -53,5 +60,4 @@ struct LoginView: View {
     
     LoginView()
         .environmentObject(spotify)
-
 }

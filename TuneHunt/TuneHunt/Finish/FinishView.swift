@@ -3,9 +3,6 @@ import SpotifyWebAPI
 import Combine
 import Foundation
 
-// TODO: Skip track on error and print after which ones didn't succeed
-// TODO: Because now you get an error message with a lot of tracks but the tracks were added to the playlist
-// TODO: Lawy Scrollview for tracks
 struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
@@ -28,7 +25,7 @@ struct FinishView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Button {
-                    shouldNavigate = true
+                    validateAndNavigate()
                 } label: {
                     Text("Add tracks to playlist")
                         .frame(maxWidth: .infinity)
@@ -104,6 +101,18 @@ struct FinishView: View {
                     self.image = image
                 }
             )
+    }
+    
+    func validateAndNavigate() {
+        guard !tracks.isEmpty else {
+            self.alert = AlertItem(
+                title: "Error",
+                message: "No tracks to add to the playlist."
+            )
+            return
+        }
+        
+        shouldNavigate = true
     }
     
 }

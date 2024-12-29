@@ -6,49 +6,62 @@ import SpotifyWebAPI
 struct MenuProfileBarView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
+    
     @Binding var menuStyle: MenuStyle
     
     @State private var profileImage = Image(systemName: "person.crop.circle")
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var shouldNavigate: Bool = false
+    @State private var shouldNavigate = false
     
     var body: some View {
         if spotify.currentUser != nil {
             Menu {
-                Picker("Menu layout", selection: $menuStyle) {
-                    ForEach(MenuStyle.allCases) { style in
-                        Label(style.label, systemImage: style.systemImage)
-                            .tag(style)
-                    }
-                }
-                
+                pkrMenuStyle
                 Divider()
-                
-                Button {
-                    shouldNavigate = true
-                } label: {
-                    Label("Settings", systemImage: "gear")
-                }
-                
-                Button (role: .destructive){
-                    spotify.api.authorizationManager.deauthorize()
-                } label: {
-                    Label("Logout", systemImage: "rectangle.portrait.and.arrow.forward")
-                        .foregroundStyle(.red)
-                }
-                
+                btnSettings
+                btnLogOut
             } label: {
-                profileImage
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(Circle())
-                    .frame(width: 48, height: 48)
+                lblProfile
             }
             .foregroundStyle(Theme(colorScheme).textColor)
             .onAppear(perform: loadProfileImage)
             .navigationDestination(isPresented: $shouldNavigate) {
                 SettingsView()
             }
+        }
+    }
+    
+    var lblProfile : some View {
+        profileImage
+            .resizable()
+            .scaledToFit()
+            .clipShape(Circle())
+            .frame(width: 48, height: 48)
+    }
+    
+    var pkrMenuStyle: some View {
+        Picker("Menu layout", selection: $menuStyle) {
+            ForEach(MenuStyle.allCases) { style in
+                Label(style.label, systemImage: style.systemImage)
+                    .tag(style)
+            }
+        }
+    }
+    
+    var btnSettings: some View {
+        Button {
+            shouldNavigate = true
+        } label: {
+            Label("Settings", systemImage: "gear")
+        }
+    }
+    
+    var btnLogOut: some View {
+        Button (role: .destructive){
+            spotify.api.authorizationManager.deauthorize()
+        } label: {
+            Label("Logout", systemImage: "rectangle.portrait.and.arrow.forward")
+                .foregroundStyle(.red)
         }
     }
     
@@ -76,7 +89,7 @@ struct MenuProfileBarView: View {
         href: URL(string: "www.google.com")!
     )
     
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         spotify.currentUser = demoUser
