@@ -30,7 +30,7 @@ struct MenuListItemCell: View {
             txtLabelListItem
         }
         .foregroundStyle(Theme(colorScheme).textColor)
-        .padding(12)
+        .padding(.vertical)
     }
     
     var imgLabelListItem: some View {

@@ -24,7 +24,6 @@ struct MenuListView: View {
         }
         .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
         .foregroundStyle(Theme(colorScheme).textColor)
-        
     }
     
     @ViewBuilder

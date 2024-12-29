@@ -26,6 +26,8 @@ struct MenuView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                NavigationTitleView(titleText: "Build playlist")
+
                 switch menuStyle {
                     case .list:
                         MenuListView(menuItems: menuItems)
@@ -33,8 +35,8 @@ struct MenuView: View {
                         MenuGridView(menuItems: menuItems)
                 }
             }
+            .padding()
             .navigationBarBackButtonHidden()
-            .navigationTitle("Build playlist")
             .toolbar {
                 MenuProfileBarView(menuStyle: $menuStyle)
             }

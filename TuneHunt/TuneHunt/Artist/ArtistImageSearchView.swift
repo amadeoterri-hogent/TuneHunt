@@ -13,75 +13,38 @@ struct ArtistImageSearchView: View {
     @State private var pickerItem: PhotosPickerItem? = nil
     @State private var shouldNavigate = false
     @State private var alertItem: AlertItem? = nil
-    @State private var loading: Bool = false
+    @State private var isLoading = false
     
     @State var selectedImage: UIImage? = nil
     @State var imageUploaded = false
     @State var imagePreview: Image? = nil
-    @State var searchText: String = ""
+    @State var searchText = ""
     
     var body: some View {
         ZStack {
             VStack {
-                VStack {
-                    Text("Select Image")
-                        .font(.largeTitle)
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    PhotosPicker(selection: $pickerItem, matching: .images) {
-                        HStack {
-                            Image(systemName: "square.and.arrow.up")
-                            Text("Upload an image")
-
+                NavigationTitleView(titleText: "Select Image")
+                btnUploadImage
+                DefaultCaption(captionText: "Tap the image to extract text from image")
+                
+                if imageUploaded, let imgImagePreview = self.imagePreview {
+                    imgImagePreview
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 280, height: 480)
+                        .shadow(radius: 12)
+                        .cornerRadius(12)
+                        .padding(24)
+                        .onTapGesture {
+                            guard let image = selectedImage else { return }
+                            self.isLoading = true
+                            self.performTextRecognition(on: image)
                         }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .foregroundStyle(Theme(colorScheme).textColor)
-                    .padding()
-                    .background(.blue)
-                    .clipShape(Capsule())
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Text("Tap the image to extract text from image")
-                        .font(.caption2)
-                        .foregroundColor(Theme(colorScheme).textColor)
-                        .opacity(0.4)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    if imageUploaded {
-                        VStack {
-                            if let imagePreview = imagePreview {
-                                imagePreview
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width:280, height: 480)
-                                    .shadow(radius: 12)
-                                    .cornerRadius(12)
-                                    .padding(24)
-                                    .onTapGesture {
-                                        if let image = selectedImage {
-                                            self.loading = true
-                                            self.performTextRecognition(on: image)
-                                        }
-                                    }
-                            }
-                        }
-                        .padding(.vertical)
-                    }
-                    else {
-                        Text("No image")
-                            .frame(maxHeight: .infinity, alignment: .center)
-                            .foregroundColor(Theme(colorScheme).textColor)
-                            .font(.title)
-                            .opacity(0.6)
-                            .foregroundColor(.secondary)
-                            .padding(.bottom, 48)
-                    }
-                    
-                    Spacer()
+                } else {
+                    txtNoImage
                 }
+                
+                Spacer()
             }
             .padding()
             .navigationDestination(isPresented: $shouldNavigate) {
@@ -97,26 +60,47 @@ struct ArtistImageSearchView: View {
                 Alert(title: alert.title, message: alert.message)
             }
             
-            if loading {
-                ProgressView("Loading...")
-                    .progressViewStyle(.circular)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(radius: 10)
+            if self.isLoading {
+                DefaultProgressView(progressViewText: "Loading...")
             }
         }
     }
     
+    var btnUploadImage: some View {
+        PhotosPicker(selection: $pickerItem, matching: .images) {
+            HStack {
+                Image(systemName: "square.and.arrow.up")
+                Text("Upload an image")
+
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundStyle(Theme(colorScheme).textColor)
+        .padding()
+        .background(.blue)
+        .clipShape(Capsule())
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+    
+    var txtNoImage: some View {
+        Text("No image")
+            .frame(maxHeight: .infinity, alignment: .center)
+            .foregroundColor(Theme(colorScheme).textColor)
+            .font(.title)
+            .opacity(0.6)
+            .foregroundColor(.secondary)
+            .padding(.bottom, 48)
+    }
+    
     private func processPickerItem() {
         Task {
-            self.loading = true
+            self.isLoading = true
             guard let data = try? await pickerItem?.loadTransferable(type: Data.self),
                   let uiImage = UIImage(data: data) else { return }
             self.selectedImage = uiImage
             self.imagePreview = Image(uiImage: uiImage)
             self.imageUploaded = true
-            self.loading = false
+            self.isLoading = false
         }
     }
     
@@ -163,7 +147,7 @@ struct ArtistImageSearchView: View {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try requestHandler.perform([request])
-                self.loading = false
+                self.isLoading = false
                 self.shouldNavigate = true
             } catch {
                 print("Failed to perform text recognition: \(error)")

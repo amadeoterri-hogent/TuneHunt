@@ -9,20 +9,20 @@ struct ArtistMultipleSearchView: View {
     
     @FocusState private var searchTextIsFocused: Bool
     
-    @State private var artistsSearch: String = ""
-    @State var artists: [String] = []
-    @State var artistSearchResults: [ArtistSearchResult] = []
+    @State private var artistsSearch = ""
     @State private var selectedSeparator = "Auto"
     @State private var searchCancellables: [AnyCancellable] = []
     @State private var alertItem: AlertItem? = nil
     @State private var shouldNavigate = false
-    @State private var searching: Bool = false
-    @State private var showPreview: Bool = false
+    @State private var isSearching = false
+    @State private var showPreview = false
     
     let separators = ["Auto","Comma", "Space", "Newline"]
     let pasteboard = UIPasteboard.general
     
     @State var searchText: String = ""
+    @State var artists: [String] = []
+    @State var artistSearchResults: [ArtistSearchResult] = []
     
     var body: some View {
         ZStack {
@@ -34,92 +34,18 @@ struct ArtistMultipleSearchView: View {
                             searchTextIsFocused = false
                         }
                     VStack {
-                        
-                        Text("Enter artists")
-                            .font(.largeTitle)
-                            .bold()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.bottom, 24)
-                        
-                        Button {
-                            searchArtists()
-                        } label: {
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                Text("Search artists in Spotify")
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        .foregroundStyle(Theme(colorScheme).textColor)
-                        .padding()
-                        .background(.blue)
-                        .clipShape(Capsule())
-                        
-                        TextEditor(text: $searchText)
-                            .contentMargins(12)
-                            .focused($searchTextIsFocused)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .frame(height: 480)
-                            .cornerRadius(12)
-                            .onChange(of: searchText, initial: true) {
-                                splitArtists()
-                            }
-                            .padding(.top, 24)
+                        NavigationTitleView(titleText: "Enter artists")
+                        btnSearchSpotify
+                        txtEditor
                     }
                 }
             }
             .toolbar {
-                Menu {
-                    Button {
-                        showPreview = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "eye")
-                            Text("Preview")
-                        }
-                    }
-                    
-                    Button {
-                        if let textFromPasteboard = pasteboard.string {
-                            searchText.append(textFromPasteboard)
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "list.clipboard")
-                            Text("Paste from clipboard")
-                        }
-                    }
-                    
-                    Button {
-                        searchText = ""
-                        artistsSearch = ""
-                        artists = []
-                    } label: {
-                        HStack {
-                            Image(systemName: "clear")
-                            Text("Clear text")
-                        }
-                    }
-                    
-                    Picker("Separator", selection: $selectedSeparator) {
-                        ForEach(separators, id: \.self) {
-                            Text($0)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: selectedSeparator, initial: false) {
-                        splitArtists()
-                    }
-                }
-                label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                .foregroundStyle(Theme(colorScheme).textColor)
+                toolBar
             }
             .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-                        //                .ignoresSafeArea()
+                .ignoresSafeArea()
             )
             .navigationDestination(isPresented: $shouldNavigate) {
                 ArtistSearchResultsListView(artistsSearchResults: artistSearchResults)
@@ -130,17 +56,105 @@ struct ArtistMultipleSearchView: View {
             .sheet(isPresented: $showPreview) {
                 ArtistPreviewView(artists: $artists)
             }
-            
-            if searching {
-                ProgressView("Searching...", value: Double(artistSearchResults.count), total: Double(artists.count))
-                    .progressViewStyle(.circular)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(radius: 10)
+                       
+            if isSearching {
+                DefaultProgressView(progressViewText: "Searching...")
             }
         }
     }
+    
+    var btnSearchSpotify: some View {
+        Button {
+            searchArtists()
+        } label: {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                Text("Search artists in Spotify")
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundStyle(Theme(colorScheme).textColor)
+        .padding()
+        .background(.blue)
+        .clipShape(Capsule())
+    }
+    
+    var txtEditor: some View {
+        TextEditor(text: $searchText)
+            .contentMargins(12)
+            .focused($searchTextIsFocused)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .frame(height: 480)
+            .cornerRadius(12)
+            .onChange(of: searchText, initial: true) {
+                splitArtists()
+            }
+            .padding(.top, 24)
+    }
+    
+    /// Toolbar: Start
+    var toolBar: some View {
+        Menu {
+            btnToolBarPreview
+            btnToolBarPasteFromClipboard
+            btnToolBarClearText
+        }
+        label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .foregroundStyle(Theme(colorScheme).textColor)
+    }
+    
+    var btnToolBarPreview: some View {
+        Button {
+            showPreview = true
+        } label: {
+            HStack {
+                Image(systemName: "eye")
+                Text("Preview")
+            }
+        }
+    }
+    
+    var btnToolBarPasteFromClipboard: some View {
+        Button {
+            if let textFromPasteboard = pasteboard.string {
+                searchText.append(textFromPasteboard)
+            }
+        } label: {
+            HStack {
+                Image(systemName: "list.clipboard")
+                Text("Paste from clipboard")
+            }
+        }
+    }
+    
+    var btnToolBarClearText: some View {
+        Button {
+            searchText = ""
+            artistsSearch = ""
+            artists = []
+        } label: {
+            HStack {
+                Image(systemName: "clear")
+                Text("Clear text")
+            }
+        }
+    }
+    
+    var pkrToolBarArtistsSeparator: some View {
+        Picker("Separator", selection: $selectedSeparator) {
+            ForEach(separators, id: \.self) {
+                Text($0)
+            }
+        }
+        .pickerStyle(.menu)
+        .onChange(of: selectedSeparator, initial: false) {
+            splitArtists()
+        }
+    }
+    /// Toolbar: End
     
     private func splitArtists() -> Void {
         let separator: Character
@@ -185,7 +199,7 @@ struct ArtistMultipleSearchView: View {
             return
         }
         
-        searching = true
+        self.isSearching = true
         var remainingSearches = Double(artistNames.count)
         
         for artist in artistNames {
@@ -198,7 +212,7 @@ struct ArtistMultipleSearchView: View {
                         // Only navigate when all artists have been searched in Spotify
                         remainingSearches -= 1
                         if remainingSearches == 0 {
-                            self.searching = false
+                            self.isSearching = false
                             self.shouldNavigate = true
                         }
                         if case .failure(let error) = completion {
@@ -224,7 +238,7 @@ struct ArtistMultipleSearchView: View {
 }
 
 #Preview {
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
@@ -233,3 +247,5 @@ struct ArtistMultipleSearchView: View {
     ArtistMultipleSearchView()
         .environmentObject(spotify)
 }
+
+

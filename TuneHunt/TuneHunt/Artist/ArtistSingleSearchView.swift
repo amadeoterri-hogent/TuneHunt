@@ -20,18 +20,16 @@ struct ArtistSingleSearchView: View {
             artistSingleSearchView
             
             if isSearching {
-                ProgressView("Searching artists...")
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                DefaultProgressView(progressViewText: "Searching...")
             }
         }
     }
     
     var artistSingleSearchView: some View {
         VStack {
-            txtNavigationTitle
+            NavigationTitleView(titleText: "Search For Artist")
             searchBar
-            captionArtist
+            DefaultCaption(captionText: "Tap an artist to proceed")
             
             if artists.isEmpty && !isSearching {
                 txtNoResults
@@ -41,6 +39,7 @@ struct ArtistSingleSearchView: View {
             }
             Spacer()
         }
+        .padding()
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
@@ -54,27 +53,16 @@ struct ArtistSingleSearchView: View {
         }
     }
     
-    var txtNavigationTitle: some View {
-        Text("Search For Artist")
-            .font(.largeTitle)
-            .bold()
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
     var searchBar: some View {
-        HStack {
-            TextField("Search artist in spotify...", text: $nameArtist, onCommit: searchArtist)
-                .padding(.leading, 36)
-                .submitLabel(.search)
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(10)
-                .overlay(
-                    searchBarOverlay
-                )
-        }
-        .padding(.horizontal)
+        TextField("Search artist in spotify...", text: $nameArtist, onCommit: searchArtist)
+            .padding(.leading, 36)
+            .submitLabel(.search)
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(10)
+            .overlay(
+                searchBarOverlay
+            )
     }
     
     var searchBarOverlay: some View {
@@ -99,13 +87,6 @@ struct ArtistSingleSearchView: View {
         })
     }
     
-    var captionArtist: some View {
-        Text("Tap an artist to proceed")
-            .font(.caption2)
-            .opacity(0.4)
-            .frame(maxWidth: .infinity, alignment: .center)
-    }
-    
     var txtNoResults: some View {
         Text("No results")
             .frame(maxHeight: .infinity, alignment: .center)
@@ -128,7 +109,6 @@ struct ArtistSingleSearchView: View {
             }
         }
         .listStyle(.plain)
-        .padding()
     }
     
     func searchArtist() {
@@ -187,11 +167,11 @@ struct ArtistSingleSearchView: View {
         return spotify
     }()
     
-//    let artists: [Artist] = [
-//        .pinkFloyd,.radiohead
-//    ]
+    let artists: [Artist] = [
+        .pinkFloyd,.radiohead
+    ]
     
-    let artists: [Artist] = []
+//    let artists: [Artist] = []
     
     ArtistSingleSearchView(artists:artists)
         .environmentObject(spotify)
