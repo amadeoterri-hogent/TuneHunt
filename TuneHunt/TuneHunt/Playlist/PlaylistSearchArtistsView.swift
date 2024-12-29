@@ -9,80 +9,24 @@ struct PlaylistSearchArtistsView: View {
     
     @State private var playlists: [Playlist<PlaylistItemsReference>] = []
     @State private var isSearching = false
-    @State private var namePlaylist: String = ""
+    @State private var namePlaylist = ""
     @State private var shouldNavigate = false
-    @State var artistsSearchResults: [ArtistSearchResult] = []
     @State private var alertItem: AlertItem? = nil
     @State private var searchCancellable: AnyCancellable? = nil
     @State private var artistsCancellables: Set<AnyCancellable> = []
     @State private var loadPlaylistCancellable: AnyCancellable? = nil
     
+    @State var artistsSearchResults: [ArtistSearchResult] = []
+    
     var body: some View {
         ZStack {
             VStack {
-                Text("Search For Playlist")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                HStack {
-                    TextField("Search playlist in spotify...",text: $namePlaylist, onCommit: searchPlaylist)
-                        .padding(.leading, 28)
-                        .overlay(
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                if !namePlaylist.isEmpty {
-                                    Button(action: {
-                                        self.namePlaylist = ""
-                                        self.playlists = []
-                                    }, label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.secondary)
-                                    })
-                                }
-                            }
-                        )
-                        .submitLabel(.search)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal)
-
-                
-                Text("Tap a playlist to proceed")
-                    .font(.caption2)
-                    .foregroundColor(Theme(colorScheme).textColor)
-                    .opacity(0.4)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                if playlists.isEmpty && !isSearching {
-                    Text("No results")
-                        .frame(maxHeight: .infinity, alignment: .center)
-                        .foregroundColor(Theme(colorScheme).textColor)
-                        .font(.title)
-                        .opacity(0.6)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 48)
-                }
-                else {
-                    List {
-                        ForEach(playlists, id: \.self) { playlist in
-                            Button {
-                                findArtists(playlist:playlist)
-                            } label: {
-                                Text("\(playlist.name)")
-                            }
-                            .listRowBackground(Color.clear)
-                        }
-                    }
-                    .listStyle(.plain)
-                    .padding()
-                }
+                DefaultNavigationTitleView(titleText: "Search For Playlist")
+                txtSearchPlaylist
+                DefaultCaption(captionText: "Tap a playlist to proceed")
+                playlistSearchResults
             }
+            .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
             .foregroundStyle(Theme(colorScheme).textColor)
@@ -96,14 +40,66 @@ struct PlaylistSearchArtistsView: View {
             }
             
             if isSearching {
-                ProgressView("Searching...")
-                    .progressViewStyle(.circular)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(radius: 10)
+                DefaultProgressView(progressViewText: "Searching...")
             }
         }
+    }
+    
+    var txtSearchPlaylist: some View {
+        TextField("Search playlist in spotify...", text: $namePlaylist, onCommit: searchPlaylist)
+            .padding(.leading, 28)
+            .submitLabel(.search)
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(10)
+            .overlay(overlaySearchPlaylist)
+    }
+    
+    var overlaySearchPlaylist: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            Spacer()
+            if !namePlaylist.isEmpty {
+                btnClearText
+            }
+        }
+        .padding()
+    }
+    
+    var btnClearText: some View {
+        Button(action: {
+            self.namePlaylist = ""
+            self.playlists = []
+        }, label: {
+            Image(systemName: "xmark.circle.fill")
+                .foregroundColor(.secondary)
+        })
+    }
+    
+    var playlistSearchResults: some View {
+        Group {
+            if playlists.isEmpty {
+                DefaultNoResults()
+            }
+            else {
+                lstPlaylists
+            }
+        }
+    }
+    
+    var lstPlaylists: some View {
+        List {
+            ForEach(playlists, id: \.self) { playlist in
+                Button {
+                    findArtists(playlist:playlist)
+                } label: {
+                    Text("\(playlist.name)")
+                }
+                .listRowBackground(Color.clear)
+            }
+        }
+        .listStyle(.plain)
     }
     
     func searchPlaylist() {
@@ -180,7 +176,11 @@ struct PlaylistSearchArtistsView: View {
                                     message: error.localizedDescription
                                 )
                             }
-                            self.decrementRemainingRequests(&remainingRequests)
+                            remainingRequests -= 1
+                            if remainingRequests == 0 {
+                                self.isSearching = false
+                                self.shouldNavigate = true
+                            }
                         },
                         receiveValue: { artist in
                             if !self.artistsSearchResults.contains(where: { $0.artist.id == artist.id }) {
@@ -192,15 +192,6 @@ struct PlaylistSearchArtistsView: View {
             }
         }
 
-        // If no requests were made, mark as done immediately
-        if remainingRequests == 0 {
-            self.isSearching = false
-            self.shouldNavigate = true
-        }
-    }
-
-    private func decrementRemainingRequests(_ remainingRequests: inout Int) {
-        remainingRequests -= 1
         if remainingRequests == 0 {
             self.isSearching = false
             self.shouldNavigate = true
@@ -209,7 +200,7 @@ struct PlaylistSearchArtistsView: View {
 }
 
 #Preview {
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify

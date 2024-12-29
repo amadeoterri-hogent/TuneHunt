@@ -32,7 +32,7 @@ struct ArtistSingleSearchView: View {
             DefaultCaption(captionText: "Tap an artist to proceed")
             
             if artists.isEmpty && !isSearching {
-                txtNoResults
+                DefaultNoResults()
             }
             else {
                 lstArtists
@@ -60,12 +60,10 @@ struct ArtistSingleSearchView: View {
             .padding()
             .background(Color(.secondarySystemBackground))
             .cornerRadius(10)
-            .overlay(
-                searchBarOverlay
-            )
+            .overlay(overlaySearchBar)
     }
     
-    var searchBarOverlay: some View {
+    var overlaySearchBar: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
@@ -85,15 +83,6 @@ struct ArtistSingleSearchView: View {
             Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.secondary)
         })
-    }
-    
-    var txtNoResults: some View {
-        Text("No results")
-            .frame(maxHeight: .infinity, alignment: .center)
-            .foregroundColor(Theme(colorScheme).textColor)
-            .font(.title)
-            .opacity(0.4)
-            .padding(.bottom, 48)
     }
     
     var lstArtists: some View {

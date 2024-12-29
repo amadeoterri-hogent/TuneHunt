@@ -10,7 +10,6 @@ struct PlaylistSelectView: View {
     @Environment(\.colorScheme) var colorScheme
     @Binding var artists: [Artist]
     
-    @State var playlists: [Playlist<PlaylistItemsReference>] = []
     @State private var alertItem: AlertItem? = nil
     @State private var cancellables: Set<AnyCancellable> = []
     @State private var searchCancellables: Set<AnyCancellable> = []
@@ -21,6 +20,8 @@ struct PlaylistSelectView: View {
     @State private var shouldNavigate: Bool = false
     @State private var showCreatePlaylist: Bool = false
     @State private var selectedPlaylist: Playlist<PlaylistItems>? = nil
+    
+    @State var playlists: [Playlist<PlaylistItemsReference>] = []
     @State var tracks: [Track] = []
     
     var topTracks = UserDefaults.standard.integer(forKey: "topTracks")
@@ -30,42 +31,10 @@ struct PlaylistSelectView: View {
     var body: some View {
         ZStack {
             VStack {
-                Text("Select a Playlist")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding(.horizontal)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                if !playlists.isEmpty {
-                    Text("Tap a playlist to proceed")
-                        .font(.caption2)
-                        .foregroundColor(Theme(colorScheme).textColor)
-                        .opacity(0.4)
-                        .padding(.horizontal)
-                        .padding(.top,6)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    List {
-                        ForEach(playlists, id: \.uri) { playlist in
-                            PlaylistCellView(playlist: playlist, loadPlaylist: { playlist in
-                                loadPlaylist(selectedPlaylist: playlist)
-                            })
-                        }
-                        .listRowBackground(Color.clear)
-                    }
-                    .listStyle(.plain)
-                    .scrollContentBackground(.hidden)
-                }
-                else {
-                    Text("No results")
-                        .frame(maxHeight: .infinity, alignment: .center)
-                        .foregroundColor(Theme(colorScheme).textColor)
-                        .font(.title)
-                        .opacity(0.6)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 48)
-                }
+                DefaultNavigationTitleView(titleText: "Select a Playlist")
+                playlistView
             }
+            .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
             .foregroundStyle(Theme(colorScheme).textColor)
@@ -78,42 +47,61 @@ struct PlaylistSelectView: View {
                 Alert(title: alert.title, message: alert.message)
             }
             .toolbar {
-                Button {
-                    showCreatePlaylist = true
-                } label: {
-                    Image(systemName: "plus" )
-                        .font(.title2)
-                        .frame(width:48, height: 48)
-                        .foregroundStyle(Theme(colorScheme).textColor)
-                }
-                .sheet(isPresented: $showCreatePlaylist) {
-                    PlaylistCreateView(onPlaylistCreated: { newPlaylist in
-                        playlists.insert(newPlaylist, at: 0)
-                    })
-                }
+                toolBarPlaylist
             }
             .onAppear(perform: retrievePlaylists)
             
             if isLoading {
-                ProgressView("Loading...")
-                    .progressViewStyle(.circular)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(radius: 10)
+                DefaultProgressView(progressViewText: "Loading...")
             }
             
             if isSearchingTracks {
-                ProgressView("Searching tracks...")
-                    .progressViewStyle(.circular)
-                    .padding()
-                    .background(Color(UIColor.systemBackground))
-                    .cornerRadius(10)
-                    .shadow(radius: 10)
+                DefaultProgressView(progressViewText: "Searching tracks...")
             }
         }
     }
     
+    var playlistView: some View {
+        Group {
+            if !playlists.isEmpty {
+                DefaultCaption(captionText: "Tap a playlist to proceed")
+                    .padding(.top, 8)
+                lstPlaylists
+            }
+            else {
+                DefaultNoResults()
+            }
+        }
+    }
+    
+    var lstPlaylists: some View {
+        List {
+            ForEach(playlists, id: \.uri) { playlist in
+                PlaylistCellView(playlist: playlist, loadPlaylist: { playlist in
+                    loadPlaylist(selectedPlaylist: playlist)
+                })
+            }
+            .listRowBackground(Color.clear)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+    }
+    
+    var toolBarPlaylist: some View {
+        Button {
+            showCreatePlaylist = true
+        } label: {
+            Image(systemName: "plus" )
+                .font(.title2)
+                .frame(width:48, height: 48)
+                .foregroundStyle(Theme(colorScheme).textColor)
+        }
+        .sheet(isPresented: $showCreatePlaylist) {
+            PlaylistCreateView(onPlaylistCreated: { newPlaylist in
+                playlists.insert(newPlaylist, at: 0)
+            })
+        }
+    }
     
     func retrievePlaylists() {
         // Don't try to load any playlists if we're in preview mode.

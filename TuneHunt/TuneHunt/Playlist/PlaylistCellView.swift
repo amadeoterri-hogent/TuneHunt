@@ -21,11 +21,9 @@ struct PlaylistCellView: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width:48, height: 48)
+                    .frame(width: 48, height: 48)
                     .padding(.trailing, 4)
-                VStack {
-                    Text("\(playlist.name)")
-                }
+                Text("\(playlist.name)")
             }
             .onAppear(perform: loadImage)
         }
@@ -50,22 +48,17 @@ struct PlaylistCellView: View {
     }
 }
 
-//#Preview {
-//    let spotify: Spotify = {
-//        let spotify = Spotify()
-//        spotify.isAuthorized = true
-//        return spotify
-//    }()
-//    
-//    let artists: [Artist] = [
-//        .pinkFloyd,.radiohead
-//    ]
-//    
-//    return List {
-//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .thisIsMildHighClub)
-//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .thisIsRadiohead)
-//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .modernPsychedelia)
-//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .rockClassics)
-//        PlaylistCellView(spotify: spotify,selectedPlaylist: nil, playlist: .menITrust)
-//    }
-//}
+#Preview {
+    let spotify = {
+        let spotify = Spotify()
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    
+    let artists: [Artist] = [
+        .pinkFloyd,.radiohead
+    ]
+    
+    PlaylistCellView(playlist: .thisIsMildHighClub)
+
+}

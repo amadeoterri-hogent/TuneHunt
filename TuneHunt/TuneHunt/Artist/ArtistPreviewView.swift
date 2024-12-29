@@ -8,29 +8,28 @@ struct ArtistPreviewView : View {
     var body: some View {
         VStack {
             if artists.isEmpty {
-                Text("No results")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .foregroundColor(Theme(colorScheme).textColor)
-                    .font(.title)
-                    .opacity(0.6)
-                    .foregroundColor(.secondary)
+                DefaultNoResults()
             } else {
-                List {
-                    ForEach(artists, id: \.self) {
-                        Text("\($0)")
-                            .listRowBackground(Color.clear)
-                            .foregroundStyle(Theme(colorScheme).textColor)
-                        
-                    }
-                    .onDelete(perform: removeArtist)
-                }
-                .listStyle(.plain)
-                .padding(24)
+                lstPreviewArtists
             }
         }
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
+    }
+    
+    var lstPreviewArtists: some View {
+        List {
+            ForEach(artists, id: \.self) {
+                Text("\($0)")
+                    .listRowBackground(Color.clear)
+                    .foregroundStyle(Theme(colorScheme).textColor)
+                
+            }
+            .onDelete(perform: removeArtist)
+        }
+        .listStyle(.plain)
+        .padding(24)
     }
     
     private func removeArtist(at offsets: IndexSet) {
@@ -41,8 +40,8 @@ struct ArtistPreviewView : View {
 }
 
 #Preview {
-//    let artists: [String] = ["Pink Floyd","Radiohead","Ice Cube"]
-    let artists: [String] = []
+    let artists = ["Pink Floyd","Radiohead","Ice Cube"]
+//    let artists: [String] = []
     
     ArtistPreviewView(artists: .constant(artists))
 }
