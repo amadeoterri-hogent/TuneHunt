@@ -6,7 +6,7 @@ struct ArtistSingleSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var nameArtist: String = ""
+    @State private var nameArtist = ""
     @State private var alertItem: AlertItem? = nil
     @State private var searchCancellable: AnyCancellable? = nil
     @State private var isSearching = false
@@ -17,82 +17,7 @@ struct ArtistSingleSearchView: View {
     
     var body: some View {
         ZStack {
-            VStack {
-                Text("Search For Artist")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                HStack {
-                    TextField("Search artist in spotify...",text: $nameArtist,onCommit:searchArtist)
-                        .padding(.leading, 28)
-                        .overlay(
-                            HStack {
-                                Image(systemName: "magnifyingglass")
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                                if !nameArtist.isEmpty {
-                                    Button(action: {
-                                        self.nameArtist = ""
-                                        self.artists = []
-                                    }, label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.secondary)
-                                    })
-                                }
-                            }
-                        )
-                        .submitLabel(.search)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal)
-                
-                Text("Tap an artist to proceed")
-                    .font(.caption2)
-                    .foregroundColor(Theme(colorScheme).textColor)
-                    .opacity(0.4)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                
-                if artists.isEmpty && !isSearching {
-                    Text("No results")
-                        .frame(maxHeight: .infinity, alignment: .center)
-                        .foregroundColor(Theme(colorScheme).textColor)
-                        .font(.title)
-                        .opacity(0.6)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 48)
-                }
-                else {
-                    List {
-                        ForEach(artists, id: \.self) { artist in
-                            Button {
-                                spotifyArtists = [artist]
-                                shouldNavigate = true
-                            } label: {
-                                Text("\(artist.name)")
-                            }
-                            .listRowBackground(Color.clear)
-                        }
-                    }
-                    .listStyle(.plain)
-                    .padding()
-                }
-                Spacer()
-            }
-            .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea())
-            .foregroundStyle(Theme(colorScheme).textColor)
-            .navigationDestination(isPresented: $shouldNavigate) {
-                if !spotifyArtists.isEmpty {
-                    PlaylistSelectView(artists: $spotifyArtists)
-                }
-            }
-            .alert(item: $alertItem) { alert in
-                Alert(title: alert.title, message: alert.message)
-            }
+            artistSingleSearchView
             
             if isSearching {
                 ProgressView("Searching artists...")
@@ -102,20 +27,112 @@ struct ArtistSingleSearchView: View {
         }
     }
     
-    func searchArtist() {
-        if self.nameArtist == "" {
-            self.alertItem = AlertItem(
-                title: "Couldn't search artist",
-                message: "Artist name is empty."
-            )
-            return
+    var artistSingleSearchView: some View {
+        VStack {
+            txtNavigationTitle
+            searchBar
+            captionArtist
+            
+            if artists.isEmpty && !isSearching {
+                txtNoResults
+            }
+            else {
+                lstArtists
+            }
+            Spacer()
         }
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
+        .foregroundStyle(Theme(colorScheme).textColor)
+        .navigationDestination(isPresented: $shouldNavigate) {
+            if !spotifyArtists.isEmpty {
+                PlaylistSelectView(artists: $spotifyArtists)
+            }
+        }
+        .alert(item: $alertItem) { alert in
+            Alert(title: alert.title, message: alert.message)
+        }
+    }
+    
+    var txtNavigationTitle: some View {
+        Text("Search For Artist")
+            .font(.largeTitle)
+            .bold()
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    var searchBar: some View {
+        HStack {
+            TextField("Search artist in spotify...", text: $nameArtist, onCommit: searchArtist)
+                .padding(.leading, 36)
+                .submitLabel(.search)
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(10)
+                .overlay(
+                    searchBarOverlay
+                )
+        }
+        .padding(.horizontal)
+    }
+    
+    var searchBarOverlay: some View {
+        HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+            Spacer()
+            if !nameArtist.isEmpty {
+                btnClearSearch
+            }
+        }
+        .padding()
+    }
         
-        guard spotify.currentUser?.uri != nil else {
-            self.alertItem = AlertItem(
-                title: "User not found",
-                message: "Please make sure you are logged in."
-            )
+    var btnClearSearch: some View {
+        Button(action: {
+            self.nameArtist = ""
+            self.artists = []
+        }, label: {
+            Image(systemName: "xmark.circle.fill")
+                .foregroundColor(.secondary)
+        })
+    }
+    
+    var captionArtist: some View {
+        Text("Tap an artist to proceed")
+            .font(.caption2)
+            .opacity(0.4)
+            .frame(maxWidth: .infinity, alignment: .center)
+    }
+    
+    var txtNoResults: some View {
+        Text("No results")
+            .frame(maxHeight: .infinity, alignment: .center)
+            .foregroundColor(Theme(colorScheme).textColor)
+            .font(.title)
+            .opacity(0.4)
+            .padding(.bottom, 48)
+    }
+    
+    var lstArtists: some View {
+        List {
+            ForEach(artists, id: \.self) { artist in
+                Button {
+                    spotifyArtists = [artist]
+                    shouldNavigate = true
+                } label: {
+                    Text("\(artist.name)")
+                }
+                .listRowBackground(Color.clear)
+            }
+        }
+        .listStyle(.plain)
+        .padding()
+    }
+    
+    func searchArtist() {
+        if !validate() {
             return
         }
         
@@ -141,10 +158,30 @@ struct ArtistSingleSearchView: View {
             }
         )
     }
+    
+    func validate() -> Bool {
+        if self.nameArtist == "" {
+            self.alertItem = AlertItem(
+                title: "Couldn't search artist",
+                message: "Artist name is empty."
+            )
+            return false
+        }
+        
+        guard spotify.currentUser?.uri != nil else {
+            self.alertItem = AlertItem(
+                title: "User not found",
+                message: "Please make sure you are logged in."
+            )
+            return false
+        }
+        
+        return true
+    }
 }
 
 #Preview{
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
