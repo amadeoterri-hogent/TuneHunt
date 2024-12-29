@@ -10,7 +10,7 @@ struct FinishView: View {
     @State private var image = Image(.spotifyLogoGreen)
     @State private var alert: AlertItem? = nil
     @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var shouldNavigate: Bool = false
+    @State private var shouldNavigate = false
     
     var tracks: [Track]
     var playlist: Playlist<PlaylistItems>
@@ -19,57 +19,10 @@ struct FinishView: View {
     var body: some View {
         ZStack {
             VStack {
-                Text("Complete Playlist")
-                    .font(.largeTitle)
-                    .bold()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                Button {
-                    validateAndNavigate()
-                } label: {
-                    Text("Add tracks to playlist")
-                        .frame(maxWidth: .infinity)
-                }
-                .foregroundStyle(Theme(colorScheme).textColor)
-                .padding()
-                .background(.blue)
-                .clipShape(Capsule())
-                .frame(maxWidth: .infinity, alignment: .center)
-                
-                HStack {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 64, height: 64)
-                        .padding(.trailing, 4)
-                    
-                    VStack(alignment: .leading) {
-                        Text(playlist.name)
-                            .font(.title)
-                        
-                        if let owner = playlist.owner?.displayName {
-                            Text(owner)
-                                .font(.subheadline)
-                        }
-                        
-                    }
-                    
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical,24)
-                
-                Text("Tracks (\(tracks.count))")
-                    .font(.title2)
-                    .foregroundColor(Theme(colorScheme).textColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                ScrollView {
-                    LazyVStack {
-                        ForEach(tracks, id: \.self) { track in
-                            TrackCellView(track: track)
-                        }
-                    }
-                }
+                DefaultNavigationTitleView(titleText: "Complete Playlist")
+                btnAddTracksToPlaylist
+                playlistView
+                tracksView
                 
                 Spacer()
                 
@@ -85,6 +38,76 @@ struct FinishView: View {
                 FinishProgressView(tracks: tracks, playlist: playlist, artists: artists)
             }
             
+        }
+    }
+    
+    var btnAddTracksToPlaylist: some View {
+        Button {
+            validateAndNavigate()
+        } label: {
+            HStack {
+                Image(systemName: "rectangle.badge.plus")
+                Text("Add tracks to playlist")
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundStyle(Theme(colorScheme).textColor)
+        .padding()
+        .background(.blue)
+        .clipShape(Capsule())
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+    
+    var playlistView: some View {
+        HStack {
+            imgPlaylist
+            lblPlaylist
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical,24)
+    }
+    
+    var imgPlaylist: some View {
+        image
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 64, height: 64)
+            .padding(.trailing, 4)
+    }
+    
+    var lblPlaylist: some View {
+        VStack(alignment: .leading) {
+            Text(playlist.name)
+                .font(.title)
+            
+            if let owner = playlist.owner?.displayName {
+                Text(owner)
+                    .font(.subheadline)
+            }
+        }
+    }
+    
+    var tracksView: some View {
+        VStack {
+            txtTracksView
+            lstTracks
+        }
+    }
+    
+    var txtTracksView: some View {
+        Text("Tracks (\(tracks.count))")
+            .font(.title2)
+            .foregroundColor(Theme(colorScheme).textColor)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    var lstTracks: some View {
+        ScrollView {
+            LazyVStack {
+                ForEach(tracks, id: \.self) { track in
+                    TrackCellView(track: track)
+                }
+            }
         }
     }
     
@@ -127,7 +150,7 @@ extension Array {
 
 #Preview {
     
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         //        spotify.isAuthorized = false
         spotify.isAuthorized = true

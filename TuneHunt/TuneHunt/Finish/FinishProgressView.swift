@@ -3,7 +3,6 @@ import SpotifyWebAPI
 
 // TODO: Skip track on error and print after which ones didn't succeed
 // TODO: play playlist?
-// TODO: new Navigationstack??
 
 struct FinishProgressView: View {
     @EnvironmentObject var spotify: Spotify
@@ -19,61 +18,70 @@ struct FinishProgressView: View {
     
     var body: some View {
         VStack {
-            if progress == 1.0 {
-                Text("Completed")
-                    .font(.title)
-                    .padding(.bottom, 36)
-                    .scaleEffect(animationAmount)
-                    .animation(
-                        .easeInOut(duration: 1).repeatCount(10, autoreverses: true),
-                        value: animationAmount
-                    )
-                    .onAppear {
-                        animationAmount = 1.2
-                    }
-            }
-            else {
-                Text("Adding tracks to playlist")
-                    .font(.title)
-                    .padding(.vertical, 36)
-                    .scaleEffect(animationAmount)
-                    .animation(
-                        .easeInOut(duration: 1).repeatForever(autoreverses: true),
-                        value: animationAmount
-                    )
-            }
-
-            
-            ProgressView(value: progress)
-                .progressViewStyle(CustomCircularProgressViewStyle())
-                .padding()
-                    
+            txtProgressStatus
+            pvProgress
         }
-        .toolbar() {
-            Button {
-                shouldNavigate = true
-            } label: {
-                HStack {
-                    Image(systemName: "house")
-                    Text("Home")
-                }
-            }
-        }
-        .navigationDestination(isPresented: $shouldNavigate) {
-            MenuView()
-        }
+        .padding()
+        .toolbar() {btnHome}
+        .navigationDestination(isPresented: $shouldNavigate) {MenuView()}
         .frame(maxHeight: .infinity, alignment: .center)
-        .background(
-            LinearGradient(
-                colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-        )
+        .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
+            .ignoresSafeArea())
         .onAppear() {
             Task {
                 await finish()
+            }
+        }
+    }
+    
+    var txtProgressStatus: some View {
+        Group {
+            if progress == 1.0 {
+                txtCompleted
+            }
+            else {
+                txtInProgress
+            }
+        }
+    }
+    
+    var txtCompleted: some View {
+        Text("Completed")
+            .font(.title)
+            .padding(.bottom, 36)
+            .scaleEffect(animationAmount)
+            .animation(
+                .easeInOut(duration: 1).repeatCount(10, autoreverses: true),
+                value: animationAmount
+            )
+            .onAppear {
+                animationAmount = 1.2
+            }
+    }
+    
+    var txtInProgress: some View {
+        Text("Adding tracks to playlist")
+            .font(.title)
+            .padding(.vertical, 36)
+            .scaleEffect(animationAmount)
+            .animation(
+                .easeInOut(duration: 1).repeatForever(autoreverses: true),
+                value: animationAmount
+            )
+    }
+    
+    var pvProgress: some View {
+        ProgressView(value: progress)
+            .progressViewStyle(CustomCircularProgressViewStyle())
+    }
+    
+    var btnHome: some View {
+        Button {
+            shouldNavigate = true
+        } label: {
+            HStack {
+                Image(systemName: "house")
+                Text("Home")
             }
         }
     }
@@ -93,13 +101,6 @@ struct FinishProgressView: View {
                 .receive(on: RunLoop.main)
                 .sink(
                     receiveCompletion: { completion in
-//                        if case .failure(let error) = completion {
-//                            self.alert = AlertItem(
-//                                title: "Couldn't Add Tracks",
-//                                message: error.localizedDescription
-//                            )
-//                            remainingChunks = 0 // Stop processing if there's an error
-//                        } else {
                             remainingChunks -= 1
                     },
                     receiveValue: { _ in }
