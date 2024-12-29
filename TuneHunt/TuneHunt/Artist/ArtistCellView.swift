@@ -13,18 +13,8 @@ struct ArtistCellView: View {
 
     var body: some View {
         HStack() {
-            (artistSearchResult.image ?? placeholderImage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 60, height: 60)
-                .cornerRadius(5)
-                .padding(.trailing, 5)
-
-            
-            Text(artistSearchResult.artist.name)
-                .font(.headline)
-            
-            Toggle("",isOn: $artistSearchResult.addToPlaylist)
+            imgArtist
+            lblArtist
             Spacer()
         }
         .padding(.vertical, 5)
@@ -32,6 +22,24 @@ struct ArtistCellView: View {
             if artistSearchResult.image == nil {
                 loadImage()
             }
+        }
+    }
+    
+    var imgArtist: some View {
+        (artistSearchResult.image ?? placeholderImage)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 60, height: 60)
+            .cornerRadius(5)
+            .padding(.trailing, 5)
+    }
+    
+    var lblArtist: some View {
+        HStack {
+            Text(artistSearchResult.artist.name)
+                .font(.headline)
+            
+            Toggle("",isOn: $artistSearchResult.addToPlaylist)
         }
     }
     
@@ -58,7 +66,7 @@ struct ArtistCellView: View {
 #Preview {
     let artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
     
-    let spotify: Spotify = {
+    let spotify = {
         let spotify = Spotify()
         spotify.isAuthorized = true
         return spotify
