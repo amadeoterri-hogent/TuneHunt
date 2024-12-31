@@ -3,6 +3,10 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSingleSearchViewModel: ObservableObject {
+    @Published private var model = ArtistSingleSearchModel()
+    @Published var alertItem: AlertItem? = nil
+    @Published var shouldNavigate = false
+    
     let spotify: Spotify = Spotify.shared
     var searchText: String = ""
     var isSearching = false
@@ -12,10 +16,6 @@ class ArtistSingleSearchViewModel: ObservableObject {
     init(isPreview: Bool) {
         self.isPreview = isPreview
     }
-    
-    @Published private var model = ArtistSingleSearchModel()
-    @Published var alertItem: AlertItem? = nil
-    @Published var shouldNavigate = false
     
     var artists: [Artist] {
         self.model.artists
