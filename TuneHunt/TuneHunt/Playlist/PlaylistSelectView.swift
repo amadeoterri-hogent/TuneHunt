@@ -8,7 +8,8 @@ import SpotifyExampleContent
 struct PlaylistSelectView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    @Binding var artists: [Artist]
+//    @Binding var artists: [Artist]
+    var artists: [Artist]
     
     @State private var alertItem: AlertItem? = nil
     @State private var cancellables: Set<AnyCancellable> = []
@@ -215,6 +216,8 @@ struct PlaylistSelectView: View {
         .pinkFloyd,.radiohead
     ]
     
-    PlaylistSelectView(artists: .constant(artists), playlists: playlists)
+//    PlaylistSelectView(artists: .constant(artists), playlists: playlists)
+//        .environmentObject(spotify)
+    PlaylistSelectView(artists: artists, playlists: playlists)
         .environmentObject(spotify)
 }

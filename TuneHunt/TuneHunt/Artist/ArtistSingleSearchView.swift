@@ -3,23 +3,20 @@ import Combine
 import SpotifyWebAPI
 
 struct ArtistSingleSearchView: View {
-    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
+    @ObservedObject var spotify: Spotify
+    @ObservedObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel
     
-    @State private var nameArtist = ""
-    @State private var alertItem: AlertItem? = nil
-    @State private var searchCancellable: AnyCancellable? = nil
-    @State private var isSearching = false
-    @State private var shouldNavigate = false
-    @State private var spotifyArtists: [Artist] = []
-    
-    @State var artists: [Artist] = []
+    init(spotify: Spotify, artistSingleSearchViewModel: ArtistSingleSearchViewModel) {
+        self.spotify = spotify
+        self.artistSingleSearchViewModel = artistSingleSearchViewModel
+    }
     
     var body: some View {
         ZStack {
             artistSingleSearchView
             
-            if isSearching {
+            if artistSingleSearchViewModel.isSearching {
                 DefaultProgressView(progressViewText: "Searching...")
             }
         }
@@ -30,31 +27,25 @@ struct ArtistSingleSearchView: View {
             DefaultNavigationTitleView(titleText: "Search For Artist")
             searchBar
             DefaultCaption(captionText: "Tap an artist to proceed")
-            
-            if artists.isEmpty && !isSearching {
-                DefaultNoResults()
-            }
-            else {
-                lstArtists
-            }
+            artistsView
             Spacer()
         }
         .padding()
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
-        .navigationDestination(isPresented: $shouldNavigate) {
-            if !spotifyArtists.isEmpty {
-                PlaylistSelectView(artists: $spotifyArtists)
+        .navigationDestination(isPresented: $artistSingleSearchViewModel.shouldNavigate) {
+            if !artistSingleSearchViewModel.selectedArtists.isEmpty {
+                PlaylistSelectView(artists: artistSingleSearchViewModel.selectedArtists)
             }
         }
-        .alert(item: $alertItem) { alert in
+        .alert(item: $artistSingleSearchViewModel.alertItem) { alert in
             Alert(title: alert.title, message: alert.message)
         }
     }
     
     var searchBar: some View {
-        TextField("Search artist in spotify...", text: $nameArtist, onCommit: searchArtist)
+        TextField("Search artist in spotify...", text: $artistSingleSearchViewModel.searchText, onCommit: artistSingleSearchViewModel.search)
             .padding(.leading, 36)
             .submitLabel(.search)
             .padding()
@@ -68,29 +59,38 @@ struct ArtistSingleSearchView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
             Spacer()
-            if !nameArtist.isEmpty {
+            if !artistSingleSearchViewModel.searchText.isEmpty {
                 btnClearSearch
             }
         }
         .padding()
     }
-        
+    
     var btnClearSearch: some View {
-        Button(action: {
-            self.nameArtist = ""
-            self.artists = []
-        }, label: {
+        Button {
+            artistSingleSearchViewModel.clear()
+        } label: {
             Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.secondary)
-        })
+        }
+    }
+    
+    var artistsView: some View {
+        Group {
+            if artistSingleSearchViewModel.artists.isEmpty && !artistSingleSearchViewModel.isSearching {
+                DefaultNoResults()
+            }
+            else {
+                lstArtists
+            }
+        }
     }
     
     var lstArtists: some View {
         List {
-            ForEach(artists, id: \.self) { artist in
+            ForEach(artistSingleSearchViewModel.artists, id: \.self) { artist in
                 Button {
-                    spotifyArtists = [artist]
-                    shouldNavigate = true
+                    artistSingleSearchViewModel.select(artist)
                 } label: {
                     Text("\(artist.name)")
                 }
@@ -98,54 +98,6 @@ struct ArtistSingleSearchView: View {
             }
         }
         .listStyle(.plain)
-    }
-    
-    func searchArtist() {
-        if !validate() {
-            return
-        }
-        
-        self.artists = []
-        self.isSearching = true
-        
-        self.searchCancellable = spotify.api.search(
-            query: self.nameArtist, categories: [.artist]
-        )
-        .receive(on: RunLoop.main)
-        .sink(
-            receiveCompletion: { completion in
-                if case .failure(let error) = completion {
-                    self.alertItem = AlertItem(
-                        title: "Couldn't Perform Search",
-                        message: error.localizedDescription
-                    )
-                }
-                self.isSearching = false
-            },
-            receiveValue: { searchResults in
-                self.artists = searchResults.artists?.items ?? []
-            }
-        )
-    }
-    
-    func validate() -> Bool {
-        if self.nameArtist == "" {
-            self.alertItem = AlertItem(
-                title: "Couldn't search artist",
-                message: "Artist name is empty."
-            )
-            return false
-        }
-        
-        guard spotify.currentUser?.uri != nil else {
-            self.alertItem = AlertItem(
-                title: "User not found",
-                message: "Please make sure you are logged in."
-            )
-            return false
-        }
-        
-        return true
     }
 }
 
@@ -156,12 +108,7 @@ struct ArtistSingleSearchView: View {
         return spotify
     }()
     
-    let artists: [Artist] = [
-        .pinkFloyd,.radiohead
-    ]
-    
-//    let artists: [Artist] = []
-    
-    ArtistSingleSearchView(artists:artists)
-        .environmentObject(spotify)
+    let artistSingleSearchViewModel = ArtistSingleSearchViewModel(spotify: spotify, isPreview: true)
+
+    ArtistSingleSearchView(spotify: spotify, artistSingleSearchViewModel: artistSingleSearchViewModel)
 }

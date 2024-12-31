@@ -3,7 +3,8 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuListView: View {
-    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var spotify: Spotify
+    @StateObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel
     @Environment(\.colorScheme) var colorScheme
     
     @State private var menuImage = Image(.recordPlayer)
@@ -15,6 +16,12 @@ struct MenuListView: View {
     
     var menuItems: [MenuItem]
     
+    init(spotify: Spotify, menuItems: [MenuItem]) {
+        self.spotify = spotify
+        self.menuItems = menuItems
+        _artistSingleSearchViewModel = StateObject<ArtistSingleSearchViewModel>(wrappedValue: ArtistSingleSearchViewModel(spotify: spotify, isPreview: false))
+    }
+
     var body: some View {
         VStack {
             ForEach(menuItems, id: \.self) { menuItem in
@@ -30,7 +37,7 @@ struct MenuListView: View {
     func destinationView() -> some View {
         switch selection {
         case 1:
-            ArtistSingleSearchView()
+            ArtistSingleSearchView(spotify: spotify, artistSingleSearchViewModel: artistSingleSearchViewModel)
         case 2:
             ArtistMultipleSearchView()
         case 3:
@@ -43,28 +50,28 @@ struct MenuListView: View {
     }
 }
 
-#Preview {
-    let spotify = {
-        let spotify = Spotify()
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    let menuItems = [
-        MenuItem(selection: 1,
-                 imageSystemName: "person",
-                 listItemTitle: "Top tracks from single artist"),
-        MenuItem(selection: 2,
-                 imageSystemName: "person.3",
-                 listItemTitle: "Top tracks from multiple artists"),
-        MenuItem(selection: 3,
-                 imageSystemName: "photo",
-                 listItemTitle: "Find artists from image"),
-        MenuItem(selection: 4,
-                 imageSystemName: "music.note.list",
-                 listItemTitle: "Find artists from other playlist")
-    ]
-    
-    MenuListView(menuItems: menuItems)
-        .environmentObject(spotify)
-}
+//#Preview {
+//    let spotify = {
+//        let spotify = Spotify()
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    let menuItems = [
+//        MenuItem(selection: 1,
+//                 imageSystemName: "person",
+//                 listItemTitle: "Top tracks from single artist"),
+//        MenuItem(selection: 2,
+//                 imageSystemName: "person.3",
+//                 listItemTitle: "Top tracks from multiple artists"),
+//        MenuItem(selection: 3,
+//                 imageSystemName: "photo",
+//                 listItemTitle: "Find artists from image"),
+//        MenuItem(selection: 4,
+//                 imageSystemName: "music.note.list",
+//                 listItemTitle: "Find artists from other playlist")
+//    ]
+//    
+//    MenuListView(menuItems: menuItems)
+//        .environmentObject(spotify)
+//}

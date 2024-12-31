@@ -30,9 +30,10 @@ struct MenuView: View {
 
                 switch menuStyle {
                     case .list:
-                        MenuListView(menuItems: menuItems)
+                        MenuListView(spotify: spotify, menuItems: menuItems)
                     case .grid:
-                        MenuGridView(menuItems: menuItems)
+//                        MenuGridView(menuItems: menuItems)
+                    EmptyView()
                 }
             }
             .padding()
@@ -46,22 +47,22 @@ struct MenuView: View {
     }
 }
 
-#Preview {
-    let demoUser = SpotifyUser(
-        displayName: "Amadeo",
-        uri: "www.google.com",
-        id: "1",
-        href: URL(string: "www.google.com")!
-    )
-    
-    let spotify = {
-        let spotify = Spotify()
-        spotify.isAuthorized = true
-        spotify.currentUser = demoUser
-        return spotify
-    }()
-    
-    return MenuView()
-        .environmentObject(spotify)
-}
+//#Preview {
+//    let demoUser = SpotifyUser(
+//        displayName: "Amadeo",
+//        uri: "www.google.com",
+//        id: "1",
+//        href: URL(string: "www.google.com")!
+//    )
+//    
+//    let spotify = {
+//        let spotify = Spotify()
+//        spotify.isAuthorized = true
+//        spotify.currentUser = demoUser
+//        return spotify
+//    }()
+//    
+//    return MenuView()
+//        .environmentObject(spotify)
+//}
 
