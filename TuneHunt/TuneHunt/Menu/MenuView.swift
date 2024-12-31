@@ -27,7 +27,7 @@ struct MenuView: View {
             .padding()
             .navigationBarBackButtonHidden()
             .toolbar {
-                MenuProfileBarView(menuStyle: $menuViewModel.menuStyle)
+                MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: $menuViewModel.menuStyle, shouldNavigate: $menuViewModel.shouldNavigate )
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
@@ -66,6 +66,8 @@ struct MenuView: View {
             ArtistImageSearchView()
         case 4:
             PlaylistSearchArtistsView()
+        case 5:
+            SettingsView(menuViewModel: menuViewModel)
         default:
             EmptyView()
         }
@@ -73,22 +75,23 @@ struct MenuView: View {
 }
 
 #Preview {
-//    let demoUser = SpotifyUser(
-//        displayName: "Amadeo",
-//        uri: "www.google.com",
-//        id: "1",
-//        href: URL(string: "www.google.com")!
-//    )
-//
-//    let spotify = {
-//        let spotify = Spotify.shared
-//        spotify.isAuthorized = true
-//        spotify.currentUser = demoUser
-//        return spotify
-//    }()
+    let demoUser = SpotifyUser(
+        displayName: "Amadeo",
+        uri: "www.google.com",
+        id: "1",
+        href: URL(string: "www.google.com")!
+    )
+
+    let spotify = {
+        let spotify = Spotify.shared
+        spotify.isAuthorized = true
+        spotify.currentUser = demoUser
+        return spotify
+    }()
     
     let artistSingleSearchViewModel = ArtistSingleSearchViewModel(isPreview: true)
 
     return MenuView(artistSingleSearchViewModel: artistSingleSearchViewModel)
+        .environmentObject(spotify)
 }
 

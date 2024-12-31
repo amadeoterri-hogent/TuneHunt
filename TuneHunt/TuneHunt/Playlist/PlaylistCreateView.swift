@@ -2,7 +2,6 @@ import SwiftUI
 import Combine
 import SpotifyWebAPI
 
-// TODO: Edit button and layout
 struct PlaylistCreateView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme

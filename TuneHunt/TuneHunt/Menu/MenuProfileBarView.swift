@@ -4,14 +4,11 @@ import Foundation
 import SpotifyWebAPI
 
 struct MenuProfileBarView: View {
-    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    
+    @EnvironmentObject var spotify: Spotify
+    @ObservedObject var menuViewModel: MenuViewModel
     @Binding var menuStyle: MenuStyle
-    
-    @State private var profileImage = Image(systemName: "person.crop.circle")
-    @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var shouldNavigate = false
+    @Binding var shouldNavigate: Bool
     
     var body: some View {
         if spotify.currentUser != nil {
@@ -24,15 +21,12 @@ struct MenuProfileBarView: View {
                 lblProfile
             }
             .foregroundStyle(Theme(colorScheme).textColor)
-            .onAppear(perform: loadProfileImage)
-            .navigationDestination(isPresented: $shouldNavigate) {
-                SettingsView()
-            }
+            .onAppear(perform: menuViewModel.loadProfileImage)
         }
     }
     
     var lblProfile : some View {
-        profileImage
+        menuViewModel.profileImage
             .resizable()
             .scaledToFit()
             .clipShape(Circle())
@@ -50,6 +44,7 @@ struct MenuProfileBarView: View {
     
     var btnSettings: some View {
         Button {
+            menuViewModel.selection = 5
             shouldNavigate = true
         } label: {
             Label("Settings", systemImage: "gear")
@@ -63,21 +58,6 @@ struct MenuProfileBarView: View {
             Label("Logout", systemImage: "rectangle.portrait.and.arrow.forward")
                 .foregroundStyle(.red)
         }
-    }
-    
-    func loadProfileImage() {
-        guard let spotifyImage = spotify.currentUser?.images?.largest else {
-            return
-        }
-        
-        self.loadImageCancellable = spotifyImage.load()
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { image in
-                    self.profileImage = image
-                }
-            )
     }
 }
 
@@ -96,6 +76,8 @@ struct MenuProfileBarView: View {
         return spotify
     }()
     
-    MenuProfileBarView(menuStyle: .constant(.list))
+    let menuViewModel: MenuViewModel = MenuViewModel()
+    
+    MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: .constant(.list), shouldNavigate: .constant(false))
         .environmentObject(spotify)
 }

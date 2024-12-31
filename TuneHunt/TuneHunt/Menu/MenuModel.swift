@@ -1,3 +1,5 @@
+import Foundation
+
 struct MenuModel {
     
     var menuItems: [MenuItem] = [
@@ -14,5 +16,7 @@ struct MenuModel {
                  imageSystemName: "music.note.list",
                  listItemTitle: "By finding artists from another playlist")
     ]
+    
+    var countries: [Country] = Bundle.main.decode("countries.json")
     
 }

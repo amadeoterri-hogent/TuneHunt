@@ -4,7 +4,6 @@ import SpotifyWebAPI
 
 struct ArtistSingleSearchView: View {
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var spotify: Spotify
     @ObservedObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel
     
     var body: some View {
