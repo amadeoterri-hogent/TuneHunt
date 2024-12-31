@@ -67,7 +67,7 @@ struct ArtistCellView: View {
     let artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
     
     let spotify = {
-        let spotify = Spotify()
+        let spotify = Spotify.shared
         spotify.isAuthorized = true
         return spotify
     }()

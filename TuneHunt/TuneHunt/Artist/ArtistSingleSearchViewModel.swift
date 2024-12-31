@@ -3,14 +3,13 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSingleSearchViewModel: ObservableObject {
-    let spotify: Spotify
+    let spotify: Spotify = Spotify.shared
     var searchText: String = ""
     var isSearching = false
     var isPreview: Bool
     private var searchCancellable: AnyCancellable? = nil
     
-    init(spotify: Spotify, isPreview: Bool) {
-        self.spotify = spotify
+    init(isPreview: Bool) {
         self.isPreview = isPreview
     }
     

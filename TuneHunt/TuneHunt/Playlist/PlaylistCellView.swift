@@ -50,7 +50,7 @@ struct PlaylistCellView: View {
 
 #Preview {
     let spotify = {
-        let spotify = Spotify()
+        let spotify = Spotify.shared
         spotify.isAuthorized = true
         return spotify
     }()

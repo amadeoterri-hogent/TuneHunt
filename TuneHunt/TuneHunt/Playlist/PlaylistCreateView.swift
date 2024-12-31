@@ -151,7 +151,7 @@ struct PlaylistCreateView: View {
 
 #Preview{
     let spotify: Spotify = {
-        let spotify = Spotify()
+        let spotify = Spotify.shared
         spotify.isAuthorized = true
         return spotify
     }()

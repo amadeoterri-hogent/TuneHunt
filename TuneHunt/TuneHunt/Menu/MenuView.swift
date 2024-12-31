@@ -4,8 +4,11 @@ import SpotifyWebAPI
 
 struct MenuView: View {
     @EnvironmentObject var spotify: Spotify
+    @StateObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel = ArtistSingleSearchViewModel(isPreview: false)
     @Environment(\.colorScheme) var colorScheme
     
+    @State private var shouldNavigate = false
+    @State private var selection: Int = 0
     @State private var menuStyle: MenuStyle = .list
     
     var menuItems: [MenuItem] = [
@@ -27,14 +30,18 @@ struct MenuView: View {
         NavigationStack {
             VStack {
                 DefaultNavigationTitleView(titleText: "Build playlist")
-
-                switch menuStyle {
+                
+                Group {
+                    switch menuStyle {
                     case .list:
-                        MenuListView(spotify: spotify, menuItems: menuItems)
+                        menuListView
                     case .grid:
-//                        MenuGridView(menuItems: menuItems)
-                    EmptyView()
+                        menuGridView
+                    }
+                    Spacer()
                 }
+                .navigationDestination(isPresented: $shouldNavigate) { destinationView()}
+                .foregroundStyle(Theme(colorScheme).textColor)
             }
             .padding()
             .navigationBarBackButtonHidden()
@@ -43,6 +50,43 @@ struct MenuView: View {
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
+        }
+    }
+    
+    var menuListView: some View {
+        VStack {
+            ForEach(menuItems, id: \.self) { menuItem in
+                MenuListItemCell(shouldNavigate: $shouldNavigate, selection: $selection, menuItem: menuItem)
+            }
+        }
+    }
+    
+    var menuGridView: some View {
+        VStack {
+            let columns = [GridItem(.adaptive(minimum: 144))]
+            
+            LazyVGrid (columns: columns) {
+                ForEach(menuItems, id: \.self) { menuItem in
+                    MenuGridItemCell(shouldNavigate: $shouldNavigate, selection: $selection, menuItem: menuItem)
+                        .padding(12)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func destinationView() -> some View {
+        switch selection {
+        case 1:
+            ArtistSingleSearchView(artistSingleSearchViewModel: artistSingleSearchViewModel)
+        case 2:
+            ArtistMultipleSearchView()
+        case 3:
+            ArtistImageSearchView()
+        case 4:
+            PlaylistSearchArtistsView()
+        default:
+            EmptyView()
         }
     }
 }
@@ -54,14 +98,14 @@ struct MenuView: View {
 //        id: "1",
 //        href: URL(string: "www.google.com")!
 //    )
-//    
+//
 //    let spotify = {
-//        let spotify = Spotify()
+//        let spotify = Spotify.shared
 //        spotify.isAuthorized = true
 //        spotify.currentUser = demoUser
 //        return spotify
 //    }()
-//    
+//
 //    return MenuView()
 //        .environmentObject(spotify)
 //}

@@ -151,7 +151,7 @@ extension Array {
 #Preview {
     
     let spotify = {
-        let spotify = Spotify()
+        let spotify = Spotify.shared
         //        spotify.isAuthorized = false
         spotify.isAuthorized = true
         return spotify

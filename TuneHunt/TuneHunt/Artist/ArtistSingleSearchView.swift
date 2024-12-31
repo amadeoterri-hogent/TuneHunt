@@ -4,13 +4,8 @@ import SpotifyWebAPI
 
 struct ArtistSingleSearchView: View {
     @Environment(\.colorScheme) var colorScheme
-    @ObservedObject var spotify: Spotify
+    @EnvironmentObject var spotify: Spotify
     @ObservedObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel
-    
-    init(spotify: Spotify, artistSingleSearchViewModel: ArtistSingleSearchViewModel) {
-        self.spotify = spotify
-        self.artistSingleSearchViewModel = artistSingleSearchViewModel
-    }
     
     var body: some View {
         ZStack {
@@ -102,13 +97,6 @@ struct ArtistSingleSearchView: View {
 }
 
 #Preview{
-    let spotify = {
-        let spotify = Spotify()
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    let artistSingleSearchViewModel = ArtistSingleSearchViewModel(spotify: spotify, isPreview: true)
-
-    ArtistSingleSearchView(spotify: spotify, artistSingleSearchViewModel: artistSingleSearchViewModel)
+    let artistSingleSearchViewModel = ArtistSingleSearchViewModel(isPreview: true)
+    ArtistSingleSearchView(artistSingleSearchViewModel: artistSingleSearchViewModel)
 }

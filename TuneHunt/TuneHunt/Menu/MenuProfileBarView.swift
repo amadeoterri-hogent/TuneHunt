@@ -90,7 +90,7 @@ struct MenuProfileBarView: View {
     )
     
     let spotify = {
-        let spotify = Spotify()
+        let spotify = Spotify.shared
         spotify.isAuthorized = true
         spotify.currentUser = demoUser
         return spotify

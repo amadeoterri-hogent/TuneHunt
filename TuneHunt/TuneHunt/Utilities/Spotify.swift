@@ -14,6 +14,8 @@ import SpotifyWebAPI
 */
 
 final class Spotify: ObservableObject {
+    static let shared = Spotify()
+    
     @Published var isAuthorized = false
     @Published var isRetrievingTokens = false
     @Published var currentUser: SpotifyUser? = nil
@@ -37,7 +39,7 @@ final class Spotify: ObservableObject {
     var authorizationState = String.randomURLSafe(length: 128)
     var cancellables: Set<AnyCancellable> = []
 
-    init() {
+    private init() {
         self.api.apiRequestLogger.logLevel = .trace
         self.api.logger.logLevel = .trace
         
