@@ -9,18 +9,9 @@ import NaturalLanguage
 struct ArtistImageSearchView: View {
     @EnvironmentObject var spotify: Spotify
     @ObservedObject var searchArtistViewModel: SearchArtistViewModel
+    @StateObject var searchArtistImageViewModel: SearchArtistImageViewModel = SearchArtistImageViewModel()
     @Environment(\.colorScheme) var colorScheme
-    
-    @State private var pickerItem: PhotosPickerItem? = nil
-    @State private var shouldNavigate = false
-    @State private var alertItem: AlertItem? = nil
-    @State private var isLoading = false
-    
-    @State var selectedImage: UIImage? = nil
-    @State var imageUploaded = false
-    @State var imagePreview: Image? = nil
-    @State var searchText = ""
-    
+            
     var body: some View {
         ZStack {
             VStack {
@@ -28,7 +19,7 @@ struct ArtistImageSearchView: View {
                 btnUploadImage
                 DefaultCaption(captionText: "Tap the image to extract text from image")
 
-                if imageUploaded {
+                if searchArtistImageViewModel.imageUploaded {
                     imgPreview
                 } else {
                     txtNoImage
@@ -37,27 +28,27 @@ struct ArtistImageSearchView: View {
                 Spacer()
             }
             .padding()
-            .navigationDestination(isPresented: $shouldNavigate) {
+            .navigationDestination(isPresented: $searchArtistImageViewModel.shouldNavigate) {
                 ArtistMultipleSearchView(searchArtistViewModel: searchArtistViewModel)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
-            .onChange(of: pickerItem, initial: false) {
-                processPickerItem()
+            .onChange(of: searchArtistImageViewModel.pickerItem, initial: false) {
+                searchArtistImageViewModel.processPickerItem()
             }
-            .alert(item: $alertItem) { alert in
+            .alert(item: $searchArtistImageViewModel.alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)
             }
             
-            if self.isLoading {
+            if searchArtistImageViewModel.isLoading {
                 DefaultProgressView(progressViewText: "Loading...")
             }
         }
     }
     
     var btnUploadImage: some View {
-        PhotosPicker(selection: $pickerItem, matching: .images) {
+        PhotosPicker(selection: $searchArtistImageViewModel.pickerItem, matching: .images) {
             HStack {
                 Image(systemName: "square.and.arrow.up")
                 Text("Upload an image")
@@ -74,7 +65,7 @@ struct ArtistImageSearchView: View {
     
     var imgPreview: some View {
         Group {
-            if let imgUploadedImagePreview = self.imagePreview {
+            if let imgUploadedImagePreview = searchArtistImageViewModel.imagePreview {
                 imgUploadedImagePreview
                     .resizable()
                     .scaledToFit()
@@ -83,9 +74,8 @@ struct ArtistImageSearchView: View {
                     .cornerRadius(12)
                     .padding(24)
                     .onTapGesture {
-                        guard let image = selectedImage else { return }
-                        self.isLoading = true
-                        self.performTextRecognition(on: image)
+                        guard let image = searchArtistImageViewModel.selectedImage else { return }
+                        searchArtistImageViewModel.performTextRecognition(searchArtistViewModel: searchArtistViewModel)
                     }
             }
         }
@@ -99,75 +89,6 @@ struct ArtistImageSearchView: View {
             .opacity(0.6)
             .foregroundColor(.secondary)
             .padding(.bottom, 48)
-    }
-    
-    private func processPickerItem() {
-        Task {
-            self.isLoading = true
-            guard let data = try? await pickerItem?.loadTransferable(type: Data.self),
-                  let uiImage = UIImage(data: data) else { return }
-            self.selectedImage = uiImage
-            self.imagePreview = Image(uiImage: uiImage)
-            self.imageUploaded = true
-            self.isLoading = false
-        }
-    }
-    
-    private func performTextRecognition(on image: UIImage) {
-        guard let cgImage = image.cgImage else { return }
-        
-        let request = VNRecognizeTextRequest { request, error in
-            defer { imageUploaded = true }
-            
-            if let error = error {
-                print("Text recognition error: \(error)")
-                DispatchQueue.main.async {
-                    self.alertItem = AlertItem(
-                        title: "Couldn't Perform Search",
-                        message: "No artists where found."
-                    )
-                }
-                return
-            }
-            
-            // Process recognized text
-            if let observations = request.results as? [VNRecognizedTextObservation] {
-                let recognizedStrings = observations.compactMap { $0.topCandidates(1).first?.string }
-                DispatchQueue.main.async {
-                    self.searchText = recognizedStrings
-                        .joined(separator: " ")
-                        .replacingOccurrences(of: "•", with: ",")
-                        .replacingOccurrences(of: "-", with: ",")
-                        .replacingOccurrences(of: "  ", with: " ")
-                        .components(separatedBy: CharacterSet(charactersIn: ",\n"))
-                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: ",")
-                    
-                    print(self.searchText)
-                }
-            }
-        }
-        
-        // Configure the request
-        request.recognitionLevel = .accurate
-        
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try requestHandler.perform([request])
-                self.isLoading = false
-                self.shouldNavigate = true
-            } catch {
-                print("Failed to perform text recognition: \(error)")
-                DispatchQueue.main.async {
-                    self.alertItem = AlertItem(
-                        title: "Couldn't Perform Search",
-                        message: "No artists where found."
-                    )
-                }
-            }
-        }
     }
 }
 
@@ -192,9 +113,9 @@ struct ArtistImageSearchView: View {
     let selectedImage = UIImage(resource: .recordPlayer)
     let imageUploaded = true
     let imagePreview = Image(uiImage: selectedImage)
-    
+    let searchArtistImageViewModel = SearchArtistImageViewModel(selectedImage: selectedImage, imageUploaded: imageUploaded, imagePreview: imagePreview)
     let searchArtistViewModel = SearchArtistViewModel()
 
-    ArtistImageSearchView(searchArtistViewModel: searchArtistViewModel, selectedImage: selectedImage, imageUploaded: imageUploaded, imagePreview: imagePreview)
+    ArtistImageSearchView(searchArtistViewModel: searchArtistViewModel, searchArtistImageViewModel: searchArtistImageViewModel)
         .environmentObject(spotify)
 }
