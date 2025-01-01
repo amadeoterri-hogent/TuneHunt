@@ -2,19 +2,20 @@ import Foundation
 import SpotifyWebAPI
 import Combine
 
-class SearchArtistViewModel: ObservableObject {
-    @Published private var model = SearchArtistModel()
+class ArtistSearchViewModel: ObservableObject {
+    let spotify: Spotify = Spotify.shared
+
+    @Published private var model = ArtistSearch()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate = false
     @Published var showArtistsPreview = false
+    @Published var searchText: String = ""
+    @Published var artistsPreview: [String] = []
+    @Published var selectedSeparator = "Auto"
+    @Published var isSearching = false
 
-    let spotify: Spotify = Spotify.shared
-    var searchText: String = ""
-    var artistSearchValueSplit: String = ""
-    var isSearching = false
-    var selectedSeparator = "Auto"
+    private var artistSearchValueSplit: String = ""
     private var searchCancellables: [AnyCancellable] = []
-    var artistsPreview: [String] = []
     
     init() {}
     
@@ -24,10 +25,6 @@ class SearchArtistViewModel: ObservableObject {
     
     var selectedArtists: [Artist] {
         self.model.selectedArtists
-    }
-    
-    var artistSearchResults: [SearchArtistModel.ArtistSearchResult] {
-        self.model.artistSearchResults
     }
     
     var separators: [String] {
@@ -72,7 +69,7 @@ class SearchArtistViewModel: ObservableObject {
         self.searchCancellables.append(cancellable)
     }
     
-    func searchMultipleArtists() {
+    func searchMultipleArtists(artistSearchResultViewModel: ArtistSearchResultViewModel) {
         guard !artistsPreview.isEmpty else {
             self.alertItem = AlertItem(
                 title: "Couldn't Perform Search",
@@ -81,7 +78,7 @@ class SearchArtistViewModel: ObservableObject {
             return
         }
         
-        self.model.clearArtistSearchResults()
+        artistSearchResultViewModel.clearArtistSearchResults()
         self.isSearching = true
         let artistNames = artistsPreview
         var remainingSearches = Double(artistNames.count)
@@ -109,7 +106,7 @@ class SearchArtistViewModel: ObservableObject {
                     receiveValue: { searchResults in
                         // Add the first result to the list of artists to send to the next screen
                         if let artist = searchResults.artists?.items.first {
-                            self.model.addArtistToArtistSearchResults(artist: artist)
+                            artistSearchResultViewModel.addArtistToArtistSearchResults(artist: artist)
                         }
                     }
                 )
@@ -117,7 +114,7 @@ class SearchArtistViewModel: ObservableObject {
         }
     }
     
-    func splitArtists() -> Void {
+    func splitArtists() {
         let separator: Character
         self.artistSearchValueSplit = searchText
         switch selectedSeparator {
@@ -147,7 +144,7 @@ class SearchArtistViewModel: ObservableObject {
         self.artistsPreview.remove(atOffsets: offsets)
     }
     
-    func clear() -> Void {
+    func clear() {
         self.searchText = ""
         self.artistSearchValueSplit = ""
         self.artistsPreview = []

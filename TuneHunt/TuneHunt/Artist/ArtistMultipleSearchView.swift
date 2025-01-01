@@ -5,7 +5,8 @@ import SpotifyWebAPI
 
 struct ArtistMultipleSearchView: View {
     @EnvironmentObject var spotify: Spotify
-    @ObservedObject var searchArtistViewModel: SearchArtistViewModel
+    @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
+    @StateObject var artistSearchResultViewModel: ArtistSearchResultViewModel = ArtistSearchResultViewModel()
     @Environment(\.colorScheme) var colorScheme
     @FocusState private var searchTextIsFocused: Bool
         
@@ -13,30 +14,37 @@ struct ArtistMultipleSearchView: View {
         
     var body: some View {
         ZStack {
-                ZStack {
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            searchTextIsFocused = false
-                        }
-                    VStack {
-                        DefaultNavigationTitleView(titleText: "Enter artists")
-                        ScrollView {
-                            btnSearchSpotify
-                            txtEditor
-                        }
+            ZStack {
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        searchTextIsFocused = false
                     }
                 
+                ScrollView {
+                    VStack {
+                        DefaultNavigationTitleView(titleText: "Enter artists")
+                        btnSearchSpotify
+                    }
+                    .onTapGesture {
+                        searchTextIsFocused = false
+                    }
+
+                    txtEditor
+                }
+                .padding()
+
             }
             .toolbar {
                 toolBar
             }
-            .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             )
             .navigationDestination(isPresented: $searchArtistViewModel.shouldNavigate) {
-                ArtistSearchResultsListView(artistsSearchResults: searchArtistViewModel.artistSearchResults)
+                ArtistSearchResultsListView(artistSearchResultViewModel: artistSearchResultViewModel)
             }
             .alert(item: $searchArtistViewModel.alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)
@@ -53,7 +61,7 @@ struct ArtistMultipleSearchView: View {
     
     var btnSearchSpotify: some View {
         Button {
-            searchArtistViewModel.searchMultipleArtists()
+            searchArtistViewModel.searchMultipleArtists(artistSearchResultViewModel: artistSearchResultViewModel)
         } label: {
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -73,7 +81,7 @@ struct ArtistMultipleSearchView: View {
             .focused($searchTextIsFocused)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-            .frame(height: 480)
+            .frame(height: 320)
             .cornerRadius(12)
             .onChange(of: searchArtistViewModel.searchText, initial: true) {
                 searchArtistViewModel.splitArtists()
@@ -157,7 +165,7 @@ struct ArtistMultipleSearchView: View {
         return spotify
     }()
     
-    let searchArtistViewModel = SearchArtistViewModel()
+    let searchArtistViewModel = ArtistSearchViewModel()
     
     ArtistMultipleSearchView(searchArtistViewModel: searchArtistViewModel)
         .environmentObject(spotify)

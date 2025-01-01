@@ -34,6 +34,7 @@ struct ArtistPreviewView : View {
     
     private func removeArtist(at offsets: IndexSet) {
         withAnimation {
+            // FIXME: use remove from viewmodel
             artists.remove(atOffsets: offsets)
         }
     }

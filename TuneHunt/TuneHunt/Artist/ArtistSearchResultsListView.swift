@@ -4,15 +4,8 @@ import Combine
 
 
 struct ArtistSearchResultsListView: View {
-    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    
-    @State private var didRequestImage = false
-    @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var shouldNavigate = false
-    @State private var spotifyArtists: [Artist] = []
-    
-    @State var artistsSearchResults: [SearchArtistModel.ArtistSearchResult]
+    @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
     
     var body: some View {
         VStack {
@@ -24,19 +17,16 @@ struct ArtistSearchResultsListView: View {
         .padding()
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
-        .navigationDestination(isPresented: $shouldNavigate) {
-//            PlaylistSelectView(artists: $spotifyArtists)
+        .navigationDestination(isPresented: $artistSearchResultViewModel.shouldNavigate) {
+            // TODO: select artists from getartists
+//            PlaylistSelectView(artists: artistSearchResultViewModel.spotifyArtists)
         }
     }
     
     var btnSelectSpotifyPlaylist: some View {
         Button {
-            for artistsSearchResult in artistsSearchResults {
-                if artistsSearchResult.addToPlaylist {
-                    spotifyArtists.append(artistsSearchResult.artist)
-                }
-            }
-            shouldNavigate = true
+            // TODO: select artists
+            artistSearchResultViewModel.shouldNavigate = true
         } label: {
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -51,19 +41,8 @@ struct ArtistSearchResultsListView: View {
     }
     
     var toggleSelectAllArtists: some View {
-        Group {
-            let selectAll = Binding<Bool>(
-                get: {
-                    artistsSearchResults.allSatisfy { $0.addToPlaylist }
-                },
-                set: { newValue in
-                    for index in artistsSearchResults.indices {
-                        artistsSearchResults[index].addToPlaylist = newValue
-                    }
-                }
-            )
-            
-            Toggle("Select All", isOn: selectAll)
+        Group {            
+            Toggle("Select All", isOn: $artistSearchResultViewModel.selectAll)
                 .frame(alignment: .trailing)
                 .padding(.horizontal, 28)
                 .padding(.vertical, 12)
@@ -71,28 +50,32 @@ struct ArtistSearchResultsListView: View {
     }
     
     var lstArtists: some View {
-        List($artistsSearchResults, id: \.id) { $artistSearchResult in
-            ArtistCellView(artistSearchResult: $artistSearchResult)
-                .listRowBackground(Color.clear)
+        List($artistSearchResultViewModel.artistResult.artistSearchResults, id: \.id) { $artistSearchResult in
+            ArtistCellView(
+                artistSearchResultViewModel: artistSearchResultViewModel,
+                artistSearchResult: $artistSearchResult
+            )
+            .listRowBackground(Color.clear)
         }
         .listStyle(.plain)
     }
+
 }
 
-#Preview {
-    
-    let spotify: Spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    let artists = [
-        SearchArtistModel.ArtistSearchResult(artist: .pinkFloyd),
-        SearchArtistModel.ArtistSearchResult(artist: .radiohead)
-    ]
-    
-    ArtistSearchResultsListView(artistsSearchResults: artists)
-        .environmentObject(spotify)
-}
+//#Preview {
+//    
+//    let spotify: Spotify = {
+//        let spotify = Spotify.shared
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    let artists = [
+//        SearchArtistModel.ArtistSearchResult(artist: .pinkFloyd),
+//        SearchArtistModel.ArtistSearchResult(artist: .radiohead)
+//    ]
+//    
+//    ArtistSearchResultsListView(artistsSearchResults: artists)
+//        .environmentObject(spotify)
+//}
 

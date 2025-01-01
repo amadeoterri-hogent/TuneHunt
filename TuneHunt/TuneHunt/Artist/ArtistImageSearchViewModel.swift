@@ -6,7 +6,7 @@ import PhotosUI
 import Vision
 import NaturalLanguage
 
-class SearchArtistImageViewModel: ObservableObject {
+class ArtistImageSearchViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var imageUploaded = false
     @Published var shouldNavigate = false
@@ -39,7 +39,7 @@ class SearchArtistImageViewModel: ObservableObject {
         }
     }
     
-    func performTextRecognition(searchArtistViewModel: SearchArtistViewModel) {
+    func performTextRecognition(searchArtistViewModel: ArtistSearchViewModel) {
         guard let image = self.selectedImage else { return }
         guard let cgImage = image.cgImage else { return }
         

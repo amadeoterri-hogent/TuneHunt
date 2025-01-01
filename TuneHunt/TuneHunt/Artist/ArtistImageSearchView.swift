@@ -8,8 +8,8 @@ import NaturalLanguage
 
 struct ArtistImageSearchView: View {
     @EnvironmentObject var spotify: Spotify
-    @ObservedObject var searchArtistViewModel: SearchArtistViewModel
-    @StateObject var searchArtistImageViewModel: SearchArtistImageViewModel = SearchArtistImageViewModel()
+    @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
+    @StateObject var searchArtistImageViewModel: ArtistImageSearchViewModel = ArtistImageSearchViewModel()
     @Environment(\.colorScheme) var colorScheme
             
     var body: some View {
@@ -113,8 +113,8 @@ struct ArtistImageSearchView: View {
     let selectedImage = UIImage(resource: .recordPlayer)
     let imageUploaded = true
     let imagePreview = Image(uiImage: selectedImage)
-    let searchArtistImageViewModel = SearchArtistImageViewModel(selectedImage: selectedImage, imageUploaded: imageUploaded, imagePreview: imagePreview)
-    let searchArtistViewModel = SearchArtistViewModel()
+    let searchArtistImageViewModel = ArtistImageSearchViewModel(selectedImage: selectedImage, imageUploaded: imageUploaded, imagePreview: imagePreview)
+    let searchArtistViewModel = ArtistSearchViewModel()
 
     ArtistImageSearchView(searchArtistViewModel: searchArtistViewModel, searchArtistImageViewModel: searchArtistImageViewModel)
         .environmentObject(spotify)

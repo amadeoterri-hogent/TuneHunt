@@ -4,10 +4,8 @@ import SpotifyWebAPI
 
 struct ArtistCellView: View {
     @EnvironmentObject var spotify: Spotify
-    @Binding var artistSearchResult: SearchArtistModel.ArtistSearchResult
-
-    @State private var didRequestImage = false
-    @State private var loadImageCancellable: AnyCancellable? = nil
+    @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
+    @Binding var artistSearchResult: ArtistResult.ArtistSearchResult
     
     let placeholderImage = Image(.spotifyLogoGreen)
 
@@ -20,7 +18,7 @@ struct ArtistCellView: View {
         .padding(.vertical, 5)
         .onAppear {
             if artistSearchResult.image == nil {
-                loadImage()
+                artistSearchResultViewModel.loadImage(for: artistSearchResult)
             }
         }
     }
@@ -39,32 +37,13 @@ struct ArtistCellView: View {
             Text(artistSearchResult.artist.name)
                 .font(.headline)
             
-            Toggle("",isOn: $artistSearchResult.addToPlaylist)
+            Toggle("", isOn: $artistSearchResult.addToPlaylist)
         }
-    }
-    
-    
-    func loadImage() {
-        if self.didRequestImage { return }
-        self.didRequestImage = true
-        
-        guard let spotifyImage = artistSearchResult.artist.images?.largest else {
-            return
-        }
-        
-        self.loadImageCancellable = spotifyImage.load()
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { image in
-                    artistSearchResult.image = image
-                }
-            )
     }
 }
 
 #Preview {
-    let artistSearchResult = SearchArtistModel.ArtistSearchResult(artist: .pinkFloyd)
+    let artistSearchResult = ArtistResult.ArtistSearchResult(artist: .pinkFloyd)
     
     let spotify = {
         let spotify = Spotify.shared
@@ -72,13 +51,14 @@ struct ArtistCellView: View {
         return spotify
     }()
     
+    let artistSearchResultViewModel = ArtistSearchResultViewModel()
+    
+    
     List {
-        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
     }
-    .environmentObject(spotify)
-
 }
 
