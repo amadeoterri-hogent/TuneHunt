@@ -12,7 +12,7 @@ struct ArtistSearchResultsListView: View {
     @State private var shouldNavigate = false
     @State private var spotifyArtists: [Artist] = []
     
-    @State var artistsSearchResults: [ArtistSearchResult]
+    @State var artistsSearchResults: [SearchArtistModel.ArtistSearchResult]
     
     var body: some View {
         VStack {
@@ -88,8 +88,8 @@ struct ArtistSearchResultsListView: View {
     }()
     
     let artists = [
-        ArtistSearchResult(artist: .pinkFloyd),
-        ArtistSearchResult(artist: .radiohead)
+        SearchArtistModel.ArtistSearchResult(artist: .pinkFloyd),
+        SearchArtistModel.ArtistSearchResult(artist: .radiohead)
     ]
     
     ArtistSearchResultsListView(artistsSearchResults: artists)

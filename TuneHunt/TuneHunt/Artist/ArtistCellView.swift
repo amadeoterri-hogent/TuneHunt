@@ -4,7 +4,7 @@ import SpotifyWebAPI
 
 struct ArtistCellView: View {
     @EnvironmentObject var spotify: Spotify
-    @Binding var artistSearchResult: ArtistSearchResult
+    @Binding var artistSearchResult: SearchArtistModel.ArtistSearchResult
 
     @State private var didRequestImage = false
     @State private var loadImageCancellable: AnyCancellable? = nil
@@ -64,7 +64,7 @@ struct ArtistCellView: View {
 }
 
 #Preview {
-    let artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
+    let artistSearchResult = SearchArtistModel.ArtistSearchResult(artist: .pinkFloyd)
     
     let spotify = {
         let spotify = Spotify.shared

@@ -8,6 +8,7 @@ import NaturalLanguage
 
 struct ArtistImageSearchView: View {
     @EnvironmentObject var spotify: Spotify
+    @ObservedObject var searchArtistViewModel: SearchArtistViewModel
     @Environment(\.colorScheme) var colorScheme
     
     @State private var pickerItem: PhotosPickerItem? = nil
@@ -37,7 +38,7 @@ struct ArtistImageSearchView: View {
             }
             .padding()
             .navigationDestination(isPresented: $shouldNavigate) {
-                ArtistMultipleSearchView(searchText: searchText)
+                ArtistMultipleSearchView(searchArtistViewModel: searchArtistViewModel)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
@@ -191,7 +192,9 @@ struct ArtistImageSearchView: View {
     let selectedImage = UIImage(resource: .recordPlayer)
     let imageUploaded = true
     let imagePreview = Image(uiImage: selectedImage)
+    
+    let searchArtistViewModel = SearchArtistViewModel()
 
-    ArtistImageSearchView(selectedImage: selectedImage, imageUploaded: imageUploaded, imagePreview: imagePreview)
+    ArtistImageSearchView(searchArtistViewModel: searchArtistViewModel, selectedImage: selectedImage, imageUploaded: imageUploaded, imagePreview: imagePreview)
         .environmentObject(spotify)
 }

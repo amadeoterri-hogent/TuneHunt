@@ -16,7 +16,7 @@ struct PlaylistSearchArtistsView: View {
     @State private var artistsCancellables: Set<AnyCancellable> = []
     @State private var loadPlaylistCancellable: AnyCancellable? = nil
     
-    @State var artistsSearchResults: [ArtistSearchResult] = []
+    @State var artistsSearchResults: [SearchArtistModel.ArtistSearchResult] = []
     
     var body: some View {
         ZStack {
@@ -184,7 +184,7 @@ struct PlaylistSearchArtistsView: View {
                         },
                         receiveValue: { artist in
                             if !self.artistsSearchResults.contains(where: { $0.artist.id == artist.id }) {
-                                self.artistsSearchResults.append(ArtistSearchResult(artist: artist))
+                                self.artistsSearchResults.append(SearchArtistModel.ArtistSearchResult(artist: artist))
                             }
                         }
                     )

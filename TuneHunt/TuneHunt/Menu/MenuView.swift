@@ -3,7 +3,7 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuView: View {
-    @StateObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel = ArtistSingleSearchViewModel(isPreview: false)
+    @StateObject var searchArtistViewModel: SearchArtistViewModel = SearchArtistViewModel()
     @StateObject var menuViewModel: MenuViewModel = MenuViewModel()
     @Environment(\.colorScheme) var colorScheme
         
@@ -59,11 +59,11 @@ struct MenuView: View {
     func destinationView() -> some View {
         switch menuViewModel.selection {
         case 1:
-            ArtistSingleSearchView(artistSingleSearchViewModel: artistSingleSearchViewModel)
+            ArtistSingleSearchView(searchArtistViewModel: searchArtistViewModel)
         case 2:
-            ArtistMultipleSearchView()
+            ArtistMultipleSearchView(searchArtistViewModel: searchArtistViewModel)
         case 3:
-            ArtistImageSearchView()
+            ArtistImageSearchView(searchArtistViewModel: searchArtistViewModel)
         case 4:
             PlaylistSearchArtistsView()
         case 5:
@@ -89,9 +89,9 @@ struct MenuView: View {
         return spotify
     }()
     
-    let artistSingleSearchViewModel = ArtistSingleSearchViewModel(isPreview: true)
+    let searchArtistViewModel = SearchArtistViewModel()
 
-    return MenuView(artistSingleSearchViewModel: artistSingleSearchViewModel)
+    MenuView(searchArtistViewModel: searchArtistViewModel)
         .environmentObject(spotify)
 }
 

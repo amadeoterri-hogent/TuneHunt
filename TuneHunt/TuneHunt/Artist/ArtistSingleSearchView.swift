@@ -4,13 +4,13 @@ import SpotifyWebAPI
 
 struct ArtistSingleSearchView: View {
     @Environment(\.colorScheme) var colorScheme
-    @ObservedObject var artistSingleSearchViewModel: ArtistSingleSearchViewModel
+    @ObservedObject var searchArtistViewModel: SearchArtistViewModel
     
     var body: some View {
         ZStack {
             artistSingleSearchView
             
-            if artistSingleSearchViewModel.isSearching {
+            if searchArtistViewModel.isSearching {
                 DefaultProgressView(progressViewText: "Searching...")
             }
         }
@@ -28,18 +28,18 @@ struct ArtistSingleSearchView: View {
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
-        .navigationDestination(isPresented: $artistSingleSearchViewModel.shouldNavigate) {
-            if !artistSingleSearchViewModel.selectedArtists.isEmpty {
-                PlaylistSelectView(artists: artistSingleSearchViewModel.selectedArtists)
+        .navigationDestination(isPresented: $searchArtistViewModel.shouldNavigate) {
+            if !searchArtistViewModel.selectedArtists.isEmpty {
+                PlaylistSelectView(artists: searchArtistViewModel.selectedArtists)
             }
         }
-        .alert(item: $artistSingleSearchViewModel.alertItem) { alert in
+        .alert(item: $searchArtistViewModel.alertItem) { alert in
             Alert(title: alert.title, message: alert.message)
         }
     }
     
     var searchBar: some View {
-        TextField("Search artist in spotify...", text: $artistSingleSearchViewModel.searchText, onCommit: artistSingleSearchViewModel.search)
+        TextField("Search artist in spotify...", text: $searchArtistViewModel.searchText, onCommit: searchArtistViewModel.searchSingleArtist)
             .padding(.leading, 36)
             .submitLabel(.search)
             .padding()
@@ -53,7 +53,7 @@ struct ArtistSingleSearchView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
             Spacer()
-            if !artistSingleSearchViewModel.searchText.isEmpty {
+            if !searchArtistViewModel.searchText.isEmpty {
                 btnClearSearch
             }
         }
@@ -62,7 +62,7 @@ struct ArtistSingleSearchView: View {
     
     var btnClearSearch: some View {
         Button {
-            artistSingleSearchViewModel.clear()
+            searchArtistViewModel.clear()
         } label: {
             Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.secondary)
@@ -71,7 +71,7 @@ struct ArtistSingleSearchView: View {
     
     var artistsView: some View {
         Group {
-            if artistSingleSearchViewModel.artists.isEmpty && !artistSingleSearchViewModel.isSearching {
+            if searchArtistViewModel.artists.isEmpty && !searchArtistViewModel.isSearching {
                 DefaultNoResults()
             }
             else {
@@ -82,9 +82,9 @@ struct ArtistSingleSearchView: View {
     
     var lstArtists: some View {
         List {
-            ForEach(artistSingleSearchViewModel.artists, id: \.self) { artist in
+            ForEach(searchArtistViewModel.artists, id: \.self) { artist in
                 Button {
-                    artistSingleSearchViewModel.select(artist)
+                    searchArtistViewModel.select(artist)
                 } label: {
                     Text("\(artist.name)")
                 }
@@ -96,6 +96,6 @@ struct ArtistSingleSearchView: View {
 }
 
 #Preview{
-    let artistSingleSearchViewModel = ArtistSingleSearchViewModel(isPreview: true)
-    ArtistSingleSearchView(artistSingleSearchViewModel: artistSingleSearchViewModel)
+    let searchArtistViewModel = SearchArtistViewModel()
+    ArtistSingleSearchView(searchArtistViewModel: searchArtistViewModel)
 }
