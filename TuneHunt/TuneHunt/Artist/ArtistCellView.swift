@@ -5,7 +5,7 @@ import SpotifyWebAPI
 struct ArtistCellView: View {
     @EnvironmentObject var spotify: Spotify
     @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
-    @Binding var artistSearchResult: ArtistResult.ArtistSearchResult
+    @Binding var artistSearchResult: ArtistModel.ArtistSearchResult
     
     let placeholderImage = Image(.spotifyLogoGreen)
 
@@ -43,7 +43,7 @@ struct ArtistCellView: View {
 }
 
 #Preview {
-    let artistSearchResult = ArtistResult.ArtistSearchResult(artist: .pinkFloyd)
+    let artistSearchResult = ArtistModel.ArtistSearchResult(artist: .pinkFloyd)
     
     let spotify = {
         let spotify = Spotify.shared

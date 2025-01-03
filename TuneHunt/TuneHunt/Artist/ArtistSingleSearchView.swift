@@ -5,6 +5,7 @@ import SpotifyWebAPI
 struct ArtistSingleSearchView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
+    @StateObject var playlistViewModel: PlaylistViewModel = PlaylistViewModel()
     
     var body: some View {
         ZStack {
@@ -29,8 +30,8 @@ struct ArtistSingleSearchView: View {
             .ignoresSafeArea())
         .foregroundStyle(Theme(colorScheme).textColor)
         .navigationDestination(isPresented: $searchArtistViewModel.shouldNavigate) {
-            if !searchArtistViewModel.selectedArtists.isEmpty {
-                PlaylistSelectView(artists: searchArtistViewModel.selectedArtists)
+            if !playlistViewModel.artists.isEmpty {
+                PlaylistSelectView(playlistViewModel: playlistViewModel)
             }
         }
         .alert(item: $searchArtistViewModel.alertItem) { alert in
@@ -85,6 +86,7 @@ struct ArtistSingleSearchView: View {
             ForEach(searchArtistViewModel.artists, id: \.self) { artist in
                 Button {
                     searchArtistViewModel.select(artist)
+                    playlistViewModel.playlistModel.artists = searchArtistViewModel.selectedArtists
                 } label: {
                     Text("\(artist.name)")
                 }

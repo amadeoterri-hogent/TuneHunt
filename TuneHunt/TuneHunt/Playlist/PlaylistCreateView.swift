@@ -5,16 +5,8 @@ import SpotifyWebAPI
 struct PlaylistCreateView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.dismiss) var dismiss
-    
-    @State private var createPlaylistCancellable: AnyCancellable?
-    @State private var namePlaylist: String = ""
-    @State private var alert: AlertItem? = nil
-    @State private var alertItem: AlertItem? = nil
-    @State private var createdPlaylist: Playlist<PlaylistItems>? = nil
-    
-    var onPlaylistCreated: ((Playlist<PlaylistItemsReference>) -> Void)?
-    
+    @ObservedObject var playlistViewModel: PlaylistViewModel
+        
     var body: some View {
         VStack {
             txtCreatePlaylist
@@ -29,7 +21,7 @@ struct PlaylistCreateView: View {
     }
     
     var txtCreatePlaylist: some View {
-        TextField("Enter playlist name...", text: $namePlaylist)
+        TextField("Enter playlist name...", text: $playlistViewModel.newPlaylistName)
             .padding(.leading, 28)
             .submitLabel(.search)
             .padding()
@@ -43,7 +35,7 @@ struct PlaylistCreateView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
             Spacer()
-            if !namePlaylist.isEmpty {
+            if !playlistViewModel.newPlaylistName.isEmpty {
                 btnClearText
             }
         }
@@ -52,7 +44,7 @@ struct PlaylistCreateView: View {
     
     var btnClearText: some View {
         Button(action: {
-            self.namePlaylist = ""
+            playlistViewModel.newPlaylistName = ""
         }, label: {
             Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.secondary)
@@ -61,8 +53,8 @@ struct PlaylistCreateView: View {
     
     var btnCreatePlaylist: some View {
         Button {
-            // Create playlist and dismiss sheet
-            createPlaylist()
+            playlistViewModel.createPlaylist()
+
         } label: {
             HStack {
                 Image(systemName: "plus")
@@ -76,85 +68,15 @@ struct PlaylistCreateView: View {
         .clipShape(Capsule())
         .frame(maxWidth: .infinity, alignment: .center)
     }
-    
-    func createPlaylist() {
-        if !validate() {
-            return
-        }
-        
-        let playlistDetails = PlaylistDetails(
-            name: self.namePlaylist,
-            isPublic: true,
-            isCollaborative: false
-        )
-        
-        guard let userURI = spotify.currentUser?.uri else {
-            self.alert = AlertItem(
-                title: "User not found",
-                message: "Please make sure you are logged in."
-            )
-            return
-        }
-        
-        createPlaylistCancellable = spotify.api.createPlaylist(for: userURI, playlistDetails)
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { completion in
-                    switch completion {
-                    case .finished:
-                        print("Playlist created successfully.")
-                        // Dismiss the sheet
-                        dismiss()
-                    case .failure(let error):
-                        print("Failed to create playlist: \(error)")
-                        self.alert = AlertItem(
-                            title: "Failed to create playlist",
-                            message: "There went something wrong while creating a playlist."
-                        )
-                    }
-                },
-                receiveValue: { playlist in
-                    // Create a new Playlist<PlaylistItemsReference>
-                    let playlistReference = Playlist<PlaylistItemsReference>(
-                        name: playlist.name,
-                        items: PlaylistItemsReference(href: playlist.items.href, total: 0),
-                        owner: playlist.owner,
-                        isPublic: playlist.isPublic,
-                        isCollaborative: playlist.isCollaborative,
-                        description: playlist.description,
-                        snapshotId: playlist.snapshotId,
-                        externalURLs: playlist.externalURLs,
-                        followers: playlist.followers,
-                        href: playlist.href,
-                        id: playlist.id,
-                        uri: playlist.uri,
-                        images: playlist.images
-                    )
-                    onPlaylistCreated?(playlistReference)
-                }
-            )
-    }
-    
-    func validate() -> Bool {
-        if self.namePlaylist == "" {
-            self.alert = AlertItem(
-                title: "Couldn't create playlist",
-                message: "Playlist name is empty."
-            )
-            return false
-        }
-        
-        return true
-    }
 }
 
-#Preview{
-    let spotify: Spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    return PlaylistCreateView()
-        .environmentObject(spotify)
-}
+//#Preview{
+//    let spotify: Spotify = {
+//        let spotify = Spotify.shared
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    return PlaylistCreateView()
+//        .environmentObject(spotify)
+//}

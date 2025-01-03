@@ -6,6 +6,7 @@ import Combine
 struct ArtistSearchResultsListView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
+    @StateObject var playlistViewModel: PlaylistViewModel = PlaylistViewModel()
     
     var body: some View {
         VStack {
@@ -18,14 +19,15 @@ struct ArtistSearchResultsListView: View {
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .navigationDestination(isPresented: $artistSearchResultViewModel.shouldNavigate) {
-            // TODO: select artists from getartists
-//            PlaylistSelectView(artists: artistSearchResultViewModel.spotifyArtists)
+            if !playlistViewModel.artists.isEmpty {
+                PlaylistSelectView(playlistViewModel: playlistViewModel)
+            }
         }
     }
     
     var btnSelectSpotifyPlaylist: some View {
         Button {
-            // TODO: select artists
+            playlistViewModel.playlistModel.artists = artistSearchResultViewModel.getArtists
             artistSearchResultViewModel.shouldNavigate = true
         } label: {
             HStack {

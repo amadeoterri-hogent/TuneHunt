@@ -4,61 +4,42 @@ import Foundation
 import SpotifyWebAPI
 
 struct PlaylistCellView: View {
-    @EnvironmentObject var spotify: Spotify
-
-    @State private var image = Image(.spotifyLogoGreen)
-    @State private var didRequestImage = false
-    @State private var loadImageCancellable: AnyCancellable? = nil
+    @ObservedObject var playlistViewModel: PlaylistViewModel
     
-    var playlist: Playlist<PlaylistItemsReference>
-    var loadPlaylist: ((Playlist<PlaylistItemsReference>) -> Void)?
+    var userPlaylist: PlaylistModel.UserPlaylist
     
     var body: some View {
         Button {
-            loadPlaylist?(playlist)
+            playlistViewModel.loadPlaylist(selectedPlaylist: userPlaylist.playlist)
         } label: {
             HStack {
-                image
+                (userPlaylist.image ?? Image(.spotifyLogoGreen))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 48, height: 48)
                     .padding(.trailing, 4)
-                Text("\(playlist.name)")
+                Text(userPlaylist.playlist.name)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .onAppear(perform: loadImage)
-        }
-    }
-    
-    func loadImage() {
-        if self.didRequestImage { return }
-        self.didRequestImage = true
-        
-        guard let spotifyImage = playlist.images.largest else {
-            return
-        }
-        
-        self.loadImageCancellable = spotifyImage.load()
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { image in
-                    self.image = image
+            .padding(.vertical)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .onAppear {
+                if userPlaylist.image == nil {
+                    playlistViewModel.loadImage(for: userPlaylist)
                 }
-            )
+            }
+        }
     }
 }
 
 #Preview {
-    let spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        return spotify
-    }()
+    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
     
-    let artists: [Artist] = [
-        .pinkFloyd,.radiohead
-    ]
-    
-    PlaylistCellView(playlist: .thisIsMildHighClub)
+    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
 
 }

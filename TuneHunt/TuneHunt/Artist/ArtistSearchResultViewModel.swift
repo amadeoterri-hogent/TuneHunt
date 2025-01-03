@@ -3,13 +3,13 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSearchResultViewModel: ObservableObject {
-    @Published var artistResult: ArtistResult = ArtistResult()
+    @Published var artistResult: ArtistModel = ArtistModel()
     @Published var loadingImages: Set<String> = []
+    @Published var shouldNavigate = false
     
-    var didRequestImage = false
-    var loadImageCancellable: AnyCancellable? = nil
-    var shouldNavigate = false
     var spotifyArtists: [Artist] = []
+    
+    private var loadImageCancellables: [AnyCancellable] = []
     
     var getArtists: [Artist] {
         self.artistResult.getArtistsFromArtistSearchResults()
@@ -33,7 +33,7 @@ class ArtistSearchResultViewModel: ObservableObject {
         }
     }
     
-    func loadImage(for artistSearchResult: ArtistResult.ArtistSearchResult) {
+    func loadImage(for artistSearchResult: ArtistModel.ArtistSearchResult) {
         if let id = artistSearchResult.id {
             if !loadingImages.contains(id) {
                 self.loadingImages.insert(id)
@@ -46,7 +46,7 @@ class ArtistSearchResultViewModel: ObservableObject {
             return
         }
         
-        self.loadImageCancellable = spotifyImage.load()
+        let cancellable = spotifyImage.load()
             .receive(on: RunLoop.main)
             .sink(
                 receiveCompletion: { _ in },
@@ -54,5 +54,7 @@ class ArtistSearchResultViewModel: ObservableObject {
                     self.artistResult.updateImageOfArtistSearchResult(for: artistSearchResult, image: image)
                 }
             )
+        
+        loadImageCancellables.append(cancellable)
     }
 }

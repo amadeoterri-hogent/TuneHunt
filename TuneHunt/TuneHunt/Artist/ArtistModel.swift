@@ -1,12 +1,12 @@
 import SpotifyWebAPI
 import SwiftUI
 
-struct ArtistResult{
+struct ArtistModel{
     var artistSearchResults: [ArtistSearchResult] = []
     
     mutating func addArtistToArtistSearchResults(artist: Artist) {
         if !self.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
-            self.artistSearchResults.append(ArtistResult.ArtistSearchResult(artist: artist))
+            self.artistSearchResults.append(ArtistModel.ArtistSearchResult(artist: artist))
         }
     }
     
