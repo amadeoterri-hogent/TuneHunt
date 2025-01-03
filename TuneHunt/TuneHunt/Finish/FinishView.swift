@@ -7,14 +7,7 @@ struct FinishView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var image = Image(.spotifyLogoGreen)
-    @State private var alert: AlertItem? = nil
-    @State private var loadImageCancellable: AnyCancellable? = nil
-    @State private var shouldNavigate = false
-    
-    var tracks: [Track]
-    var playlist: Playlist<PlaylistItems>
-    var artists: [Artist]
+    @ObservedObject var finishViewModel: FinishViewModel
     
     var body: some View {
         ZStack {
@@ -25,17 +18,17 @@ struct FinishView: View {
                 tracksView
                 
                 Spacer()
-                
             }
-            .onAppear(perform: loadImage)
             .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
-            .alert(item: $alert) { alert in
+            .alert(item: $finishViewModel.alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)
             }
-            .navigationDestination(isPresented: $shouldNavigate) {
-                FinishProgressView(tracks: tracks, playlist: playlist, artists: artists)
+            .navigationDestination(isPresented: $finishViewModel.shouldNavigateProgress) {
+                if finishViewModel.loadedPlaylist != nil {
+                    FinishProgressView(finishViewModel: finishViewModel)
+                }
             }
             
         }
@@ -43,7 +36,8 @@ struct FinishView: View {
     
     var btnAddTracksToPlaylist: some View {
         Button {
-            validateAndNavigate()
+            finishViewModel.loadPlaylist()
+            finishViewModel.shouldNavigateProgress = true
         } label: {
             HStack {
                 Image(systemName: "rectangle.badge.plus")
@@ -68,21 +62,26 @@ struct FinishView: View {
     }
     
     var imgPlaylist: some View {
-        image
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 64, height: 64)
-            .padding(.trailing, 4)
+        Group {
+            if let selectedPlaylist = finishViewModel.finishModel.selectedPlaylist {
+                (selectedPlaylist.image ?? Image(.spotifyLogoGreen))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 64, height: 64)
+                    .padding(.trailing, 4)
+            }
+        }
     }
     
     var lblPlaylist: some View {
         VStack(alignment: .leading) {
-            Text(playlist.name)
-                .font(.title)
-            
-            if let owner = playlist.owner?.displayName {
-                Text(owner)
-                    .font(.subheadline)
+            if let selectedPlaylist = finishViewModel.finishModel.selectedPlaylist {
+                Text(selectedPlaylist.playlist.name)
+                    .font(.title)
+                if let owner = selectedPlaylist.playlist.owner?.displayName {
+                    Text(owner)
+                        .font(.subheadline)
+                }
             }
         }
     }
@@ -95,7 +94,7 @@ struct FinishView: View {
     }
     
     var txtTracksView: some View {
-        Text("Tracks (\(tracks.count))")
+        Text("Tracks (\(finishViewModel.finishModel.tracks.count))")
             .font(.title2)
             .foregroundColor(Theme(colorScheme).textColor)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -104,40 +103,12 @@ struct FinishView: View {
     var lstTracks: some View {
         ScrollView {
             LazyVStack {
-                ForEach(tracks, id: \.self) { track in
+                ForEach(finishViewModel.finishModel.tracks, id: \.self) { track in
                     TrackCellView(track: track)
                 }
             }
         }
     }
-    
-    func loadImage() {
-        guard let spotifyImage = playlist.images.largest else {
-            return
-        }
-        
-        self.loadImageCancellable = spotifyImage.load()
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { image in
-                    self.image = image
-                }
-            )
-    }
-    
-    func validateAndNavigate() {
-        guard !tracks.isEmpty else {
-            self.alert = AlertItem(
-                title: "Error",
-                message: "No tracks to add to the playlist."
-            )
-            return
-        }
-        
-        shouldNavigate = true
-    }
-    
 }
 
 extension Array {
@@ -148,24 +119,24 @@ extension Array {
     }
 }
 
-#Preview {
-    
-    let spotify = {
-        let spotify = Spotify.shared
-        //        spotify.isAuthorized = false
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
-    let playlist: Playlist = .crumb
-    let artists: [Artist] = [
-        .pinkFloyd,.radiohead
-    ]
-    let tracks: [Track] = [
-        .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
-    ]
-    
-    FinishView(tracks: tracks, playlist: playlist , artists: artists)
-        .environmentObject(spotify)
-}
+//#Preview {
+//    
+//    let spotify = {
+//        let spotify = Spotify.shared
+//        //        spotify.isAuthorized = false
+//        spotify.isAuthorized = true
+//        return spotify
+//    }()
+//    
+//    let playlist: Playlist = .crumb
+//    let artists: [Artist] = [
+//        .pinkFloyd,.radiohead
+//    ]
+//    let tracks: [Track] = [
+//        .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
+//    ]
+//    
+//    FinishView(tracks: tracks, playlist: playlist , artists: artists)
+//        .environmentObject(spotify)
+//}
 

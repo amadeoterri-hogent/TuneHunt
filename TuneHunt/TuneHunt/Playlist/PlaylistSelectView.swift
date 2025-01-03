@@ -8,6 +8,7 @@ import SpotifyExampleContent
 struct PlaylistSelectView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var playlistViewModel: PlaylistViewModel
+    @StateObject var finishViewModel: FinishViewModel = FinishViewModel()
         
     var body: some View {
         ZStack {
@@ -23,8 +24,8 @@ struct PlaylistSelectView: View {
                 .ignoresSafeArea())
             .foregroundStyle(Theme(colorScheme).textColor)
             .navigationDestination(isPresented: $playlistViewModel.shouldNavigate) {
-                if let playlist = playlistViewModel.selectedPlaylist {
-                    FinishView(tracks: playlistViewModel.tracks, playlist: playlist, artists: playlistViewModel.artists)
+                if finishViewModel.finishModel.selectedPlaylist != nil && !finishViewModel.finishModel.tracks.isEmpty {
+                    FinishView(finishViewModel: finishViewModel)
                 }
             }
             .alert(item: $playlistViewModel.alertItem) { alert in
@@ -62,6 +63,7 @@ struct PlaylistSelectView: View {
         ForEach(playlistViewModel.playlistModel.userPlaylists, id: \.playlist.uri) { userPlaylist in
             PlaylistCellView(
                 playlistViewModel: playlistViewModel,
+                finishViewModel: finishViewModel,
                 userPlaylist: userPlaylist
             )
         }

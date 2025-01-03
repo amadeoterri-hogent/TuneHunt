@@ -5,12 +5,13 @@ import SpotifyWebAPI
 
 struct PlaylistCellView: View {
     @ObservedObject var playlistViewModel: PlaylistViewModel
+    @ObservedObject var finishViewModel: FinishViewModel
     
     var userPlaylist: PlaylistModel.UserPlaylist
     
     var body: some View {
         Button {
-            playlistViewModel.loadPlaylist(selectedPlaylist: userPlaylist.playlist)
+            playlistViewModel.searchTopTracks(userPlaylist: userPlaylist, finishViewModel: finishViewModel)
         } label: {
             HStack {
                 (userPlaylist.image ?? Image(.spotifyLogoGreen))
@@ -34,12 +35,12 @@ struct PlaylistCellView: View {
     }
 }
 
-#Preview {
-    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
-    
-    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-
-}
+//#Preview {
+//    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+//    
+//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+//
+//}

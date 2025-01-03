@@ -43,7 +43,6 @@ struct PlaylistModel {
         }
     }
     
-    
     mutating func clearTracks() {
         self.tracks = []
     }

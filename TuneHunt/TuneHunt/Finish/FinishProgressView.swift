@@ -7,14 +7,10 @@ import SpotifyWebAPI
 struct FinishProgressView: View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    
+    @ObservedObject var finishViewModel: FinishViewModel
+
     @State private var progress: Double = 0.0
     @State private var animationAmount: Double = 1.0
-    @State private var shouldNavigate: Bool = false
-    
-    var tracks: [Track]
-    var playlist: Playlist<PlaylistItems>
-    var artists: [Artist]
     
     var body: some View {
         VStack {
@@ -23,7 +19,7 @@ struct FinishProgressView: View {
         }
         .padding()
         .toolbar() {btnHome}
-        .navigationDestination(isPresented: $shouldNavigate) {MenuView()}
+        .navigationDestination(isPresented: $finishViewModel.shouldNavigateHome) {MenuView()}
         .frame(maxHeight: .infinity, alignment: .center)
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
@@ -77,7 +73,7 @@ struct FinishProgressView: View {
     
     var btnHome: some View {
         Button {
-            shouldNavigate = true
+            finishViewModel.shouldNavigateHome = true
         } label: {
             HStack {
                 Image(systemName: "house")
@@ -87,28 +83,28 @@ struct FinishProgressView: View {
     }
     
     func finish() async {
-        let playlistURI = playlist.uri
-        let trackURIs = tracks.compactMap { $0.uri }
-                
-        // Split track URIs into batches of 100
-        let chunks = trackURIs.chunked(into: 100)
-        var remainingChunks = chunks.count
-        
-        await startAsyncTask(totalChunks: Double(chunks.count))
-        
-        for chunk in chunks {
-            spotify.api.addToPlaylist(playlistURI, uris: chunk)
-                .receive(on: RunLoop.main)
-                .sink(
-                    receiveCompletion: { completion in
+        if let playlist = finishViewModel.loadedPlaylist {
+            let trackURIs = finishViewModel.finishModel.tracks.compactMap { $0.uri }
+            
+            // Split track URIs into batches of 100
+            let chunks = trackURIs.chunked(into: 100)
+            var remainingChunks = chunks.count
+            
+            await startAsyncTask(totalChunks: Double(chunks.count))
+            
+            for chunk in chunks {
+                spotify.api.addToPlaylist(playlist.uri, uris: chunk)
+                    .receive(on: RunLoop.main)
+                    .sink(
+                        receiveCompletion: { completion in
                             remainingChunks -= 1
-                    },
-                    receiveValue: { _ in }
-                )
-                .store(in: &spotify.cancellables)
+                        },
+                        receiveValue: { _ in }
+                    )
+                    .store(in: &spotify.cancellables)
+            }
         }
     }
-    
     
     func startAsyncTask(totalChunks: Double) async {
         animationAmount = 1.2

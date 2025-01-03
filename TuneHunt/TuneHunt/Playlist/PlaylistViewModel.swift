@@ -87,22 +87,10 @@ class PlaylistViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func loadPlaylist(selectedPlaylist: Playlist<PlaylistItemsReference>) {
-        self.isSearchingTracks = true
-        self.loadPlaylistCancellable =  spotify.api.playlist(selectedPlaylist)
-            .receive(on: RunLoop.main)
-            .sink(
-                receiveCompletion:{ _ in
-                    self.searchTopTracks()
-                },
-                receiveValue: { playlist in
-                    self.playlistModel.selectedPlaylist = playlist
-                }
-            )
-    }
-    
-    func searchTopTracks() {
+    func searchTopTracks(userPlaylist: PlaylistModel.UserPlaylist, finishViewModel: FinishViewModel) {
         if ProcessInfo.processInfo.isPreviewing { return }
+        
+        self.isSearchingTracks = true
         
         self.playlistModel.clearTracks()
         var remainingRequests = self.playlistModel.artists.count
@@ -123,6 +111,8 @@ class PlaylistViewModel: ObservableObject {
                             remainingRequests -= 1
                             if remainingRequests == 0 {
                                 self.playlistModel.removeDuplicatesFromTracks()
+                                finishViewModel.finishModel.tracks = self.playlistModel.tracks
+                                finishViewModel.finishModel.selectedPlaylist = userPlaylist                         
                                 self.isSearchingTracks = false
                                 self.shouldNavigate = true
                             }

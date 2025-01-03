@@ -51,7 +51,7 @@ class ArtistImageSearchViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     self.alertItem = AlertItem(
                         title: "Couldn't Perform Search",
-                        message: "No artists where found."
+                        message: "\(error)"
                     )
                 }
                 return
