@@ -4,14 +4,13 @@ import Combine
 
 class ArtistSearchResultViewModel: ObservableObject {
     @Published var artistResult: ArtistModel = ArtistModel()
-    @Published var loadingImages: Set<String> = []
     @Published var shouldNavigate = false
     
     var spotifyArtists: [Artist] = []
     
     private var loadImageCancellables: [AnyCancellable] = []
     
-    var getArtists: [Artist] {
+    var artists: [Artist] {
         self.artistResult.getArtistsFromArtistSearchResults()
     }
     
@@ -34,12 +33,8 @@ class ArtistSearchResultViewModel: ObservableObject {
     }
     
     func loadImage(for artistSearchResult: ArtistModel.ArtistSearchResult) {
-        if let id = artistSearchResult.id {
-            if !loadingImages.contains(id) {
-                self.loadingImages.insert(id)
-            } else {
-                return
-            }
+        if artistSearchResult.image != nil {
+            return
         }
         
         guard let spotifyImage = artistSearchResult.artist.images?.largest else {

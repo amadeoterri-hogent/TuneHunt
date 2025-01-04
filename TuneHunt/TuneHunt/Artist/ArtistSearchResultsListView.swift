@@ -27,7 +27,7 @@ struct ArtistSearchResultsListView: View {
     
     var btnSelectSpotifyPlaylist: some View {
         Button {
-            playlistViewModel.playlistModel.artists = artistSearchResultViewModel.getArtists
+            playlistViewModel.playlistModel.artists = artistSearchResultViewModel.artists
             artistSearchResultViewModel.shouldNavigate = true
         } label: {
             HStack {

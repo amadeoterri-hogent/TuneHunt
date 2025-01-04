@@ -3,11 +3,11 @@ import SpotifyWebAPI
 import Combine
 import Foundation
 
-struct FinishView: View {
+struct FinishView <Items: Codable & Hashable> : View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
-    @ObservedObject var finishViewModel: FinishViewModel
+    @ObservedObject var finishViewModel : FinishViewModel<Items>
     
     var body: some View {
         ZStack {
@@ -64,7 +64,7 @@ struct FinishView: View {
     var imgPlaylist: some View {
         Group {
             if let selectedPlaylist = finishViewModel.finishModel.selectedPlaylist {
-                (selectedPlaylist.image ?? Image(.spotifyLogoGreen))
+                (selectedPlaylist.image ?? Image(systemName: "music.note.list"))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 64, height: 64)
@@ -94,7 +94,7 @@ struct FinishView: View {
     }
     
     var txtTracksView: some View {
-        Text("Tracks (\(finishViewModel.finishModel.tracks.count))")
+        Text("Tracks (\(finishViewModel.trackResults.count))")
             .font(.title2)
             .foregroundColor(Theme(colorScheme).textColor)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -103,8 +103,8 @@ struct FinishView: View {
     var lstTracks: some View {
         ScrollView {
             LazyVStack {
-                ForEach(finishViewModel.finishModel.tracks, id: \.self) { track in
-                    TrackCellView(track: track)
+                ForEach(finishViewModel.trackResults, id: \.track.id) { trackResult in
+                    TrackCellView(finishViewModel: finishViewModel, trackResult: trackResult)
                 }
             }
         }
@@ -119,24 +119,21 @@ extension Array {
     }
 }
 
-//#Preview {
-//    
-//    let spotify = {
-//        let spotify = Spotify.shared
-//        //        spotify.isAuthorized = false
-//        spotify.isAuthorized = true
-//        return spotify
-//    }()
-//    
-//    let playlist: Playlist = .crumb
-//    let artists: [Artist] = [
-//        .pinkFloyd,.radiohead
-//    ]
-//    let tracks: [Track] = [
-//        .because,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,.comeTogether,.faces,.illWind,.odeToViceroy,.reckoner,.theEnd,
-//    ]
-//    
-//    FinishView(tracks: tracks, playlist: playlist , artists: artists)
-//        .environmentObject(spotify)
-//}
+#Preview {
+    let playlist: PlaylistModel.UserPlaylist = PlaylistModel.UserPlaylist(playlist: .crumb)
+    let trackResults: [FinishModel<PlaylistItems>.TrackResult] = [
+        FinishModel.TrackResult(track: .because),
+        FinishModel.TrackResult(track: .comeTogether),
+        FinishModel.TrackResult(track: .faces),
+        FinishModel.TrackResult(track: .illWind),
+        FinishModel.TrackResult(track: .odeToViceroy),
+        FinishModel.TrackResult(track: .reckoner),
+        FinishModel.TrackResult(track: .theEnd)
+
+    ]
+    let finishModel: FinishModel<PlaylistItems> = FinishModel(selectedPlaylist: playlist, trackResults: trackResults)
+    let finishViewModel: FinishViewModel = FinishViewModel(finishModel: finishModel)
+    
+    FinishView(finishViewModel: finishViewModel)
+}
 

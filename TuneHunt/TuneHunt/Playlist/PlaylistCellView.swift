@@ -5,16 +5,16 @@ import SpotifyWebAPI
 
 struct PlaylistCellView: View {
     @ObservedObject var playlistViewModel: PlaylistViewModel
-    @ObservedObject var finishViewModel: FinishViewModel
+    @ObservedObject var finishViewModel: FinishViewModel<PlaylistItemsReference>
     
-    var userPlaylist: PlaylistModel.UserPlaylist
+    var userPlaylist: PlaylistModel<PlaylistItemsReference>.UserPlaylist
     
     var body: some View {
         Button {
             playlistViewModel.searchTopTracks(userPlaylist: userPlaylist, finishViewModel: finishViewModel)
         } label: {
             HStack {
-                (userPlaylist.image ?? Image(.spotifyLogoGreen))
+                (userPlaylist.image ?? Image(systemName: "music.note.list"))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 48, height: 48)
@@ -36,12 +36,13 @@ struct PlaylistCellView: View {
     }
 }
 
-//#Preview {
-//    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
-//    
-//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-//    PlaylistCellView(playlistViewModel: playlistViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
-//
-//}
+#Preview {
+    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+    let finishViewModel: FinishViewModel<PlaylistItemsReference> = FinishViewModel()
+    
+    PlaylistCellView(playlistViewModel: playlistViewModel, finishViewModel: finishViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))
+    PlaylistCellView(playlistViewModel: playlistViewModel, finishViewModel: finishViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .lucyInTheSkyWithDiamonds))
+    PlaylistCellView(playlistViewModel: playlistViewModel, finishViewModel: finishViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .menITrust))
+    PlaylistCellView(playlistViewModel: playlistViewModel, finishViewModel: finishViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsSonicYouth))
+
+}

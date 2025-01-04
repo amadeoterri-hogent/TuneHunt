@@ -1,7 +1,7 @@
 import SpotifyWebAPI
 import SwiftUI
 
-struct PlaylistModel {
+struct PlaylistModel<Items: Codable & Hashable>  {
     var userPlaylists: [UserPlaylist] = []
     var selectedPlaylist: Playlist<PlaylistItems>? = nil
     var tracks: [Track] = []
@@ -13,11 +13,11 @@ struct PlaylistModel {
         self.userPlaylists = userPlaylists
     }
     
-    mutating func addPlaylist(playlist: Playlist<PlaylistItemsReference>) {
+    mutating func addPlaylist(playlist: Playlist<Items>) {
         self.userPlaylists.insert(UserPlaylist(playlist: playlist), at: 0)
     }
     
-    mutating func addPlaylists(playlists: [Playlist<PlaylistItemsReference>]) {
+    mutating func addPlaylists(playlists: [Playlist<Items>]) {
         for playlist in playlists {
             self.addPlaylist(playlist: playlist)
         }
@@ -37,7 +37,7 @@ struct PlaylistModel {
         }
     }
     
-    mutating func updateImageOfUserPlaylist(_ playlist: PlaylistModel.UserPlaylist, image: Image?) {
+    mutating func updateImageOfUserPlaylist(_ playlist: UserPlaylist, image: Image?) {
         if let index = self.userPlaylists.firstIndex(where: { $0.id == playlist.id }) {
             self.userPlaylists[index].updateImage(image)
         }
@@ -49,14 +49,14 @@ struct PlaylistModel {
     
     struct UserPlaylist {
         var id: String
-        var playlist: Playlist<PlaylistItemsReference>
+        var playlist: Playlist<Items>
         var image: Image? = nil {
             didSet {
                 print("Image set for userplaylist with name: \(playlist.name)")
             }
         }
         
-        init(playlist: Playlist<PlaylistItemsReference>) {
+        init(playlist: Playlist<Items>) {
             self.id = playlist.id
             self.playlist = playlist
         }

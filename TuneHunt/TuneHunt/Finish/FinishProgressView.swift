@@ -4,10 +4,10 @@ import SpotifyWebAPI
 // TODO: Skip track on error and print after which ones didn't succeed
 // TODO: play playlist?
 
-struct FinishProgressView: View {
+struct FinishProgressView <Items: Codable & Hashable> : View {
     @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
-    @ObservedObject var finishViewModel: FinishViewModel
+    @ObservedObject var finishViewModel: FinishViewModel<Items>
 
     @State private var progress: Double = 0.0
     @State private var animationAmount: Double = 1.0
@@ -84,7 +84,7 @@ struct FinishProgressView: View {
     
     func finish() async {
         if let playlist = finishViewModel.loadedPlaylist {
-            let trackURIs = finishViewModel.finishModel.tracks.compactMap { $0.uri }
+            let trackURIs = finishViewModel.tracks.compactMap { $0.uri }
             
             // Split track URIs into batches of 100
             let chunks = trackURIs.chunked(into: 100)

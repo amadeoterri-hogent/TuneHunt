@@ -8,7 +8,7 @@ import SpotifyExampleContent
 struct PlaylistSelectView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var playlistViewModel: PlaylistViewModel
-    @StateObject var finishViewModel: FinishViewModel = FinishViewModel()
+    @StateObject var finishViewModel: FinishViewModel<PlaylistItemsReference> = FinishViewModel()
         
     var body: some View {
         ZStack {
@@ -24,7 +24,7 @@ struct PlaylistSelectView: View {
                 .ignoresSafeArea())
             .foregroundStyle(Theme(colorScheme).textColor)
             .navigationDestination(isPresented: $playlistViewModel.shouldNavigate) {
-                if finishViewModel.finishModel.selectedPlaylist != nil && !finishViewModel.finishModel.tracks.isEmpty {
+                if finishViewModel.finishModel.selectedPlaylist != nil && !finishViewModel.tracks.isEmpty {
                     FinishView(finishViewModel: finishViewModel)
                 }
             }

@@ -3,11 +3,8 @@ import Combine
 import SpotifyWebAPI
 
 struct ArtistCellView: View {
-    @EnvironmentObject var spotify: Spotify
     @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
     @Binding var artistSearchResult: ArtistModel.ArtistSearchResult
-    
-    let placeholderImage = Image(.spotifyLogoGreen)
 
     var body: some View {
         HStack() {
@@ -17,14 +14,12 @@ struct ArtistCellView: View {
         }
         .padding(.vertical, 5)
         .onAppear {
-            if artistSearchResult.image == nil {
-                artistSearchResultViewModel.loadImage(for: artistSearchResult)
-            }
+            artistSearchResultViewModel.loadImage(for: artistSearchResult)
         }
     }
     
     var imgArtist: some View {
-        (artistSearchResult.image ?? placeholderImage)
+        (artistSearchResult.image ?? Image(.spotifyLogoGreen))
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 60, height: 60)

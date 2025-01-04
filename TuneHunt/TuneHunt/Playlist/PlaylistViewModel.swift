@@ -5,7 +5,7 @@ import Combine
 class PlaylistViewModel: ObservableObject {
     let spotify: Spotify = Spotify.shared
 
-    @Published var playlistModel: PlaylistModel = PlaylistModel()
+    @Published var playlistModel: PlaylistModel<PlaylistItemsReference> = PlaylistModel()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate: Bool = false
     @Published var showCreatePlaylist: Bool = false
@@ -13,21 +13,18 @@ class PlaylistViewModel: ObservableObject {
     @Published var newPlaylistName: String = ""
     @Published var isLoading = false
     @Published var isSearchingTracks = false
+    @Published var createdPlaylist: Playlist<PlaylistItems>? = nil
 
-    @Published private var cancellables: Set<AnyCancellable> = []
-    @Published private var searchCancellables: Set<AnyCancellable> = []
-    @Published private var loadPlaylistCancellable: AnyCancellable? = nil
-    @Published private var showingAlert = false
-    @Published private var createPlaylistCancellable: AnyCancellable?
-    @Published private var createdPlaylist: Playlist<PlaylistItems>? = nil
-    
+    private var cancellables: Set<AnyCancellable> = []
+    private var searchCancellables: Set<AnyCancellable> = []
+    private var createPlaylistCancellable: AnyCancellable?
     private var topTracks = UserDefaults.standard.integer(forKey: "topTracks")
     private var selectedCountryCode: String = UserDefaults.standard.string(forKey: "Country") ?? "BE"
     private var loadImageCancellables: [AnyCancellable] = []
     
     init() {}
     
-    init(playlistModel: PlaylistModel) {
+    init(playlistModel: PlaylistModel<PlaylistItemsReference>) {
         self.playlistModel = playlistModel
     }
         
@@ -43,7 +40,7 @@ class PlaylistViewModel: ObservableObject {
         self.playlistModel.artists
     }
     
-    var getPlaylists: [PlaylistModel.UserPlaylist] {
+    var getPlaylists: [PlaylistModel<PlaylistItemsReference>.UserPlaylist] {
         self.playlistModel.userPlaylists
     }
     
@@ -51,7 +48,7 @@ class PlaylistViewModel: ObservableObject {
         self.playlistModel.addPlaylist(playlist: playlist)
     }
     
-    func setUserPlaylists(_ playlists: [PlaylistModel.UserPlaylist]) {
+    func setUserPlaylists(_ playlists: [PlaylistModel<PlaylistItemsReference>.UserPlaylist]) {
         self.playlistModel.setUserPlaylists(playlists)
     }
     
@@ -60,7 +57,6 @@ class PlaylistViewModel: ObservableObject {
     }
     
     func retrievePlaylists() {
-        // Don't try to load any playlists if we're in preview mode.
         if ProcessInfo.processInfo.isPreviewing { return }
 
         self.isLoading = true
@@ -87,7 +83,7 @@ class PlaylistViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func searchTopTracks(userPlaylist: PlaylistModel.UserPlaylist, finishViewModel: FinishViewModel) {
+    func searchTopTracks(userPlaylist: PlaylistModel<PlaylistItemsReference>.UserPlaylist, finishViewModel: FinishViewModel<PlaylistItemsReference>) {
         if ProcessInfo.processInfo.isPreviewing { return }
         
         self.isSearchingTracks = true
@@ -111,8 +107,8 @@ class PlaylistViewModel: ObservableObject {
                             remainingRequests -= 1
                             if remainingRequests == 0 {
                                 self.playlistModel.removeDuplicatesFromTracks()
-                                finishViewModel.finishModel.tracks = self.playlistModel.tracks
-                                finishViewModel.finishModel.selectedPlaylist = userPlaylist                         
+                                finishViewModel.finishModel.setSelectedPlaylist(userPlaylist)
+                                finishViewModel.finishModel.setTracks(self.playlistModel.tracks)
                                 self.isSearchingTracks = false
                                 self.shouldNavigate = true
                             }
@@ -137,9 +133,7 @@ class PlaylistViewModel: ObservableObject {
         }
     }
     
-    func loadImage(for userPlaylist: PlaylistModel.UserPlaylist) {       
-        print("Loading image for playlist with name: \(userPlaylist.playlist.name)")
-
+    func loadImage(for userPlaylist: PlaylistModel<PlaylistItemsReference>.UserPlaylist) {       
         guard let spotifyImage = userPlaylist.playlist.images.largest else {
             return
         }
