@@ -31,11 +31,12 @@ struct ArtistSearchResultsListView: View {
             artistSearchResultViewModel.shouldNavigate = true
         } label: {
             HStack {
-                Image(systemName: "magnifyingglass")
+                Image(systemName: "music.note.list")
                 Text("Select spotify playlist")
             }
             .frame(maxWidth: .infinity)
         }
+        .disabled(playlistViewModel.isSearchingTracks)
         .foregroundStyle(Theme(colorScheme).textColor)
         .padding()
         .background(.blue)

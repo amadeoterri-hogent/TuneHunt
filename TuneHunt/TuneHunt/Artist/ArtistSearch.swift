@@ -1,7 +1,4 @@
-import Foundation
 import SpotifyWebAPI
-import Combine
-import SwiftUI
 
 struct ArtistSearch {
     private(set) var artists: [Artist] = []

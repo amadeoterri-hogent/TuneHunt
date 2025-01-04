@@ -9,7 +9,7 @@ class ArtistSearchViewModel: ObservableObject {
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate = false
     @Published var showArtistsPreview = false
-    @Published var searchText: String = ""
+    @Published var searchText = ""
     @Published var artistsPreview: [String] = []
     @Published var selectedSeparator = "Auto"
     @Published var isSearching = false

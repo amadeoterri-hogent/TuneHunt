@@ -91,6 +91,7 @@ struct ArtistSingleSearchView: View {
                     Text("\(artist.name)")
                 }
                 .listRowBackground(Color.clear)
+                .disabled(searchArtistViewModel.isSearching)
             }
         }
         .listStyle(.plain)

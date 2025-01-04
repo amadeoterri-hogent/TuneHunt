@@ -4,10 +4,10 @@ import Foundation
 import SpotifyWebAPI
 
 struct ArtistMultipleSearchView: View {
-    @EnvironmentObject var spotify: Spotify
+    @Environment(\.colorScheme) var colorScheme
     @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
     @StateObject var artistSearchResultViewModel: ArtistSearchResultViewModel = ArtistSearchResultViewModel()
-    @Environment(\.colorScheme) var colorScheme
+    
     @FocusState private var searchTextIsFocused: Bool
         
     let pasteboard = UIPasteboard.general
@@ -69,6 +69,7 @@ struct ArtistMultipleSearchView: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .disabled(searchArtistViewModel.isSearching)
         .foregroundStyle(Theme(colorScheme).textColor)
         .padding()
         .background(.blue)

@@ -32,6 +32,7 @@ struct PlaylistCellView: View {
                 }
             }
         }
+        .disabled(playlistViewModel.isSearchingTracks)
     }
 }
 
