@@ -24,9 +24,7 @@ struct PlaylistSelectView: View {
                 .ignoresSafeArea())
             .foregroundStyle(Theme(colorScheme).textColor)
             .navigationDestination(isPresented: $playlistViewModel.shouldNavigate) {
-                if finishViewModel.finishModel.selectedPlaylist != nil && !finishViewModel.tracks.isEmpty {
-                    FinishView(finishViewModel: finishViewModel)
-                }
+                FinishView(finishViewModel: finishViewModel)
             }
             .alert(item: $playlistViewModel.alertItem) { alert in
                 Alert(title: alert.title, message: alert.message)

@@ -62,7 +62,7 @@ struct FinishView <Items: Codable & Hashable> : View {
     
     var imgPlaylist: some View {
         Group {
-            if let selectedPlaylist = finishViewModel.finishModel.selectedPlaylist {
+            if let selectedPlaylist = finishViewModel.selectedPlaylist {
                 (selectedPlaylist.image ?? Image(systemName: "music.note.list"))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -74,7 +74,7 @@ struct FinishView <Items: Codable & Hashable> : View {
     
     var lblPlaylist: some View {
         VStack(alignment: .leading) {
-            if let selectedPlaylist = finishViewModel.finishModel.selectedPlaylist {
+            if let selectedPlaylist = finishViewModel.selectedPlaylist {
                 Text(selectedPlaylist.playlist.name)
                     .font(.title)
                 if let owner = selectedPlaylist.playlist.owner?.displayName {

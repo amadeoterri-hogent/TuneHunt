@@ -18,17 +18,25 @@ struct ArtistSearchResultsListView: View {
         .padding()
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
+        .alert(item: $artistSearchResultViewModel.alertItem) { alert in
+            Alert(title: alert.title, message: alert.message)
+        }
         .navigationDestination(isPresented: $artistSearchResultViewModel.shouldNavigate) {
-            if !playlistViewModel.artists.isEmpty {
-                PlaylistSelectView(playlistViewModel: playlistViewModel)
-            }
+            PlaylistSelectView(playlistViewModel: playlistViewModel)
         }
     }
     
     var btnSelectSpotifyPlaylist: some View {
         Button {
-            playlistViewModel.playlistModel.artists = artistSearchResultViewModel.artists
-            artistSearchResultViewModel.shouldNavigate = true
+            if !artistSearchResultViewModel.artists.isEmpty {
+                playlistViewModel.playlistModel.artists = artistSearchResultViewModel.artists
+                artistSearchResultViewModel.shouldNavigate = true
+            } else {
+                artistSearchResultViewModel.alertItem = AlertItem(
+                    title: "Couldn't Resume",
+                    message: "Please select an artist"
+                )
+            }
         } label: {
             HStack {
                 Image(systemName: "music.note.list")
@@ -53,10 +61,10 @@ struct ArtistSearchResultsListView: View {
     }
     
     var lstArtists: some View {
-        List($artistSearchResultViewModel.artistModel.artistSearchResults, id: \.id) { $artistSearchResult in
+        List(artistSearchResultViewModel.artistSearchResults, id: \.id) { artistSearchResult in
             ArtistCellView(
                 artistSearchResultViewModel: artistSearchResultViewModel,
-                artistSearchResult: $artistSearchResult
+                artistSearchResult: artistSearchResult
             )
             .listRowBackground(Color.clear)
         }

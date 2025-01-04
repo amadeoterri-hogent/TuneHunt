@@ -107,8 +107,8 @@ class PlaylistViewModel: ObservableObject {
                             remainingRequests -= 1
                             if remainingRequests == 0 {
                                 self.playlistModel.removeDuplicatesFromTracks()
-                                finishViewModel.finishModel.setSelectedPlaylist(userPlaylist)
-                                finishViewModel.finishModel.setTracks(self.playlistModel.tracks)
+                                finishViewModel.setSelectedPlaylist(userPlaylist)
+                                finishViewModel.setTracks(self.playlistModel.tracks)
                                 self.isSearchingTracks = false
                                 self.shouldNavigate = true
                             }

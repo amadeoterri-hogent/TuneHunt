@@ -3,8 +3,9 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSearchResultViewModel: ObservableObject {
-    @Published var artistModel: ArtistModel = ArtistModel()
+    @Published private var artistModel: ArtistModel = ArtistModel()
     @Published var shouldNavigate = false
+    @Published var alertItem: AlertItem? = nil
     
     var spotifyArtists: [Artist] = []
     
@@ -20,12 +21,20 @@ class ArtistSearchResultViewModel: ObservableObject {
         self.artistModel.getArtistsFromArtistSearchResults()
     }
     
+    var artistSearchResults: [ArtistModel.ArtistSearchResult] {
+        self.artistModel.artistSearchResults
+    }
+    
     func clearArtistSearchResults() {
         self.artistModel.clearArtistSearchResults()
     }
     
     func addArtistToArtistSearchResults(artist: Artist) {
         self.artistModel.addArtistToArtistSearchResults(artist: artist)
+    }
+    
+    func updateAddToPlaylist(for artistSearchResult: ArtistModel.ArtistSearchResult, isSelected: Bool) {
+        self.artistModel.updateAddToPlaylist(for: artistSearchResult, isSelected: isSelected)
     }
     
     var selectAll: Bool {

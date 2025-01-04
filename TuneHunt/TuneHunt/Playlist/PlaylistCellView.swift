@@ -11,7 +11,14 @@ struct PlaylistCellView: View {
     
     var body: some View {
         Button {
-            playlistViewModel.searchTopTracks(userPlaylist: userPlaylist, finishViewModel: finishViewModel)
+            if finishViewModel.selectedPlaylist != nil && !finishViewModel.tracks.isEmpty {
+                playlistViewModel.searchTopTracks(userPlaylist: userPlaylist, finishViewModel: finishViewModel)
+            } else {
+                playlistViewModel.alertItem = AlertItem(
+                    title: "Couldn't Resume",
+                    message: "Playlist or tracks are empty"
+                )
+            }
         } label: {
             HStack {
                 (userPlaylist.image ?? Image(systemName: "music.note.list"))

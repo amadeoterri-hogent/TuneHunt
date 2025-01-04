@@ -6,7 +6,7 @@ import SpotifyWebAPI
 class FinishViewModel<Items: Codable & Hashable> : ObservableObject {
     let spotify: Spotify = Spotify.shared
     
-    @Published var finishModel: FinishModel<Items> = FinishModel()
+    @Published private var finishModel: FinishModel<Items> = FinishModel()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigateProgress = false
     @Published var shouldNavigateHome = false
@@ -21,12 +21,24 @@ class FinishViewModel<Items: Codable & Hashable> : ObservableObject {
         self.finishModel = finishModel
     }
     
+    var tracks: [Track] {
+        self.finishModel.getTracksFromTrackResults()
+    }
+    
     var trackResults: [FinishModel<Items>.TrackResult] {
         self.finishModel.trackResults
     }
     
-    var tracks: [Track] {
-        self.finishModel.getTracksFromTrackResults()
+    var selectedPlaylist: PlaylistModel<Items>.UserPlaylist? {
+        self.finishModel.selectedPlaylist
+    }
+    
+    func setSelectedPlaylist(_ userPlaylist: PlaylistModel<Items>.UserPlaylist) {
+        self.finishModel.setSelectedPlaylist(userPlaylist)
+    }
+    
+    func setTracks(_ tracks: [Track]) {
+        self.finishModel.setTracks(tracks)
     }
     
     func loadPlaylist() {

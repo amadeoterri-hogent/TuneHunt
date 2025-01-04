@@ -4,7 +4,8 @@ import SpotifyWebAPI
 
 struct ArtistCellView: View {
     @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
-    @Binding var artistSearchResult: ArtistModel.ArtistSearchResult
+    
+    var artistSearchResult: ArtistModel.ArtistSearchResult
 
     var body: some View {
         HStack() {
@@ -32,7 +33,14 @@ struct ArtistCellView: View {
             Text(artistSearchResult.artist.name)
                 .font(.headline)
             
-            Toggle("", isOn: $artistSearchResult.addToPlaylist)
+            Toggle("", isOn: Binding(
+                get: {
+                    artistSearchResult.addToPlaylist
+                },
+                set: { newValue in
+                    artistSearchResultViewModel.updateAddToPlaylist(for: artistSearchResult, isSelected: newValue)
+                }
+            ))
         }
     }
 }
@@ -42,10 +50,10 @@ struct ArtistCellView: View {
     let artistSearchResultViewModel = ArtistSearchResultViewModel()
 
     List {
-        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
-        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: artistSearchResult)
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: artistSearchResult)
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: artistSearchResult)
+        ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: artistSearchResult)
     }
 }
 

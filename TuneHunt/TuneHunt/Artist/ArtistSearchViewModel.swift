@@ -3,7 +3,7 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSearchViewModel: ObservableObject {
-    @Published private var model = ArtistSearch()
+    @Published private var artistSearchModel = ArtistSearchModel()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate = false
     @Published var showArtistsPreview = false
@@ -23,25 +23,25 @@ class ArtistSearchViewModel: ObservableObject {
     }
     
     var artists: [Artist] {
-        self.model.artists
+        self.artistSearchModel.artists
     }
     
     var selectedArtists: [Artist] {
-        self.model.selectedArtists
+        self.artistSearchModel.selectedArtists
     }
     
     var separators: [String] {
-        self.model.separators
+        self.artistSearchModel.separators
     }
     
     func select(_ artist: Artist) {
-        self.model.select(artist)
+        self.artistSearchModel.select(artist)
         self.shouldNavigate = true
     }
     
     func searchSingleArtist() {
         if ProcessInfo.processInfo.isPreviewing {
-            self.model.updateArtists([.pinkFloyd,.radiohead])
+            self.artistSearchModel.updateArtists([.pinkFloyd,.radiohead])
             return
         }
         
@@ -66,7 +66,7 @@ class ArtistSearchViewModel: ObservableObject {
                     self.isSearching = false
                 }, receiveValue: { searchResults in
                     let artists  = searchResults.artists?.items ?? []
-                    self.model.updateArtists(artists)
+                    self.artistSearchModel.updateArtists(artists)
             }
         )
         self.searchCancellables.append(cancellable)
@@ -151,7 +151,7 @@ class ArtistSearchViewModel: ObservableObject {
         self.searchText = ""
         self.artistSearchValueSplit = ""
         self.artistsPreview = []
-        self.model.clearArtists()
+        self.artistSearchModel.clearArtists()
     }
     
     func validate() -> Bool {

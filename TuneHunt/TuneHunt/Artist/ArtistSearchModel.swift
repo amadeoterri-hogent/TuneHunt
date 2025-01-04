@@ -1,6 +1,6 @@
 import SpotifyWebAPI
 
-struct ArtistSearch {
+struct ArtistSearchModel {
     private(set) var artists: [Artist] = []
     private(set) var selectedArtists: [Artist] = []
     

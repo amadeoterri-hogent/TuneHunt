@@ -37,6 +37,12 @@ struct ArtistModel{
         }
     }
     
+    mutating func updateAddToPlaylist(for artistSearchResult: ArtistSearchResult, isSelected: Bool) {
+        if let index = artistSearchResults.firstIndex(where: { $0.id == artistSearchResult.id }) {
+            artistSearchResults[index].addToPlaylist = isSelected
+        }
+    }
+    
     func getArtistsFromArtistSearchResults() -> [Artist] {
         self.artistSearchResults
             .filter { $0.addToPlaylist }
