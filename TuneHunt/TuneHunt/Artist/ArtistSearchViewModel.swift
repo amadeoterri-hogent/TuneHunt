@@ -12,11 +12,15 @@ class ArtistSearchViewModel: ObservableObject {
     @Published var selectedSeparator = "Auto"
     @Published var isSearching = false
 
-    private let spotify: Spotify = Spotify.shared
+    private var spotify: Spotify = Spotify.shared
     private var artistSearchValueSplit: String = ""
     private var searchCancellables: [AnyCancellable] = []
     
     init() {}
+    
+    init(spotify: Spotify) {
+        self.spotify = spotify
+    }
     
     var artists: [Artist] {
         self.model.artists

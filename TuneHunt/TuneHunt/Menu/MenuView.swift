@@ -28,7 +28,7 @@ struct MenuView: View {
             .padding()
             .navigationBarBackButtonHidden()
             .toolbar {
-                MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: $menuViewModel.menuStyle)
+                MenuProfileBarView(menuViewModel: menuViewModel)
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
@@ -78,22 +78,29 @@ struct MenuView: View {
 }
 
 #Preview {
-    let demoUser = SpotifyUser(
-        displayName: "Amadeo",
-        uri: "www.google.com",
-        id: "1",
-        href: URL(string: "www.google.com")!
-    )
+    if let image = URL(string: "https://picsum.photos/200/300") {
+        let spotifyImage = SpotifyImage(url: image)
+        let demoUser = SpotifyUser(
+            displayName: "Amadeo",
+            uri: "www.google.com",
+            id: "1",
+            images: [spotifyImage],
+            href: URL(string: "www.google.com")!
+        )
 
-    let spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        spotify.currentUser = demoUser
-        return spotify
-    }()
-    
-    let searchArtistViewModel = ArtistSearchViewModel()
-
-    MenuView(searchArtistViewModel: searchArtistViewModel)
+        let spotify = {
+            let spotify = Spotify.shared
+            spotify.isAuthorized = true
+            spotify.currentUser = demoUser
+            return spotify
+        }()
+        
+        let searchArtistViewModel = ArtistSearchViewModel(spotify: spotify)
+        MenuView(searchArtistViewModel: searchArtistViewModel)
+    }
+    else {
+        let searchArtistViewModel = ArtistSearchViewModel()
+        MenuView(searchArtistViewModel: searchArtistViewModel)
+    }
 }
 

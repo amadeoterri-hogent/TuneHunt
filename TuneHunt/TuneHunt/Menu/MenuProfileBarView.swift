@@ -6,7 +6,6 @@ import SpotifyWebAPI
 struct MenuProfileBarView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var menuViewModel: MenuViewModel
-    @Binding var menuStyle: MenuStyle
     
     var body: some View {
         if menuViewModel.currentUser() != nil {
@@ -28,11 +27,11 @@ struct MenuProfileBarView: View {
             .resizable()
             .scaledToFit()
             .clipShape(Circle())
-            .frame(width: 48, height: 48)
+            .frame(width: 64, height: 64)
     }
     
     var pkrMenuStyle: some View {
-        Picker("Menu layout", selection: $menuStyle) {
+        Picker("Menu layout", selection: $menuViewModel.menuStyle) {
             ForEach(MenuStyle.allCases) { style in
                 Label(style.label, systemImage: style.systemImage)
                     .tag(style)
@@ -62,22 +61,6 @@ struct MenuProfileBarView: View {
 }
 
 #Preview {
-    let demoUser = SpotifyUser(
-        displayName: "Amadeo",
-        uri: "www.google.com",
-        id: "1",
-        href: URL(string: "www.google.com")!
-    )
-    
-    let spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        spotify.currentUser = demoUser
-        return spotify
-    }()
-    
     let menuViewModel: MenuViewModel = MenuViewModel()
-    
-    MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: .constant(.list))
-        .environmentObject(spotify)
+    MenuProfileBarView(menuViewModel: menuViewModel)
 }
