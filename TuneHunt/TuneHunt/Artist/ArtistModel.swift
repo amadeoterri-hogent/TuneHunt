@@ -4,6 +4,12 @@ import SwiftUI
 struct ArtistModel{
     var artistSearchResults: [ArtistSearchResult] = []
     
+    init() {}
+    
+    init(artistSearchResults: [ArtistSearchResult]) {
+        self.artistSearchResults = artistSearchResults
+    }
+    
     mutating func addArtistToArtistSearchResults(artist: Artist) {
         if !self.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
             self.artistSearchResults.append(ArtistModel.ArtistSearchResult(artist: artist))

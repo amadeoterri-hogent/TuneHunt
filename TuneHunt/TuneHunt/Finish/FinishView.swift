@@ -4,7 +4,6 @@ import Combine
 import Foundation
 
 struct FinishView <Items: Codable & Hashable> : View {
-    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     
     @ObservedObject var finishViewModel : FinishViewModel<Items>

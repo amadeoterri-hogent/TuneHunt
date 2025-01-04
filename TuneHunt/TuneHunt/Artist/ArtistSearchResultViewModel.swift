@@ -3,31 +3,37 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSearchResultViewModel: ObservableObject {
-    @Published var artistResult: ArtistModel = ArtistModel()
+    @Published var artistModel: ArtistModel = ArtistModel()
     @Published var shouldNavigate = false
     
     var spotifyArtists: [Artist] = []
     
     private var loadImageCancellables: [AnyCancellable] = []
     
+    init() {}
+    
+    init(artistModel: ArtistModel) {
+        self.artistModel = artistModel
+    }
+    
     var artists: [Artist] {
-        self.artistResult.getArtistsFromArtistSearchResults()
+        self.artistModel.getArtistsFromArtistSearchResults()
     }
     
     func clearArtistSearchResults() {
-        self.artistResult.clearArtistSearchResults()
+        self.artistModel.clearArtistSearchResults()
     }
     
     func addArtistToArtistSearchResults(artist: Artist) {
-        self.artistResult.addArtistToArtistSearchResults(artist: artist)
+        self.artistModel.addArtistToArtistSearchResults(artist: artist)
     }
     
     var selectAll: Bool {
         get {
-            self.artistResult.selectAll
+            self.artistModel.selectAll
         }
         set {
-            self.artistResult.selectAll = newValue
+            self.artistModel.selectAll = newValue
             objectWillChange.send()
         }
     }
@@ -46,7 +52,7 @@ class ArtistSearchResultViewModel: ObservableObject {
             .sink(
                 receiveCompletion: { _ in },
                 receiveValue: { image in
-                    self.artistResult.updateImageOfArtistSearchResult(for: artistSearchResult, image: image)
+                    self.artistModel.updateImageOfArtistSearchResult(for: artistSearchResult, image: image)
                 }
             )
         

@@ -74,7 +74,7 @@ class PlaylistSearchArtistsViewModel: ObservableObject {
             
             for artist in track.artists ?? [] {
                 guard let uri = artist.uri,
-                      !artistSearchResultViewModel.artistResult.artistSearchResults.contains(where: { $0.artist.id == artist.id }) else { continue }
+                      !artistSearchResultViewModel.artistModel.artistSearchResults.contains(where: { $0.artist.id == artist.id }) else { continue }
                 
                 remainingRequests += 1
 
@@ -95,8 +95,8 @@ class PlaylistSearchArtistsViewModel: ObservableObject {
                             }
                         },
                         receiveValue: { artist in
-                            if !artistSearchResultViewModel.artistResult.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
-                                artistSearchResultViewModel.artistResult.artistSearchResults.append(ArtistModel.ArtistSearchResult(artist: artist))
+                            if !artistSearchResultViewModel.artistModel.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
+                                artistSearchResultViewModel.artistModel.artistSearchResults.append(ArtistModel.ArtistSearchResult(artist: artist))
                             }
                         }
                     )

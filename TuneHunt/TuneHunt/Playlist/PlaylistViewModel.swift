@@ -151,7 +151,9 @@ class PlaylistViewModel: ObservableObject {
 
     }
     
-    func createPlaylist(){
+    func createPlaylist() {
+        if ProcessInfo.processInfo.isPreviewing { return }
+
         if !validate() {
             return
         }

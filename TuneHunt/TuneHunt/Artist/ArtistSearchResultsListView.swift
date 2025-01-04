@@ -53,7 +53,7 @@ struct ArtistSearchResultsListView: View {
     }
     
     var lstArtists: some View {
-        List($artistSearchResultViewModel.artistResult.artistSearchResults, id: \.id) { $artistSearchResult in
+        List($artistSearchResultViewModel.artistModel.artistSearchResults, id: \.id) { $artistSearchResult in
             ArtistCellView(
                 artistSearchResultViewModel: artistSearchResultViewModel,
                 artistSearchResult: $artistSearchResult
@@ -65,20 +65,18 @@ struct ArtistSearchResultsListView: View {
 
 }
 
-//#Preview {
-//    
-//    let spotify: Spotify = {
-//        let spotify = Spotify.shared
-//        spotify.isAuthorized = true
-//        return spotify
-//    }()
-//    
-//    let artists = [
-//        SearchArtistModel.ArtistSearchResult(artist: .pinkFloyd),
-//        SearchArtistModel.ArtistSearchResult(artist: .radiohead)
-//    ]
-//    
-//    ArtistSearchResultsListView(artistsSearchResults: artists)
-//        .environmentObject(spotify)
-//}
+#Preview {
+    let artistSearchResults: [ArtistModel.ArtistSearchResult] = [
+        ArtistModel.ArtistSearchResult(artist: .pinkFloyd),
+        ArtistModel.ArtistSearchResult(artist: .radiohead),
+        ArtistModel.ArtistSearchResult(artist: .levitationRoom),
+        ArtistModel.ArtistSearchResult(artist: .skinshape)
+    ]
+    
+    let artistModel: ArtistModel = ArtistModel(artistSearchResults: artistSearchResults)
+    let artistSearchResultViewModel = ArtistSearchResultViewModel(artistModel: artistModel)
+    let playlistViewModel = PlaylistViewModel()
+    
+    ArtistSearchResultsListView(artistSearchResultViewModel: artistSearchResultViewModel, playlistViewModel: playlistViewModel)
+}
 

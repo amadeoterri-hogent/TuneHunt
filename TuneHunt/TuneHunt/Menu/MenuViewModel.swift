@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import SpotifyWebAPI
 
 class MenuViewModel: ObservableObject {
     @Published private var model = MenuModel()
@@ -10,7 +11,7 @@ class MenuViewModel: ObservableObject {
     @Published var menuStyle: MenuStyle = .list
     @Published var profileImage = Image(systemName: "person.crop.circle")
 
-    let spotify: Spotify = Spotify.shared
+    private let spotify: Spotify = Spotify.shared
     private var loadImageCancellable: AnyCancellable? = nil
         
     var menuItems: [MenuItem] {
@@ -34,6 +35,14 @@ class MenuViewModel: ObservableObject {
                     self.profileImage = image
                 }
             )
+    }
+    
+    func currentUser() -> SpotifyUser? {
+        spotify.currentUser
+    }
+    
+    func deauthorize() {
+        spotify.api.authorizationManager.deauthorize()
     }
     
 }

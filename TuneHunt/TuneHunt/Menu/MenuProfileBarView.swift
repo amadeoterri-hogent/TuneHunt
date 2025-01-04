@@ -5,13 +5,12 @@ import SpotifyWebAPI
 
 struct MenuProfileBarView: View {
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var spotify: Spotify
     @ObservedObject var menuViewModel: MenuViewModel
     @Binding var menuStyle: MenuStyle
     @Binding var shouldNavigate: Bool
     
     var body: some View {
-        if spotify.currentUser != nil {
+        if menuViewModel.currentUser() != nil {
             Menu {
                 pkrMenuStyle
                 Divider()
@@ -52,8 +51,8 @@ struct MenuProfileBarView: View {
     }
     
     var btnLogOut: some View {
-        Button (role: .destructive){
-            spotify.api.authorizationManager.deauthorize()
+        Button (role: .destructive) {
+            self.menuViewModel.deauthorize()
         } label: {
             Label("Logout", systemImage: "rectangle.portrait.and.arrow.forward")
                 .foregroundStyle(.red)

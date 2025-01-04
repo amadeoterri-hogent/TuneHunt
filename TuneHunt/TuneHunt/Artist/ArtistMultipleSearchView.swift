@@ -160,16 +160,8 @@ struct ArtistMultipleSearchView: View {
 }
 
 #Preview {
-    let spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
     let searchArtistViewModel = ArtistSearchViewModel()
-    
     ArtistMultipleSearchView(searchArtistViewModel: searchArtistViewModel)
-        .environmentObject(spotify)
 }
 
 

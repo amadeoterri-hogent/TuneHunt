@@ -39,16 +39,8 @@ struct ArtistCellView: View {
 
 #Preview {
     let artistSearchResult = ArtistModel.ArtistSearchResult(artist: .pinkFloyd)
-    
-    let spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = true
-        return spotify
-    }()
-    
     let artistSearchResultViewModel = ArtistSearchResultViewModel()
-    
-    
+
     List {
         ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))
         ArtistCellView(artistSearchResultViewModel: artistSearchResultViewModel, artistSearchResult: .constant(artistSearchResult))

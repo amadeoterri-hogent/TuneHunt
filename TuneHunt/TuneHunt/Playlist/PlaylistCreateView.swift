@@ -3,7 +3,6 @@ import Combine
 import SpotifyWebAPI
 
 struct PlaylistCreateView: View {
-    @EnvironmentObject var spotify: Spotify
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var playlistViewModel: PlaylistViewModel
         
@@ -54,7 +53,6 @@ struct PlaylistCreateView: View {
     var btnCreatePlaylist: some View {
         Button {
             playlistViewModel.createPlaylist()
-
         } label: {
             HStack {
                 Image(systemName: "plus")
@@ -70,13 +68,7 @@ struct PlaylistCreateView: View {
     }
 }
 
-//#Preview{
-//    let spotify: Spotify = {
-//        let spotify = Spotify.shared
-//        spotify.isAuthorized = true
-//        return spotify
-//    }()
-//    
-//    return PlaylistCreateView()
-//        .environmentObject(spotify)
-//}
+#Preview {
+    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+    PlaylistCreateView(playlistViewModel: playlistViewModel)
+}
