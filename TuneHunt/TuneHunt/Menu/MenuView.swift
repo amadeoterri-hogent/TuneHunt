@@ -28,7 +28,7 @@ struct MenuView: View {
             .padding()
             .navigationBarBackButtonHidden()
             .toolbar {
-                MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: $menuViewModel.menuStyle, shouldNavigate: $menuViewModel.shouldNavigate )
+                MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: $menuViewModel.menuStyle)
             }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
@@ -69,6 +69,8 @@ struct MenuView: View {
             PlaylistSearchArtistsView(playlistSearchArtistsViewModel: playlistSearchArtistsViewModel)
         case 5:
             SettingsView(menuViewModel: menuViewModel)
+        case 6:
+            MainView()
         default:
             EmptyView()
         }
@@ -93,6 +95,5 @@ struct MenuView: View {
     let searchArtistViewModel = ArtistSearchViewModel()
 
     MenuView(searchArtistViewModel: searchArtistViewModel)
-        .environmentObject(spotify)
 }
 

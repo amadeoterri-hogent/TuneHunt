@@ -1,29 +1,16 @@
-import SwiftUI
-import Combine
+import Foundation
 import SpotifyWebAPI
+import Combine
 
-struct ContentView: View {
-    @EnvironmentObject var spotify: Spotify
-    @Environment(\.colorScheme) var colorScheme
+class MainViewModel: ObservableObject {
+    @Published var alertItem: AlertItem? = nil
     
-    @State private var cancellables: Set<AnyCancellable> = []
-    @State private var alert: AlertItem? = nil
-    
-    var body: some View {
-        VStack() {
-            if (!spotify.isAuthorized) {
-                LoginView()
-                    .onOpenURL(perform: handleURL(_:))
-            } else {
-                MenuView()
-            }
-        }
-        .accentColor(Theme(colorScheme).textColor)
-    }
+    private let spotify: Spotify = Spotify.shared
+    private var cancellables: Set<AnyCancellable> = []
     
     func handleURL(_ url: URL) {
         guard url.scheme == self.spotify.loginCallbackURL.scheme else {
-            self.alert = AlertItem(
+            self.alertItem = AlertItem(
                 title: "Cannot Handle Redirect",
                 message: "Unexpected URL"
             )
@@ -53,7 +40,7 @@ struct ContentView: View {
                     "Couldn't authorize with your account"
                     alertMessage = error.localizedDescription
                 }
-                self.alert = AlertItem(
+                self.alertItem = AlertItem(
                     title: alertTitle, message: alertMessage
                 )
             }
@@ -62,15 +49,5 @@ struct ContentView: View {
         
         self.spotify.authorizationState = String.randomURLSafe(length: 128)
     }
-}
-
-#Preview {
-    let spotify: Spotify = {
-        let spotify = Spotify.shared
-        spotify.isAuthorized = false
-        return spotify
-    }()
     
-    return ContentView()
-        .environmentObject(spotify)
 }

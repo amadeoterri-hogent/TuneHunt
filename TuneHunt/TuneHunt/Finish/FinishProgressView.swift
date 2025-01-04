@@ -6,6 +6,7 @@ import SpotifyWebAPI
 
 struct FinishProgressView <Items: Codable & Hashable> : View {
     @EnvironmentObject var spotify: Spotify
+    @EnvironmentObject var mainViewModel: MainViewModel
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var finishViewModel: FinishViewModel<Items>
 
@@ -19,7 +20,9 @@ struct FinishProgressView <Items: Codable & Hashable> : View {
         }
         .padding()
         .toolbar() {btnHome}
-        .navigationDestination(isPresented: $finishViewModel.shouldNavigateHome) {MenuView()}
+        .navigationDestination(isPresented: $finishViewModel.shouldNavigateHome) {
+            MenuView()
+        }
         .frame(maxHeight: .infinity, alignment: .center)
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())

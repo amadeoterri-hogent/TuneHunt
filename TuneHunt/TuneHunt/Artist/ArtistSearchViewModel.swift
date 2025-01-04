@@ -3,8 +3,6 @@ import SpotifyWebAPI
 import Combine
 
 class ArtistSearchViewModel: ObservableObject {
-    let spotify: Spotify = Spotify.shared
-
     @Published private var model = ArtistSearch()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate = false
@@ -14,6 +12,7 @@ class ArtistSearchViewModel: ObservableObject {
     @Published var selectedSeparator = "Auto"
     @Published var isSearching = false
 
+    private let spotify: Spotify = Spotify.shared
     private var artistSearchValueSplit: String = ""
     private var searchCancellables: [AnyCancellable] = []
     

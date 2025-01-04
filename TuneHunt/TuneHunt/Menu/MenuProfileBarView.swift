@@ -7,7 +7,6 @@ struct MenuProfileBarView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var menuViewModel: MenuViewModel
     @Binding var menuStyle: MenuStyle
-    @Binding var shouldNavigate: Bool
     
     var body: some View {
         if menuViewModel.currentUser() != nil {
@@ -44,7 +43,7 @@ struct MenuProfileBarView: View {
     var btnSettings: some View {
         Button {
             menuViewModel.selection = 5
-            shouldNavigate = true
+            menuViewModel.shouldNavigate = true
         } label: {
             Label("Settings", systemImage: "gear")
         }
@@ -53,6 +52,8 @@ struct MenuProfileBarView: View {
     var btnLogOut: some View {
         Button (role: .destructive) {
             self.menuViewModel.deauthorize()
+            menuViewModel.selection = 6
+            menuViewModel.shouldNavigate = true
         } label: {
             Label("Logout", systemImage: "rectangle.portrait.and.arrow.forward")
                 .foregroundStyle(.red)
@@ -77,6 +78,6 @@ struct MenuProfileBarView: View {
     
     let menuViewModel: MenuViewModel = MenuViewModel()
     
-    MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: .constant(.list), shouldNavigate: .constant(false))
+    MenuProfileBarView(menuViewModel: menuViewModel, menuStyle: .constant(.list))
         .environmentObject(spotify)
 }

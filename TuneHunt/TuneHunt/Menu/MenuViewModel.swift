@@ -43,6 +43,7 @@ class MenuViewModel: ObservableObject {
     
     func deauthorize() {
         spotify.api.authorizationManager.deauthorize()
+        shouldNavigate = true
     }
     
 }
