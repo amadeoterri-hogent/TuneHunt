@@ -107,6 +107,7 @@ struct FinishView <Items: Codable & Hashable> : View {
                 }
             }
         }
+        .scrollIndicators(.hidden)
     }
 }
 
@@ -119,7 +120,7 @@ extension Array {
 }
 
 #Preview {
-    let playlist: PlaylistModel.UserPlaylist = PlaylistModel.UserPlaylist(playlist: .crumb)
+    let playlist = PlaylistModel.UserPlaylist(playlist: .crumb)
     let trackResults: [FinishModel<PlaylistItems>.TrackResult] = [
         FinishModel.TrackResult(track: .because),
         FinishModel.TrackResult(track: .comeTogether),
@@ -127,11 +128,25 @@ extension Array {
         FinishModel.TrackResult(track: .illWind),
         FinishModel.TrackResult(track: .odeToViceroy),
         FinishModel.TrackResult(track: .reckoner),
+        FinishModel.TrackResult(track: .theEnd),
+        FinishModel.TrackResult(track: .because),
+        FinishModel.TrackResult(track: .comeTogether),
+        FinishModel.TrackResult(track: .faces),
+        FinishModel.TrackResult(track: .illWind),
+        FinishModel.TrackResult(track: .odeToViceroy),
+        FinishModel.TrackResult(track: .reckoner),
+        FinishModel.TrackResult(track: .theEnd),
+        FinishModel.TrackResult(track: .because),
+        FinishModel.TrackResult(track: .comeTogether),
+        FinishModel.TrackResult(track: .faces),
+        FinishModel.TrackResult(track: .illWind),
+        FinishModel.TrackResult(track: .odeToViceroy),
+        FinishModel.TrackResult(track: .reckoner),
         FinishModel.TrackResult(track: .theEnd)
-
     ]
+    
     let finishModel: FinishModel<PlaylistItems> = FinishModel(selectedPlaylist: playlist, trackResults: trackResults)
-    let finishViewModel: FinishViewModel = FinishViewModel(finishModel: finishModel)
+    let finishViewModel = FinishViewModel(finishModel: finishModel)
     
     FinishView(finishViewModel: finishViewModel)
 }

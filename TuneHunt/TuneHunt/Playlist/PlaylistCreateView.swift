@@ -69,6 +69,6 @@ struct PlaylistCreateView: View {
 }
 
 #Preview {
-    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+    let playlistViewModel = PlaylistViewModel()
     PlaylistCreateView(playlistViewModel: playlistViewModel)
 }

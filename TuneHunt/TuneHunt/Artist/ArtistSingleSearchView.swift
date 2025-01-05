@@ -5,7 +5,7 @@ import SpotifyWebAPI
 struct ArtistSingleSearchView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
-    @StateObject var playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+    @StateObject var playlistViewModel = PlaylistViewModel()
     
     var body: some View {
         ZStack {
@@ -86,7 +86,7 @@ struct ArtistSingleSearchView: View {
             ForEach(searchArtistViewModel.artists, id: \.self) { artist in
                 Button {
                     searchArtistViewModel.select(artist)
-                    playlistViewModel.playlistModel.artists = searchArtistViewModel.selectedArtists
+                    playlistViewModel.setArtists(searchArtistViewModel.selectedArtists)
                 } label: {
                     Text("\(artist.name)")
                 }

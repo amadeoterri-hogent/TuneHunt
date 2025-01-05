@@ -5,7 +5,7 @@ import SpotifyWebAPI
 struct ArtistCellView: View {
     @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
     
-    var artistSearchResult: ArtistModel.ArtistSearchResult
+    var artistSearchResult: ArtistSearchResult
 
     var body: some View {
         HStack() {
@@ -46,7 +46,7 @@ struct ArtistCellView: View {
 }
 
 #Preview {
-    let artistSearchResult = ArtistModel.ArtistSearchResult(artist: .pinkFloyd)
+    let artistSearchResult = ArtistSearchResult(artist: .pinkFloyd)
     let artistSearchResultViewModel = ArtistSearchResultViewModel()
 
     List {

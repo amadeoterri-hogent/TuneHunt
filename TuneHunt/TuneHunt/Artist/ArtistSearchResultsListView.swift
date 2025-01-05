@@ -6,7 +6,7 @@ import Combine
 struct ArtistSearchResultsListView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var artistSearchResultViewModel: ArtistSearchResultViewModel
-    @StateObject var playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+    @StateObject var playlistViewModel = PlaylistViewModel()
     
     var body: some View {
         VStack {
@@ -29,7 +29,7 @@ struct ArtistSearchResultsListView: View {
     var btnSelectSpotifyPlaylist: some View {
         Button {
             if !artistSearchResultViewModel.artists.isEmpty {
-                playlistViewModel.playlistModel.artists = artistSearchResultViewModel.artists
+                playlistViewModel.setArtists(artistSearchResultViewModel.artists)
                 artistSearchResultViewModel.shouldNavigate = true
             } else {
                 artistSearchResultViewModel.alertItem = AlertItem(
@@ -74,14 +74,14 @@ struct ArtistSearchResultsListView: View {
 }
 
 #Preview {
-    let artistSearchResults: [ArtistModel.ArtistSearchResult] = [
-        ArtistModel.ArtistSearchResult(artist: .pinkFloyd),
-        ArtistModel.ArtistSearchResult(artist: .radiohead),
-        ArtistModel.ArtistSearchResult(artist: .levitationRoom),
-        ArtistModel.ArtistSearchResult(artist: .skinshape)
+    let artistSearchResults: [ArtistSearchResult] = [
+        ArtistSearchResult(artist: .pinkFloyd),
+        ArtistSearchResult(artist: .radiohead),
+        ArtistSearchResult(artist: .levitationRoom),
+        ArtistSearchResult(artist: .skinshape)
     ]
     
-    let artistModel: ArtistModel = ArtistModel(artistSearchResults: artistSearchResults)
+    let artistModel = ArtistModel(artistSearchResults: artistSearchResults)
     let artistSearchResultViewModel = ArtistSearchResultViewModel(artistModel: artistModel)
     let playlistViewModel = PlaylistViewModel()
     

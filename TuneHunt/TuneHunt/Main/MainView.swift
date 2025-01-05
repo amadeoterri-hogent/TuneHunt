@@ -21,7 +21,7 @@ struct MainView: View {
 }
 
 #Preview {
-    let mainViewModel: MainViewModel = MainViewModel()
+    let mainViewModel = MainViewModel()
     MainView()
         .environmentObject(mainViewModel)
 }

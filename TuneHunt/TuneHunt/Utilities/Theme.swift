@@ -42,24 +42,3 @@ extension ShapeStyle where Self == Color {
         Color(red: 230/255, green: 1, blue: 1)
     }
 }
-
-struct ThemeView:View {
-    @State private var primarybgColor = Color.blue
-    @State private var secondarybgColor = Color.white
-
-    
-    var body: some View {
-        
-        ScrollView {
-            ColorPicker("Set the primary color", selection: $primarybgColor)
-            ColorPicker("Set the secondary color", selection: $secondarybgColor)
-
-        }
-        .frame(maxWidth: .infinity)
-        .background(LinearGradient(colors: [primarybgColor, secondarybgColor], startPoint: .top, endPoint: .bottom))
-
-    }
-}
-#Preview {
-    ThemeView()
-}

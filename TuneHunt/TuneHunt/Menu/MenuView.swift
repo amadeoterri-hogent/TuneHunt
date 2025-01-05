@@ -3,9 +3,9 @@ import Combine
 import SpotifyWebAPI
 
 struct MenuView: View {
-    @StateObject var searchArtistViewModel: ArtistSearchViewModel = ArtistSearchViewModel()
-    @StateObject var playlistSearchArtistsViewModel: PlaylistSearchArtistsViewModel = PlaylistSearchArtistsViewModel()
-    @StateObject var menuViewModel: MenuViewModel = MenuViewModel()
+    @StateObject var searchArtistViewModel = ArtistSearchViewModel()
+    @StateObject var playlistSearchArtistsViewModel = PlaylistSearchArtistsViewModel()
+    @StateObject var menuViewModel = MenuViewModel()
     @Environment(\.colorScheme) var colorScheme
         
     var body: some View {

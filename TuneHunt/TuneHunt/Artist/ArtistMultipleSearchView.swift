@@ -6,7 +6,7 @@ import SpotifyWebAPI
 struct ArtistMultipleSearchView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
-    @StateObject var artistSearchResultViewModel: ArtistSearchResultViewModel = ArtistSearchResultViewModel()
+    @StateObject var artistSearchResultViewModel = ArtistSearchResultViewModel()
     
     @FocusState private var searchTextIsFocused: Bool
         
@@ -34,6 +34,7 @@ struct ArtistMultipleSearchView: View {
 
                     txtEditor
                 }
+                .scrollIndicators(.hidden)
                 .padding()
 
             }

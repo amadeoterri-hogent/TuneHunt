@@ -16,6 +16,7 @@ struct PlaylistSelectView: View {
                 DefaultNavigationTitleView(titleText: "Select a Playlist")
                 playlistView
             }
+            .scrollIndicators(.hidden)
             .padding()
             .sheet(isPresented: $playlistViewModel.showCreatePlaylist) {
                 PlaylistCreateView(playlistViewModel: playlistViewModel)
@@ -58,14 +59,13 @@ struct PlaylistSelectView: View {
     }
     
     var lstPlaylists: some View {
-        ForEach(playlistViewModel.playlistModel.userPlaylists, id: \.playlist.uri) { userPlaylist in
+        ForEach(playlistViewModel.userPlaylists, id: \.playlist.uri) { userPlaylist in
             PlaylistCellView(
                 playlistViewModel: playlistViewModel,
                 finishViewModel: finishViewModel,
                 userPlaylist: userPlaylist
             )
         }
-
     }
     
     var btnCreatePlaylist: some View {
@@ -95,8 +95,8 @@ struct PlaylistSelectView: View {
     
 //    let userPlaylists: [PlaylistModel.UserPlaylist] = []
     
-    let playlistModel: PlaylistModel = PlaylistModel(userPlaylists: userPlaylists)
-    let playlistViewModel: PlaylistViewModel = PlaylistViewModel(playlistModel: playlistModel)
+    let playlistModel = PlaylistModel(userPlaylists: userPlaylists)
+    let playlistViewModel = PlaylistViewModel(playlistModel: playlistModel)
     
     PlaylistSelectView(playlistViewModel: playlistViewModel)
 }

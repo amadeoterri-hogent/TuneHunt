@@ -12,7 +12,7 @@ struct ArtistModel{
     
     mutating func addArtistToArtistSearchResults(artist: Artist) {
         if !self.artistSearchResults.contains(where: { $0.artist.id == artist.id }) {
-            self.artistSearchResults.append(ArtistModel.ArtistSearchResult(artist: artist))
+            self.artistSearchResults.append(ArtistSearchResult(artist: artist))
         }
     }
     

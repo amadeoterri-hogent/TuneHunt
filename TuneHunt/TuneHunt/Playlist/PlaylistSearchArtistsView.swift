@@ -5,7 +5,7 @@ import SpotifyWebAPI
 struct PlaylistSearchArtistsView: View {
     @Environment(\.colorScheme) var colorScheme
     @ObservedObject var playlistSearchArtistsViewModel: PlaylistSearchArtistsViewModel
-    @StateObject var artistSearchResultViewModel: ArtistSearchResultViewModel = ArtistSearchResultViewModel()
+    @StateObject var artistSearchResultViewModel = ArtistSearchResultViewModel()
 
     var body: some View {
         ZStack {

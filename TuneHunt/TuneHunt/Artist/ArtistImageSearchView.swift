@@ -8,7 +8,7 @@ import NaturalLanguage
 
 struct ArtistImageSearchView: View {
     @ObservedObject var searchArtistViewModel: ArtistSearchViewModel
-    @StateObject var searchArtistImageViewModel: ArtistImageSearchViewModel = ArtistImageSearchViewModel()
+    @StateObject var searchArtistImageViewModel = ArtistImageSearchViewModel()
     @Environment(\.colorScheme) var colorScheme
             
     var body: some View {

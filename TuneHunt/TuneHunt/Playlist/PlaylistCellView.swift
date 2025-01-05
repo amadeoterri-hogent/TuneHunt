@@ -44,7 +44,7 @@ struct PlaylistCellView: View {
 }
 
 #Preview {
-    let playlistViewModel: PlaylistViewModel = PlaylistViewModel()
+    let playlistViewModel = PlaylistViewModel()
     let finishViewModel: FinishViewModel<PlaylistItemsReference> = FinishViewModel()
     
     PlaylistCellView(playlistViewModel: playlistViewModel, finishViewModel: finishViewModel, userPlaylist: PlaylistModel.UserPlaylist(playlist: .thisIsMildHighClub))

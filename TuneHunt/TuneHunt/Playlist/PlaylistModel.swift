@@ -13,13 +13,17 @@ struct PlaylistModel<Items: Codable & Hashable>  {
         self.userPlaylists = userPlaylists
     }
     
+    mutating func setArtists(_ artists: [Artist]) {
+        self.artists = artists
+    }
+    
     mutating func addPlaylist(playlist: Playlist<Items>) {
         self.userPlaylists.insert(UserPlaylist(playlist: playlist), at: 0)
     }
     
     mutating func addPlaylists(playlists: [Playlist<Items>]) {
         for playlist in playlists {
-            self.addPlaylist(playlist: playlist)
+            self.userPlaylists.append(UserPlaylist(playlist: playlist))
         }
     }
     

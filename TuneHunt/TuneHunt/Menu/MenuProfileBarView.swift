@@ -61,6 +61,6 @@ struct MenuProfileBarView: View {
 }
 
 #Preview {
-    let menuViewModel: MenuViewModel = MenuViewModel()
+    let menuViewModel = MenuViewModel()
     MenuProfileBarView(menuViewModel: menuViewModel)
 }

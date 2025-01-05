@@ -5,7 +5,7 @@ import Combine
 class PlaylistViewModel: ObservableObject {
     let spotify: Spotify = Spotify.shared
 
-    @Published var playlistModel: PlaylistModel<PlaylistItemsReference> = PlaylistModel()
+    @Published private var playlistModel: PlaylistModel<PlaylistItemsReference> = PlaylistModel()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate: Bool = false
     @Published var showCreatePlaylist: Bool = false
@@ -40,8 +40,12 @@ class PlaylistViewModel: ObservableObject {
         self.playlistModel.artists
     }
     
-    var getPlaylists: [PlaylistModel<PlaylistItemsReference>.UserPlaylist] {
+    var userPlaylists: [PlaylistModel<PlaylistItemsReference>.UserPlaylist] {
         self.playlistModel.userPlaylists
+    }
+    
+    func setArtists(_ artists: [Artist]) {
+        self.playlistModel.setArtists(artists)
     }
     
     func addPlaylist(_ playlist: Playlist<PlaylistItemsReference>) {

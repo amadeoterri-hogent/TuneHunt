@@ -21,7 +21,7 @@ class ArtistSearchResultViewModel: ObservableObject {
         self.artistModel.getArtistsFromArtistSearchResults()
     }
     
-    var artistSearchResults: [ArtistModel.ArtistSearchResult] {
+    var artistSearchResults: [ArtistSearchResult] {
         self.artistModel.artistSearchResults
     }
     
@@ -33,7 +33,7 @@ class ArtistSearchResultViewModel: ObservableObject {
         self.artistModel.addArtistToArtistSearchResults(artist: artist)
     }
     
-    func updateAddToPlaylist(for artistSearchResult: ArtistModel.ArtistSearchResult, isSelected: Bool) {
+    func updateAddToPlaylist(for artistSearchResult: ArtistSearchResult, isSelected: Bool) {
         self.artistModel.updateAddToPlaylist(for: artistSearchResult, isSelected: isSelected)
     }
     
@@ -47,7 +47,7 @@ class ArtistSearchResultViewModel: ObservableObject {
         }
     }
     
-    func loadImage(for artistSearchResult: ArtistModel.ArtistSearchResult) {
+    func loadImage(for artistSearchResult: ArtistSearchResult) {
         if artistSearchResult.image != nil {
             return
         }
