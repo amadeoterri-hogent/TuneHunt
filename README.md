@@ -6,13 +6,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/amadeoterri-hogent/TuneHunt/">
-    <img src="/images/tunehunt.png" alt="Logo" width="80" height="80">
+    <img src="https://raw.githubusercontent.com/amadeoterri-hogent/TuneHunt/refs/heads/main/images/tunehunt.png?token=GHSAT0AAAAAAC3YX77SMLSD3E37VB7GF3ZMZ32JIQA" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Tunehunt</h3>
 
   <p align="center">
-    An awesome app to find new tunes and explore new artists
+    An awesome app to find new tunes and explore songs of new artists
  </p>
 </div>
 
@@ -97,6 +97,9 @@ _Below is an example of how you can instruct your audience on installing and set
 9. Add file config.plist
    9.1 Add key 'client_secret', type 'String' and your client secret from your app in [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
    9.1 Add key 'client_id', type 'String' and your client id from your app in [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
+   9.1 Add key 'callback', type 'String' and your callback url (f.e. 'tunehunt://login-callback') from your app in [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
+   9.1 Add key 'bundle_id', type 'String' and your bundle id from your app in [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
+
 10. Startup the project
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -104,9 +107,9 @@ _Below is an example of how you can instruct your audience on installing and set
 
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+_For more examples and explanation on how the spotify api works, please refer to the [Spotify Documentation](https://developer.spotify.com/documentation/web-api)_
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+_For more examples and explanation on how the spotify web library works, please refer to the [Spotify WEB API Documentation](https://peter-schorn.github.io/SpotifyAPI/documentation/spotifywebapi/)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -120,7 +123,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [x] Use existing views for structure.
   - [x] Use proper state management.
   - [x] Adopt the MVVM design pattern.
-- [ ] Adaptive
+- [x] Adaptive
 - [x] iOS 16 or later.
 - [x] Interact with a REST API
 - [x] Add lecturer (svanimpe) as a collaborator.
@@ -131,7 +134,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 ## License
 
-Distributed under the Unlicense License. See `LICENSE.txt` for more information.
+Distributed under the Unlicense License.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -148,10 +151,15 @@ Amadeo Terriere - amadeo.terriere@student.hogent.be
 <!-- ACKNOWLEDGMENTS -->
 
 ## Acknowledgments
+- [SpotifyAPI by Peter-Schorn](https://github.com/Peter-Schorn/SpotifyAPI)
 
 - [Hacking With Swift](https://www.hackingwithswift.com/)
 
 - [Stanford - CS193p - Developing Apps for iOS](https://cs193p.sites.stanford.edu/2023)
+
+- [Setup testing spotify API in Postman](https://youtube.com/playlist?list=PLFKq7U8AMnk3J_p9HgqpHAjXXSgZ-eBPU&si=Q8pJPzJdtuh_SK2S)
+
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
