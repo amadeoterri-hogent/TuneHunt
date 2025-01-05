@@ -6,7 +6,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/amadeoterri-hogent/TuneHunt/">
-    <img src="https://raw.githubusercontent.com/amadeoterri-hogent/TuneHunt/refs/heads/main/images/tunehunt.png?token=GHSAT0AAAAAAC3YX77SMLSD3E37VB7GF3ZMZ32JIQA" alt="Logo" width="80" height="80">
+    <img src="images/tunehunt.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Tunehunt</h3>
@@ -151,6 +151,7 @@ Amadeo Terriere - amadeo.terriere@student.hogent.be
 <!-- ACKNOWLEDGMENTS -->
 
 ## Acknowledgments
+
 - [SpotifyAPI by Peter-Schorn](https://github.com/Peter-Schorn/SpotifyAPI)
 
 - [Hacking With Swift](https://www.hackingwithswift.com/)
@@ -158,8 +159,6 @@ Amadeo Terriere - amadeo.terriere@student.hogent.be
 - [Stanford - CS193p - Developing Apps for iOS](https://cs193p.sites.stanford.edu/2023)
 
 - [Setup testing spotify API in Postman](https://youtube.com/playlist?list=PLFKq7U8AMnk3J_p9HgqpHAjXXSgZ-eBPU&si=Q8pJPzJdtuh_SK2S)
-
-
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
