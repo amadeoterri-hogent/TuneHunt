@@ -4,7 +4,7 @@ import Combine
 
 class PlaylistViewModel: ObservableObject {
     let spotify: Spotify = Spotify.shared
-
+    
     @Published private var playlistModel: PlaylistModel<PlaylistItemsReference> = PlaylistModel()
     @Published var alertItem: AlertItem? = nil
     @Published var shouldNavigate: Bool = false
@@ -14,7 +14,7 @@ class PlaylistViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isSearchingTracks = false
     @Published var createdPlaylist: Playlist<PlaylistItems>? = nil
-
+    
     private var cancellables: Set<AnyCancellable> = []
     private var searchCancellables: Set<AnyCancellable> = []
     private var createPlaylistCancellable: AnyCancellable?
@@ -27,7 +27,7 @@ class PlaylistViewModel: ObservableObject {
     init(playlistModel: PlaylistModel<PlaylistItemsReference>) {
         self.playlistModel = playlistModel
     }
-        
+    
     var selectedPlaylist: Playlist<PlaylistItems>? {
         self.playlistModel.selectedPlaylist
     }
@@ -62,7 +62,7 @@ class PlaylistViewModel: ObservableObject {
     
     func retrievePlaylists() {
         if ProcessInfo.processInfo.isPreviewing { return }
-
+        
         self.isLoading = true
         self.playlistModel.userPlaylists = []
         
@@ -114,7 +114,15 @@ class PlaylistViewModel: ObservableObject {
                                 finishViewModel.setSelectedPlaylist(userPlaylist)
                                 finishViewModel.setTracks(self.playlistModel.tracks)
                                 self.isSearchingTracks = false
-                                self.shouldNavigate = true
+                                if finishViewModel.selectedPlaylist != nil && !finishViewModel.tracks.isEmpty {
+                                    self.shouldNavigate = true
+                                } else {
+                                    self.alertItem = AlertItem(
+                                        title: "Couldn't Resume",
+                                        message: "Playlist or tracks are empty"
+                                    )
+                                }
+                                
                             }
                         },
                         receiveValue: { searchResults in
@@ -137,7 +145,7 @@ class PlaylistViewModel: ObservableObject {
         }
     }
     
-    func loadImage(for userPlaylist: PlaylistModel<PlaylistItemsReference>.UserPlaylist) {       
+    func loadImage(for userPlaylist: PlaylistModel<PlaylistItemsReference>.UserPlaylist) {
         guard let spotifyImage = userPlaylist.playlist.images.largest else {
             return
         }
@@ -152,12 +160,12 @@ class PlaylistViewModel: ObservableObject {
             )
         
         self.loadImageCancellables.append(cancellable)
-
+        
     }
     
     func createPlaylist() {
         if ProcessInfo.processInfo.isPreviewing { return }
-
+        
         if !validate() {
             return
         }

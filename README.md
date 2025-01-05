@@ -6,7 +6,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/amadeoterri-hogent/TuneHunt/">
-    <img src="/images/tunehunt" alt="Logo" width="80" height="80">
+    <img src="/images/tunehunt.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Tunehunt</h3>
@@ -64,36 +64,40 @@
 
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
 - Xcode
+- Spotify account
 
 ### Installation
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = "ENTER YOUR API";
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+1. Go to [https://developer.spotify.com](https://developer.spotify.com)
+2. Create an app https://developer.spotify.com/dashboard/create
+3. Fill in app name and description
+4. Fill in Redirect Uri
 
+```sh
+    tunehunt://login-callback #for your app
+    http://localhost:8888/callback
+    https://oauth.pstmn.io/v1/callback # for using postman
+```
+
+5. Fill in your bundle ID, the same as in the xcode project
+6. Check iOS in Apis Used
+
+7. Clone the repo
+   ```sh
+   git clone https://github.com/amadeoterri-hogent/TuneHunt.git
+   ```
+8. Open project in xcode
+9. Add file config.plist
+   9.1 Add key 'client_secret', type 'String' and your client secret from your app in [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
+   9.1 Add key 'client_id', type 'String' and your client id from your app in [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
+10. Startup the project
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
@@ -110,15 +114,16 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 ## Roadmap
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-  - [ ] Chinese
-  - [ ] Spanish
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+- [x] Native iOS app
+- [x] Sufficiently complex
+- [x] Best practices for SwiftUI
+  - [x] Use existing views for structure.
+  - [x] Use proper state management.
+  - [x] Adopt the MVVM design pattern.
+- [ ] Adaptive
+- [x] iOS 16 or later.
+- [x] Interact with a REST API
+- [x] Add lecturer (svanimpe) as a collaborator.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -145,6 +150,8 @@ Amadeo Terriere - amadeo.terriere@student.hogent.be
 ## Acknowledgments
 
 - [Hacking With Swift](https://www.hackingwithswift.com/)
+
+- [Stanford - CS193p - Developing Apps for iOS](https://cs193p.sites.stanford.edu/2023)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

@@ -35,15 +35,5 @@ class MenuViewModel: ObservableObject {
                     self.profileImage = image
                 }
             )
-    }
-    
-    func currentUser() -> SpotifyUser? {
-        spotify.currentUser
-    }
-    
-    func deauthorize() {
-        spotify.api.authorizationManager.deauthorize()
-        shouldNavigate = true
-    }
-    
+    }    
 }

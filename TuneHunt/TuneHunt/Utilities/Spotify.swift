@@ -23,12 +23,14 @@ final class Spotify: ObservableObject {
     private static let config = Config()
     private static let clientId: String = config.clientId
     private static let clientSecret: String = config.clientSecret
+    private static let callback: String = config.callback
+    private static let bundleId: String = config.bundleId
     
     let authorizationManagerKey = "authorizationManager"
     let loginCallbackURL = URL(
-        string: "tunehunt://login-callback"
+        string: Spotify.callback
     )!
-    let keychain = Keychain(service: "com.amadeo.TuneHunt")
+    let keychain = Keychain(service: Spotify.bundleId)
     let api = SpotifyAPI(
         authorizationManager: AuthorizationCodeFlowManager(
             clientId: Spotify.clientId,
@@ -162,6 +164,8 @@ extension Spotify {
     struct Config {
         let clientId: String
         let clientSecret: String
+        let callback: String
+        let bundleId: String
         
         init() {
             guard let path = Bundle.main.path(forResource: "config", ofType: "plist"),
@@ -172,12 +176,49 @@ extension Spotify {
             }
             
             guard let clientId = dict["client_id"] as? String,
-                  let clientSecret = dict["client_secret"] as? String else {
-                fatalError("Config.plist is missing client_id or client_secret")
+                  let clientSecret = dict["client_secret"] as? String,
+                  let callback = dict["callback"] as? String,
+                  let bundleId = dict["bundle_id"] as? String
+            else {
+                fatalError("Config.plist is missing client_id, client_secret, callback or bundle_id")
             }
             
             self.clientId = clientId
             self.clientSecret = clientSecret
+            self.callback = callback
+            self.bundleId = bundleId
         }
     }
+}
+
+extension SpotifyAPI where AuthorizationManager: SpotifyScopeAuthorizationManager {
+    func getAvailableDeviceThenPlay(_ playbackRequest: PlaybackRequest) -> AnyPublisher<Void, Error> {
+        return self.availableDevices().flatMap {
+            devices -> AnyPublisher<Void, Error> in
+    
+            let usableDevices = devices.filter { device in
+                !device.isRestricted && device.id != nil
+            }
+
+            let device = usableDevices.first(where: \.isActive)
+                    ?? usableDevices.first
+            
+            if let deviceId = device?.id {
+                return self.play(playbackRequest, deviceId: deviceId)
+            }
+            else {
+                return SpotifyGeneralError.other(
+                    "No active or available devices",
+                    localizedDescription:
+                    "There are no devices available to play content on. " +
+                    "Try opening the Spotify app on one of your devices."
+                )
+                .anyFailingPublisher()
+            }
+            
+        }
+        .eraseToAnyPublisher()
+        
+    }
+
 }

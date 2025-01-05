@@ -13,6 +13,12 @@ class PlaylistSearchArtistsViewModel: ObservableObject {
     @Published var searchCancellables: [AnyCancellable] = []
     @Published var artistsCancellables: Set<AnyCancellable> = []
     @Published var loadPlaylistCancellable: AnyCancellable? = nil
+    
+    init() {}
+    
+    init(playlistSearchArtistsModel: PlaylistSearchArtistsModel) {
+        self.playlistSearchArtistsModel = playlistSearchArtistsModel
+    }
         
     var playlists: [Playlist<PlaylistItemsReference>] {
         self.playlistSearchArtistsModel.playlists

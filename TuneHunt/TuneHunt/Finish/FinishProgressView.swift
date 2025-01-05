@@ -1,7 +1,6 @@
 import SwiftUI
 import SpotifyWebAPI
 
-// TODO: Skip track on error and print after which ones didn't succeed
 // TODO: play playlist?
 
 struct FinishProgressView <Items: Codable & Hashable> : View {
@@ -15,15 +14,17 @@ struct FinishProgressView <Items: Codable & Hashable> : View {
     
     var body: some View {
         VStack {
-            txtProgressStatus
-            pvProgress
+            ScrollView {
+                txtProgressStatus
+                pvProgress
+            }
         }
         .padding()
         .toolbar() {btnHome}
         .navigationDestination(isPresented: $finishViewModel.shouldNavigateHome) {
             MenuView()
         }
-        .frame(maxHeight: .infinity, alignment: .center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea())
         .onAppear() {
@@ -36,7 +37,7 @@ struct FinishProgressView <Items: Codable & Hashable> : View {
     var txtProgressStatus: some View {
         Group {
             if progress == 1.0 {
-                txtCompleted
+                completed
             }
             else {
                 txtInProgress
@@ -44,18 +45,35 @@ struct FinishProgressView <Items: Codable & Hashable> : View {
         }
     }
     
-    var txtCompleted: some View {
-        Text("Completed")
-            .font(.title)
-            .padding(.bottom, 36)
-            .scaleEffect(animationAmount)
-            .animation(
-                .easeInOut(duration: 1).repeatCount(10, autoreverses: true),
-                value: animationAmount
-            )
-            .onAppear {
-                animationAmount = 1.2
+    var completed: some View {
+        VStack {
+            Button {
+                finishViewModel.playPlaylist()
+            } label: {
+                HStack {
+                    Image(systemName: "play.circle")
+                    Text("Play Playlist")
+                }
+                .frame(maxWidth: .infinity)
             }
+            .foregroundStyle(Theme(colorScheme).textColor)
+            .padding()
+            .background(.blue)
+            .clipShape(Capsule())
+            
+            Text("Completed")
+                .font(.title)
+                .padding(.vertical, 36)
+                .scaleEffect(animationAmount)
+                .animation(
+                    .easeInOut(duration: 1).repeatCount(10, autoreverses: true),
+                    value: animationAmount
+                )
+                .onAppear {
+                    animationAmount = 1.2
+                }
+        }
+
     }
     
     var txtInProgress: some View {
@@ -83,28 +101,33 @@ struct FinishProgressView <Items: Codable & Hashable> : View {
                 Text("Home")
             }
         }
+        .padding()
     }
     
     func finish() async {
-        if let playlist = finishViewModel.loadedPlaylist {
-            let trackURIs = finishViewModel.tracks.compactMap { $0.uri }
-            
-            // Split track URIs into batches of 100
-            let chunks = trackURIs.chunked(into: 100)
-            var remainingChunks = chunks.count
-            
-            await startAsyncTask(totalChunks: Double(chunks.count))
-            
-            for chunk in chunks {
-                spotify.api.addToPlaylist(playlist.uri, uris: chunk)
-                    .receive(on: RunLoop.main)
-                    .sink(
-                        receiveCompletion: { completion in
-                            remainingChunks -= 1
-                        },
-                        receiveValue: { _ in }
-                    )
-                    .store(in: &spotify.cancellables)
+        if ProcessInfo.processInfo.isPreviewing {
+            await startAsyncTask(totalChunks: 1)
+        } else {
+            if let playlist = finishViewModel.loadedPlaylist {
+                let trackURIs = finishViewModel.tracks.compactMap { $0.uri }
+                
+                // Split track URIs into batches of 100
+                let chunks = trackURIs.chunked(into: 100)
+                var remainingChunks = chunks.count
+                
+                await startAsyncTask(totalChunks: Double(chunks.count))
+                
+                for chunk in chunks {
+                    spotify.api.addToPlaylist(playlist.uri, uris: chunk)
+                        .receive(on: RunLoop.main)
+                        .sink(
+                            receiveCompletion: { completion in
+                                remainingChunks -= 1
+                            },
+                            receiveValue: { _ in }
+                        )
+                        .store(in: &spotify.cancellables)
+                }
             }
         }
     }
@@ -134,6 +157,18 @@ struct CustomCircularProgressViewStyle: ProgressViewStyle {
     }
 }
 
-//#Preview {
-//    FinishProgressView()
-//}
+#Preview {
+    let spotify = {
+        let spotify = Spotify.shared
+        spotify.isAuthorized = true
+        return spotify
+    }()
+    
+    let playlist = PlaylistModel.UserPlaylist(playlist: .crumb)
+    let trackResults: [FinishModel<PlaylistItems>.TrackResult] = []
+    let finishModel: FinishModel<PlaylistItems> = FinishModel(selectedPlaylist: playlist, trackResults: trackResults)
+    let finishViewModel = FinishViewModel(finishModel: finishModel)
+    
+    FinishProgressView(finishViewModel: finishViewModel)
+        .environmentObject(spotify)
+}

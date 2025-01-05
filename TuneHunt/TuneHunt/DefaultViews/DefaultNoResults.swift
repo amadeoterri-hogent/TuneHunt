@@ -9,6 +9,5 @@ struct DefaultNoResults: View {
             .foregroundColor(Theme(colorScheme).textColor)
             .font(.title)
             .opacity(0.6)
-            .padding(.bottom, 48)
     }
 }

@@ -6,6 +6,12 @@ struct ArtistSearchModel {
     
     let separators = ["Auto","Comma", "Space", "Newline"]
     
+    init() {}
+    
+    init(artists: [Artist]) {
+        self.artists = artists
+    }
+    
     mutating func select(_ artist: Artist) {
         self.selectedArtists = [artist]
     }

@@ -89,14 +89,18 @@ struct PlaylistSearchArtistsView: View {
     }
 }
 
-//#Preview {
-//    let spotify = {
-//        let spotify = Spotify.shared
-//        spotify.isAuthorized = true
-//        return spotify
-//    }()
-//    
-//    PlaylistSearchArtistsView()
-//        .environmentObject(spotify)
-//    
-//}
+#Preview {
+    let playlists: [Playlist] = [
+        .modernPsychedelia,
+        .rockClassics,
+        .menITrust,
+        .thisIsRadiohead
+    ]
+    
+//    let playlist: [Playlist] = []
+    
+    let playlistSearchArtistsModel = PlaylistSearchArtistsModel(playlists: playlists)
+    let playlistSearchArtistsViewModel = PlaylistSearchArtistsViewModel(playlistSearchArtistsModel: playlistSearchArtistsModel)
+
+    PlaylistSearchArtistsView(playlistSearchArtistsViewModel: playlistSearchArtistsViewModel)
+}

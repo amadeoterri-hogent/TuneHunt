@@ -7,29 +7,30 @@ struct MenuView: View {
     @StateObject var playlistSearchArtistsViewModel = PlaylistSearchArtistsViewModel()
     @StateObject var menuViewModel = MenuViewModel()
     @Environment(\.colorScheme) var colorScheme
-        
+    
     var body: some View {
         NavigationStack {
             VStack {
-                DefaultNavigationTitleView(titleText: "Build playlist")
-                
-                Group {
-                    switch menuViewModel.menuStyle {
-                    case .list:
-                        menuListView
-                    case .grid:
-                        menuGridView
+                ScrollView {
+                    MenuProfileBarView(menuViewModel: menuViewModel)
+                    DefaultNavigationTitleView(titleText: "Build playlist")
+                    
+                    Group {
+                        switch menuViewModel.menuStyle {
+                        case .list:
+                            menuListView
+                        case .grid:
+                            menuGridView
+                        }
+                        Spacer()
                     }
-                    Spacer()
+                    .navigationDestination(isPresented: $menuViewModel.shouldNavigate) { destinationView()}
+                    .foregroundStyle(Theme(colorScheme).textColor)
                 }
-                .navigationDestination(isPresented: $menuViewModel.shouldNavigate) { destinationView()}
-                .foregroundStyle(Theme(colorScheme).textColor)
+                .scrollIndicators(.hidden)
             }
             .padding()
             .navigationBarBackButtonHidden()
-            .toolbar {
-                MenuProfileBarView(menuViewModel: menuViewModel)
-            }
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea())
         }
@@ -87,7 +88,7 @@ struct MenuView: View {
             images: [spotifyImage],
             href: URL(string: "www.google.com")!
         )
-
+        
         let spotify = {
             let spotify = Spotify.shared
             spotify.isAuthorized = true
@@ -95,8 +96,9 @@ struct MenuView: View {
             return spotify
         }()
         
-        let searchArtistViewModel = ArtistSearchViewModel(spotify: spotify)
+        let searchArtistViewModel = ArtistSearchViewModel()
         MenuView(searchArtistViewModel: searchArtistViewModel)
+            .environmentObject(spotify)
     }
     else {
         let searchArtistViewModel = ArtistSearchViewModel()

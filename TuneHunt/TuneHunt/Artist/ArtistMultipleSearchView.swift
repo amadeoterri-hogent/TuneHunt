@@ -23,19 +23,18 @@ struct ArtistMultipleSearchView: View {
                         searchTextIsFocused = false
                     }
                 
-                ScrollView {
-                    VStack {
+                VStack {
+                    ScrollView {
                         DefaultNavigationTitleView(titleText: "Enter artists")
                         btnSearchSpotify
+                        txtEditor
                     }
-                    .onTapGesture {
-                        searchTextIsFocused = false
-                    }
-
-                    txtEditor
+                    .scrollIndicators(.hidden)
                 }
-                .scrollIndicators(.hidden)
                 .padding()
+                .onTapGesture {
+                    searchTextIsFocused = false
+                }
 
             }
             .toolbar {

@@ -14,6 +14,7 @@ class FinishViewModel<Items: Codable & Hashable> : ObservableObject {
     
     private var loadPlaylistCancellable: AnyCancellable? = nil
     private var loadImageCancellables: [AnyCancellable] = []
+    private var playPlaylistCancellable: AnyCancellable? = nil
     
     init(){}
     
@@ -74,4 +75,30 @@ class FinishViewModel<Items: Codable & Hashable> : ObservableObject {
         
         loadImageCancellables.append(cancellable)
     }
+    
+    func playPlaylist() {
+        guard let selectedPlaylist = selectedPlaylist else {
+            self.alertItem = AlertItem(
+                title: "No Playlist Selected",
+                message: "Please select a playlist to play."
+            )
+            return
+        }
+
+        let playbackRequest = PlaybackRequest(
+            context: .contextURI(selectedPlaylist.playlist), offset: nil
+        )
+        self.playPlaylistCancellable = self.spotify.api
+            .getAvailableDeviceThenPlay(playbackRequest)
+            .receive(on: RunLoop.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    self.alertItem = AlertItem(
+                        title: "Couldn't Play Playlist \(selectedPlaylist.playlist.name)",
+                        message: error.localizedDescription
+                    )
+                }
+            })
+    }
+
 }

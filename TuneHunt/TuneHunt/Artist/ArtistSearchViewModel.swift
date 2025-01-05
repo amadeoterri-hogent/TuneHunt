@@ -16,10 +16,10 @@ class ArtistSearchViewModel: ObservableObject {
     private var artistSearchValueSplit: String = ""
     private var searchCancellables: [AnyCancellable] = []
     
-    init() {}
+    init () {}
     
-    init(spotify: Spotify) {
-        self.spotify = spotify
+    init (artistSearchModel: ArtistSearchModel) {
+        self.artistSearchModel = artistSearchModel
     }
     
     var artists: [Artist] {

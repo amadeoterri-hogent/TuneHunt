@@ -5,10 +5,11 @@ import SpotifyWebAPI
 
 struct MenuProfileBarView: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var spotify: Spotify
     @ObservedObject var menuViewModel: MenuViewModel
     
     var body: some View {
-        if menuViewModel.currentUser() != nil {
+        if spotify.currentUser != nil {
             Menu {
                 pkrMenuStyle
                 Divider()
@@ -17,6 +18,7 @@ struct MenuProfileBarView: View {
             } label: {
                 lblProfile
             }
+            .frame(maxWidth: .infinity, alignment: .trailing)
             .foregroundStyle(Theme(colorScheme).textColor)
             .onAppear(perform: menuViewModel.loadProfileImage)
         }
@@ -27,7 +29,7 @@ struct MenuProfileBarView: View {
             .resizable()
             .scaledToFit()
             .clipShape(Circle())
-            .frame(width: 64, height: 64)
+            .frame(width: 48, height: 48)
     }
     
     var pkrMenuStyle: some View {
@@ -50,7 +52,7 @@ struct MenuProfileBarView: View {
     
     var btnLogOut: some View {
         Button (role: .destructive) {
-            self.menuViewModel.deauthorize()
+            spotify.api.authorizationManager.deauthorize()
             menuViewModel.selection = 6
             menuViewModel.shouldNavigate = true
         } label: {
@@ -61,6 +63,35 @@ struct MenuProfileBarView: View {
 }
 
 #Preview {
-    let menuViewModel = MenuViewModel()
-    MenuProfileBarView(menuViewModel: menuViewModel)
+    if let image = URL(string: "https://picsum.photos/200/300") {
+        let spotifyImage = SpotifyImage(url: image)
+        let demoUser = SpotifyUser(
+            displayName: "Amadeo",
+            uri: "www.google.com",
+            id: "1",
+            images: [spotifyImage],
+            href: URL(string: "www.google.com")!
+        )
+
+        let spotify = {
+            let spotify = Spotify.shared
+            spotify.isAuthorized = true
+            spotify.currentUser = demoUser
+            return spotify
+        }()
+        
+        let menuViewModel = MenuViewModel()
+        MenuProfileBarView(menuViewModel: menuViewModel)
+            .environmentObject(spotify)
+    }
+    else {
+        let spotify = {
+            let spotify = Spotify.shared
+            spotify.isAuthorized = true
+            return spotify
+        }()
+        
+        let menuViewModel = MenuViewModel()
+        MenuProfileBarView(menuViewModel: menuViewModel)
+    }
 }

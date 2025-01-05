@@ -98,7 +98,17 @@ struct ArtistSingleSearchView: View {
     }
 }
 
-#Preview{
-    let searchArtistViewModel = ArtistSearchViewModel()
+#Preview {
+    let artists: [Artist] = [
+        .pinkFloyd,
+        .radiohead,
+        .levitationRoom,
+        .skinshape
+    ]
+    
+//    let artists: [Artist] = []
+    
+    let artistSearchModel = ArtistSearchModel(artists: artists)
+    let searchArtistViewModel = ArtistSearchViewModel(artistSearchModel: artistSearchModel)
     ArtistSingleSearchView(searchArtistViewModel: searchArtistViewModel)
 }

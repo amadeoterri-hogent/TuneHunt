@@ -11,12 +11,15 @@ struct FinishView <Items: Codable & Hashable> : View {
     var body: some View {
         ZStack {
             VStack {
-                DefaultNavigationTitleView(titleText: "Complete Playlist")
-                btnAddTracksToPlaylist
-                playlistView
-                tracksView
-                
-                Spacer()
+                ScrollView {
+                    DefaultNavigationTitleView(titleText: "Complete Playlist")
+                    btnAddTracksToPlaylist
+                    playlistView
+                    tracksView
+                    
+                    Spacer()
+                }
+                .scrollIndicators(.hidden)
             }
             .padding()
             .background(LinearGradient(colors: [Theme(colorScheme).primaryColor, Theme(colorScheme).secondaryColor], startPoint: .top, endPoint: .bottom)
